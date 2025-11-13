@@ -15,7 +15,7 @@ const UserLevel = () => {
           <div className="p-8">
             <div className="flex flex-col md:flex-row items-center justify-between gap-6">
               <div className="flex items-center gap-6">
-                <div className="w-20 h-20 rounded-2xl bg-gradient-gold flex items-center justify-center shadow-lg">
+                <div className="w-20 h-20 rounded-2xl bg-gradient-accent flex items-center justify-center shadow-lg">
                   <Trophy className="w-10 h-10 text-accent-foreground" />
                 </div>
                 

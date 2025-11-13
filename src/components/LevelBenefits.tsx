@@ -1,4 +1,5 @@
 import { Badge } from "@/components/ui/badge";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Star, Crown, Sparkles, Trophy } from "lucide-react";
 
 const levels = [
@@ -57,7 +58,7 @@ const levels = [
 
 const LevelBenefits = () => {
   return (
-    <section className="py-24 bg-background">
+    <section id="livelli" className="py-24 bg-background">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
@@ -68,37 +69,50 @@ const LevelBenefits = () => {
           </p>
         </div>
         
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {levels.map((level, index) => {
-            const Icon = level.icon;
-            return (
-              <div 
-                key={index}
-                className="relative bg-gradient-card rounded-2xl p-6 shadow-card hover:shadow-elegant transition-all duration-300 hover:scale-105"
-              >
-                <div className={`w-16 h-16 rounded-2xl ${level.bgColor} flex items-center justify-center mb-4`}>
-                  <Icon className={`w-8 h-8 ${level.color}`} />
-                </div>
-                
-                <h3 className="text-2xl font-bold text-card-foreground mb-2">
-                  {level.name}
-                </h3>
-                
-                <Badge variant="secondary" className="mb-4">
-                  {level.range}
-                </Badge>
-                
-                <ul className="space-y-2">
-                  {level.benefits.map((benefit, i) => (
-                    <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground">
-                      <div className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 flex-shrink-0" />
-                      <span>{benefit}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            );
-          })}
+        <div className="max-w-4xl mx-auto">
+          <Accordion type="single" collapsible className="space-y-4">
+            {levels.map((level, index) => {
+              const Icon = level.icon;
+              return (
+                <AccordionItem 
+                  key={index} 
+                  value={`level-${index}`}
+                  className="bg-gradient-card rounded-2xl border-border/50 shadow-card overflow-hidden"
+                >
+                  <AccordionTrigger className="px-6 py-4 hover:no-underline">
+                    <div className="flex items-center gap-4 w-full">
+                      <div className={`w-14 h-14 rounded-xl ${level.bgColor} flex items-center justify-center flex-shrink-0`}>
+                        <Icon className={`w-7 h-7 ${level.color}`} />
+                      </div>
+                      
+                      <div className="text-left flex-1">
+                        <h3 className="text-2xl font-bold text-card-foreground">
+                          {level.name}
+                        </h3>
+                        <Badge variant="secondary" className="mt-1">
+                          {level.range}
+                        </Badge>
+                      </div>
+                    </div>
+                  </AccordionTrigger>
+                  
+                  <AccordionContent className="px-6 pb-6">
+                    <div className="pt-4 border-t border-border/50">
+                      <h4 className="font-semibold text-card-foreground mb-3">Vantaggi Inclusi:</h4>
+                      <ul className="space-y-3">
+                        {level.benefits.map((benefit, i) => (
+                          <li key={i} className="flex items-start gap-3 text-muted-foreground">
+                            <div className="w-2 h-2 rounded-full bg-gradient-hero mt-1.5 flex-shrink-0" />
+                            <span>{benefit}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              );
+            })}
+          </Accordion>
         </div>
       </div>
     </section>

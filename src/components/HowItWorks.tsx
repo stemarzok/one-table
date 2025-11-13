@@ -25,7 +25,7 @@ const steps = [
 
 const HowItWorks = () => {
   return (
-    <section className="py-24 bg-secondary">
+    <section id="come-funziona" className="py-24 bg-secondary">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
@@ -48,7 +48,7 @@ const HowItWorks = () => {
                   {index + 1}
                 </div>
                 
-                <div className="w-16 h-16 rounded-2xl bg-gradient-gold flex items-center justify-center mb-6 mt-2">
+                <div className="w-16 h-16 rounded-2xl bg-gradient-accent flex items-center justify-center mb-6 mt-2">
                   <Icon className="w-8 h-8 text-accent-foreground" />
                 </div>
                 
