@@ -61,7 +61,7 @@ export default {
       backgroundImage: {
         'gradient-hero': 'var(--gradient-hero)',
         'gradient-card': 'var(--gradient-card)',
-        'gradient-gold': 'var(--gradient-gold)',
+        'gradient-accent': 'var(--gradient-accent)',
       },
       boxShadow: {
         'elegant': 'var(--shadow-elegant)',

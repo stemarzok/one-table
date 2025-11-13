@@ -1,14 +1,14 @@
 import { Button } from "@/components/ui/button";
 import { Star, Award, TrendingUp } from "lucide-react";
-import heroImage from "@/assets/hero-restaurant.jpg";
+import heroImage from "@/assets/hero-modern.jpg";
 
 const Hero = () => {
   return (
-    <section className="relative min-h-[90vh] flex items-center overflow-hidden">
+    <section className="relative min-h-screen flex items-center overflow-hidden pt-16">
       <div 
         className="absolute inset-0 z-0"
         style={{
-          backgroundImage: `linear-gradient(135deg, rgba(139, 21, 34, 0.85), rgba(139, 21, 34, 0.65)), url(${heroImage})`,
+          backgroundImage: `linear-gradient(135deg, rgba(88, 28, 135, 0.85), rgba(14, 165, 233, 0.70)), url(${heroImage})`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
         }}
@@ -23,7 +23,7 @@ const Hero = () => {
           
           <h1 className="text-5xl md:text-7xl font-bold text-primary-foreground mb-6 leading-tight">
             Prenota, Guadagna,
-            <span className="block bg-gradient-gold bg-clip-text text-transparent">
+            <span className="block bg-gradient-accent bg-clip-text text-transparent">
               Goditi i Vantaggi
             </span>
           </h1>
