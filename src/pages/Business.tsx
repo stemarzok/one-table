@@ -15,7 +15,7 @@ const Business = () => {
         <div 
           className="absolute inset-0 z-0"
           style={{
-            backgroundImage: `linear-gradient(135deg, rgba(139, 35, 50, 0.90), rgba(139, 35, 50, 0.75)), url(${heroBusinessImage})`,
+            backgroundImage: `linear-gradient(135deg, rgba(38, 38, 38, 0.88), rgba(38, 38, 38, 0.75)), url(${heroBusinessImage})`,
             backgroundSize: 'cover',
             backgroundPosition: 'center',
           }}
