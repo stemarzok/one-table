@@ -4,7 +4,6 @@ import UserLevel from "@/components/UserLevel";
 import HowItWorks from "@/components/HowItWorks";
 import LevelBenefits from "@/components/LevelBenefits";
 import RestaurantList from "@/components/RestaurantList";
-import BusinessSection from "@/components/BusinessSection";
 import Footer from "@/components/Footer";
 
 const Index = () => {
@@ -16,7 +15,6 @@ const Index = () => {
       <HowItWorks />
       <LevelBenefits />
       <RestaurantList />
-      <BusinessSection />
       <Footer />
     </div>
   );
