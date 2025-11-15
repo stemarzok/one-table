@@ -2,8 +2,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import { MapPin } from "lucide-react";
 import { useState } from "react";
+import Map from "@/components/Map";
 
 interface Restaurant {
   id: number;
@@ -28,6 +30,7 @@ const RestaurantFilters = ({ onFilterChange, restaurants }: RestaurantFiltersPro
   const [radius, setRadius] = useState([5]);
   const [showMap, setShowMap] = useState(false);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [mapToken, setMapToken] = useState("");
   const [filters, setFilters] = useState<FilterState>({
     city: "all",
     radius: 5,

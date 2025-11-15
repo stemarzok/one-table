@@ -1,7 +1,6 @@
 import RestaurantCard from "./RestaurantCard";
 import RestaurantFilters, { FilterState } from "./RestaurantFilters";
-import { Input } from "@/components/ui/input";
-import { Search } from "lucide-react";
+import SearchBar from "./SearchBar";
 import { useState, useMemo } from "react";
 
 const restaurants = [
@@ -171,18 +170,8 @@ const RestaurantList = () => {
             Scopri i migliori ristoranti e prenota il tuo tavolo con un click
           </p>
           
-          {/* Barra di ricerca */}
           <div className="max-w-2xl mx-auto mb-8">
-            <div className="relative">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-              <Input
-                type="text"
-                placeholder="Cerca ristoranti per nome o cucina..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-12 h-12 text-lg rounded-full"
-              />
-            </div>
+            <SearchBar onSearch={(q) => setSearchQuery(q)} />
           </div>
         </div>
         
