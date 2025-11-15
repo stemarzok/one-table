@@ -5,23 +5,29 @@ import { Star, MapPin } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 interface RestaurantCardProps {
+  id: number;
   name: string;
   cuisine: string;
   location: string;
+  city: string;
   rating: number;
   priceRange: string;
   image: string;
   available: boolean;
+  sponsored: boolean;
+  coordinates: { lat: number; lng: number };
 }
 
 const RestaurantCard = ({ 
+  id,
   name, 
   cuisine, 
   location, 
   rating, 
   priceRange, 
   image,
-  available 
+  available,
+  sponsored
 }: RestaurantCardProps) => {
   const navigate = useNavigate();
 
@@ -33,9 +39,9 @@ const RestaurantCard = ({
           alt={name}
           className="w-full h-full object-cover"
         />
-        {available && (
+        {sponsored && (
           <Badge className="absolute top-4 right-4 bg-primary text-primary-foreground">
-            Disponibile
+            Sponsorizzato
           </Badge>
         )}
       </div>
@@ -60,8 +66,8 @@ const RestaurantCard = ({
         <div className="flex items-center justify-between">
           <span className="text-lg font-semibold text-primary">{priceRange}</span>
           <Button 
-            onClick={() => navigate('/restaurant/1')}
-            className="bg-primary text-primary-foreground hover:bg-primary/90"
+            onClick={() => navigate(`/restaurant/${id}`)}
+            className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-full"
           >
             Prenota Ora
           </Button>
