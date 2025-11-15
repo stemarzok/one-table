@@ -16,6 +16,7 @@ import RestaurantRegistration from "./pages/RestaurantRegistration";
 import BusinessRegistration from "./pages/BusinessRegistration";
 import Dashboard from "./pages/Dashboard";
 import AdminPanel from "./pages/AdminPanel";
+import AdminSetup from "./pages/AdminSetup";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -39,7 +40,8 @@ const App = () => (
               <Route path="/restaurant-registration" element={<RestaurantRegistration />} />
               <Route path="/business-registration" element={<BusinessRegistration />} />
               <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/admin" element={<AdminPanel />} />
+          <Route path="/admin" element={<AdminPanel />} />
+          <Route path="/admin-setup" element={<AdminSetup />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
