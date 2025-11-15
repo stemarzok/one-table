@@ -1,3 +1,5 @@
+import { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Card } from "@/components/ui/card";
@@ -7,12 +9,10 @@ import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Trophy, TrendingUp, Mail, User, Upload, Lock } from "lucide-react";
-import { useState, useEffect, useRef } from "react";
+import { Trophy, TrendingUp, Mail, User, Upload, Lock, Star, Calendar } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
-import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 
 const Profile = () => {
@@ -49,48 +49,31 @@ const Profile = () => {
   const pointsToNext = currentLevel === "Bronze" ? 301 - userPoints : currentLevel === "Argento" ? 601 - userPoints : 1001 - userPoints;
   const progress = currentLevel === "Bronze" ? (userPoints / 301) * 100 : currentLevel === "Argento" ? (userPoints / 601) * 100 : (userPoints / 1001) * 100;
 
-  const handleSaveProfile = async () => {
+  const handleProfileUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
     await updateProfile({ name, phone });
-    toast({
-      title: t('profile.profileUpdated'),
-      description: t('profile.profileUpdated'),
-    });
+    toast({ title: t('profile.profileUpdated') });
   };
 
-  const handleChangePassword = async () => {
+  const handlePasswordChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+
     if (!currentPassword || !newPassword || !confirmPassword) {
-      toast({
-        title: "Errore",
-        description: t('profile.fillAllPasswordFields'),
-        variant: "destructive",
-      });
+      toast({ title: "Errore", description: t('profile.fillAllPasswordFields'), variant: "destructive" });
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      toast({
-        title: "Errore",
-        description: t('profile.passwordsMustMatch'),
-        variant: "destructive",
-      });
+      toast({ title: "Errore", description: t('profile.passwordsMustMatch'), variant: "destructive" });
       return;
     }
 
-    const { error } = await supabase.auth.updateUser({
-      password: newPassword
-    });
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
 
     if (error) {
-      toast({
-        title: "Errore",
-        description: error.message,
-        variant: "destructive",
-      });
+      toast({ title: "Errore", description: error.message, variant: "destructive" });
     } else {
-      toast({
-        title: t('profile.passwordUpdated'),
-        description: t('profile.passwordUpdated'),
-      });
+      toast({ title: t('profile.passwordUpdated') });
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
@@ -107,28 +90,17 @@ const Profile = () => {
       const fileExt = file.name.split('.').pop();
       const fileName = `${user.id}/${Math.random()}.${fileExt}`;
 
-      const { error: uploadError, data } = await supabase.storage
+      const { error: uploadError } = await supabase.storage
         .from('avatars')
         .upload(fileName, file, { upsert: true });
 
       if (uploadError) throw uploadError;
 
-      const { data: { publicUrl } } = supabase.storage
-        .from('avatars')
-        .getPublicUrl(fileName);
-
+      const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(fileName);
       await updateProfile({ avatar_url: publicUrl });
-
-      toast({
-        title: t('profile.avatarUpdated'),
-        description: t('profile.avatarUpdated'),
-      });
+      toast({ title: t('profile.avatarUpdated') });
     } catch (error: any) {
-      toast({
-        title: "Errore",
-        description: error.message,
-        variant: "destructive",
-      });
+      toast({ title: "Errore", description: error.message, variant: "destructive" });
     } finally {
       setUploading(false);
     }
@@ -142,15 +114,40 @@ const Profile = () => {
         <div className="container mx-auto px-4 max-w-4xl">
           <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-8">{t('profile.title')}</h1>
           
+          <div className="grid gap-6 md:grid-cols-2 mb-8">
+            <Card className="p-6 hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate('/my-bookings')}>
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Calendar className="w-6 h-6 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-semibold">Le Mie Prenotazioni</h3>
+                  <p className="text-sm text-muted-foreground">Gestisci le tue prenotazioni</p>
+                </div>
+              </div>
+            </Card>
+
+            <Card className="p-6">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Star className="w-6 h-6 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-semibold">Recensioni Scritte</h3>
+                  <p className="text-sm text-muted-foreground">0 recensioni</p>
+                </div>
+              </div>
+            </Card>
+          </div>
+          
           <div className="grid gap-8">
-            {/* Card Avatar e Info Base */}
             <Card className="p-8">
               <div className="flex flex-col md:flex-row gap-8 items-start">
                 <div className="relative">
                   <Avatar className="w-32 h-32 border-4 border-primary/20">
-                    <AvatarImage src={profile?.avatar_url} />
-                    <AvatarFallback className="bg-primary/10 text-primary text-3xl">
-                      {name?.charAt(0).toUpperCase() || <User className="w-12 h-12" />}
+                    <AvatarImage src={profile?.avatar_url || undefined} />
+                    <AvatarFallback className="text-4xl bg-primary/10 text-primary">
+                      {profile?.name?.charAt(0).toUpperCase() ?? 'U'}
                     </AvatarFallback>
                   </Avatar>
                   <Button
@@ -162,157 +159,100 @@ const Profile = () => {
                     <Upload className="w-4 h-4" />
                   </Button>
                   <input
-                    ref={fileInputRef}
                     type="file"
+                    ref={fileInputRef}
+                    onChange={handleAvatarUpload}
                     accept="image/*"
                     className="hidden"
-                    onChange={handleAvatarUpload}
                   />
                 </div>
-                
+
                 <div className="flex-1 space-y-4">
                   <div>
-                    <Label htmlFor="name">{t('profile.username')}</Label>
-                    <Input 
-                      id="name" 
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      placeholder={t('profile.username')} 
-                      className="mt-2"
-                      maxLength={100}
-                    />
+                    <h2 className="text-2xl font-bold text-foreground">{profile?.name}</h2>
+                    <p className="text-muted-foreground">{profile?.email}</p>
                   </div>
-                  
-                  <div>
-                    <Label htmlFor="email">{t('profile.email')}</Label>
-                    <div className="relative mt-2">
-                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                      <Input 
-                        id="email" 
-                        type="email"
-                        value={email}
-                        disabled
-                        className="pl-10" 
-                      />
+
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">{t('profile.loyaltyLevel')}</span>
+                      <Badge variant="outline" className="px-3 py-1">
+                        <Trophy className="w-4 h-4 mr-1" />
+                        {currentLevel}
+                      </Badge>
                     </div>
-                    <p className="text-xs text-muted-foreground mt-1">{t('profile.emailNotEditable')}</p>
-                  </div>
-                  
-                  <div>
-                    <Label htmlFor="phone">{t('profile.phone')}</Label>
-                    <Input 
-                      id="phone" 
-                      type="tel"
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      placeholder="+39 123 456 7890"
-                      className="mt-2"
-                      maxLength={20}
-                    />
+                    <Progress value={progress} className="h-3" />
+                    <p className="text-xs text-muted-foreground">
+                      {userPoints} {t('profile.points')} • {t('profile.pointsToNext')} {pointsToNext} {t('profile.toReach')} {nextLevel}
+                    </p>
                   </div>
                 </div>
-              </div>
-              
-              <div className="mt-6">
-                <Button onClick={handleSaveProfile} className="w-full md:w-auto">
-                  {t('profile.saveChanges')}
-                </Button>
               </div>
             </Card>
 
-            {/* Card Cambio Password */}
             <Card className="p-8">
-              <h2 className="text-2xl font-bold text-foreground mb-6 flex items-center gap-2">
-                <Lock className="w-6 h-6 text-primary" />
-                {t('profile.changePassword')}
-              </h2>
-              
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="currentPassword">{t('profile.currentPassword')}</Label>
-                  <Input 
-                    id="currentPassword" 
-                    type="password"
-                    value={currentPassword}
-                    onChange={(e) => setCurrentPassword(e.target.value)}
-                    className="mt-2"
-                  />
+              <h3 className="text-xl font-semibold mb-6">{t('profile.title')}</h3>
+              <form onSubmit={handleProfileUpdate} className="space-y-6">
+                <div className="space-y-2">
+                  <Label htmlFor="name">{t('profile.username')}</Label>
+                  <div className="relative">
+                    <User className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
+                    <Input id="name" value={name} onChange={(e) => setName(e.target.value)} className="pl-10" />
+                  </div>
                 </div>
-                
-                <div>
-                  <Label htmlFor="newPassword">{t('profile.newPassword')}</Label>
-                  <Input 
-                    id="newPassword" 
-                    type="password"
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    className="mt-2"
-                  />
+
+                <div className="space-y-2">
+                  <Label htmlFor="email">{t('profile.email')}</Label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
+                    <Input id="email" value={email} disabled className="pl-10 bg-muted" />
+                  </div>
+                  <p className="text-xs text-muted-foreground">{t('profile.emailNotEditable')}</p>
                 </div>
-                
-                <div>
-                  <Label htmlFor="confirmPassword">{t('profile.confirmPassword')}</Label>
-                  <Input 
-                    id="confirmPassword" 
-                    type="password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="mt-2"
-                  />
+
+                <div className="space-y-2">
+                  <Label htmlFor="phone">{t('profile.phone')}</Label>
+                  <Input id="phone" value={phone} onChange={(e) => setPhone(e.target.value)} />
                 </div>
-                
-                <Button onClick={handleChangePassword} className="w-full md:w-auto">
-                  {t('profile.changePassword')}
-                </Button>
-              </div>
+
+                <Button type="submit" className="w-full">{t('profile.saveChanges')}</Button>
+              </form>
             </Card>
 
-            {/* Card Livello Fedeltà */}
             <Card className="p-8">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-foreground flex items-center gap-2">
-                  <Trophy className="w-6 h-6 text-primary" />
-                  {t('profile.loyaltyLevel')}
-                </h2>
-                <Badge variant="secondary" className="text-lg px-4 py-2">
-                  {currentLevel}
-                </Badge>
-              </div>
-              
-              <div className="space-y-6">
-                <div>
-                  <div className="flex justify-between text-sm mb-2">
-                    <span className="text-muted-foreground">{t('profile.progress')}</span>
-                    <span className="font-semibold text-foreground">{userPoints} / {currentLevel === "Bronze" ? "301" : currentLevel === "Argento" ? "601" : "1001"} {t('profile.points')}</span>
+              <h3 className="text-xl font-semibold mb-6">{t('profile.changePassword')}</h3>
+              <form onSubmit={handlePasswordChange} className="space-y-6">
+                <div className="space-y-2">
+                  <Label htmlFor="current">{t('profile.currentPassword')}</Label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
+                    <Input id="current" type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} className="pl-10" />
                   </div>
-                  <Progress value={progress} className="h-3" />
-                  <p className="text-sm text-muted-foreground mt-2">
-                    {pointsToNext > 0 
-                      ? `${pointsToNext} ${t('profile.points')} ${t('profile.toReach')} ${nextLevel}` 
-                      : "Massimo livello raggiunto!"
-                    }
-                  </p>
                 </div>
 
-                <div className="bg-muted/30 rounded-lg p-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <TrendingUp className="w-5 h-5 text-primary" />
-                    <h3 className="font-semibold text-foreground">{t('profile.benefits')}</h3>
+                <div className="space-y-2">
+                  <Label htmlFor="new">{t('profile.newPassword')}</Label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
+                    <Input id="new" type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className="pl-10" />
                   </div>
-                  <ul className="space-y-2 text-sm text-muted-foreground">
-                    <li>• Sconto 10% su tutte le prenotazioni</li>
-                    <li>• Accesso prioritario a eventi speciali</li>
-                    <li>• Punti doppi ogni venerdì</li>
-                    {currentLevel !== "Bronze" && <li>• Tavolo riservato in sala VIP</li>}
-                    {currentLevel === "Oro" && <li>• Menu degustazione esclusivo mensile</li>}
-                  </ul>
                 </div>
-              </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="confirm">{t('profile.confirmPassword')}</Label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
+                    <Input id="confirm" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className="pl-10" />
+                  </div>
+                </div>
+
+                <Button type="submit" className="w-full">{t('profile.changePassword')}</Button>
+              </form>
             </Card>
           </div>
         </div>
       </main>
-      
+
       <Footer />
     </div>
   );

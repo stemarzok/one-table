@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -7,18 +7,22 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Menu, X, User, LogOut, LayoutDashboard, Calendar } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useBusinessRole } from "@/hooks/useBusinessRole";
+import { Shield } from "lucide-react";
 import { useAdminRole } from "@/hooks/useAdminRole";
-import { Shield, LayoutDashboard } from "lucide-react";
+import { useState } from "react";
 
 const Header = () => {
   const { language, setLanguage, t } = useLanguage();
   const { isLoggedIn, profile, logout } = useAuth();
-  const { hasRole } = useBusinessRole();
+  const { hasRole: hasBusinessRole } = useBusinessRole();
   const { isAdmin } = useAdminRole();
   const location = useLocation();
+  const navigate = useNavigate();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border">
@@ -63,29 +67,29 @@ const Header = () => {
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem asChild>
-                  <Link to="/profile" className="cursor-pointer">
-                    {t('nav.profile')}
-                  </Link>
+                <DropdownMenuItem onClick={() => navigate('/profile')}>
+                  <User className="mr-2 h-4 w-4" />
+                  <span>{t('nav.profile')}</span>
                 </DropdownMenuItem>
-                {hasRole() && (
-                  <DropdownMenuItem asChild>
-                    <Link to="/dashboard" className="cursor-pointer flex items-center gap-2">
-                      <LayoutDashboard className="w-4 h-4" />
-                      Dashboard
-                    </Link>
+                <DropdownMenuItem onClick={() => navigate('/my-bookings')}>
+                  <Calendar className="mr-2 h-4 w-4" />
+                  <span>Le Mie Prenotazioni</span>
+                </DropdownMenuItem>
+                {hasBusinessRole && (
+                  <DropdownMenuItem onClick={() => navigate('/dashboard')}>
+                    <LayoutDashboard className="mr-2 h-4 w-4" />
+                    <span>Dashboard</span>
                   </DropdownMenuItem>
                 )}
                 {isAdmin && (
-                  <DropdownMenuItem asChild>
-                    <Link to="/admin" className="cursor-pointer flex items-center gap-2">
-                      <Shield className="w-4 h-4" />
-                      Admin Panel
-                    </Link>
+                  <DropdownMenuItem onClick={() => navigate('/admin')}>
+                    <Shield className="mr-2 h-4 w-4" />
+                    <span>Admin Panel</span>
                   </DropdownMenuItem>
                 )}
                 <DropdownMenuItem onClick={logout}>
-                  {t('nav.logout')}
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>{t('nav.logout')}</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -104,7 +108,39 @@ const Header = () => {
             </div>
           )}
         </nav>
+
+        <button 
+          className="md:hidden"
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+        >
+          {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+        </button>
       </div>
+
+      {mobileMenuOpen && (
+        <div className="md:hidden border-t border-border bg-background">
+          <nav className="container mx-auto px-4 py-4 flex flex-col gap-2">
+            <Link to={location.pathname === '/business' ? '/' : '/business'} className="py-2 text-foreground" onClick={() => setMobileMenuOpen(false)}>
+              {location.pathname === '/business' ? 'Home' : t('nav.forBusiness')}
+            </Link>
+            {isLoggedIn && (
+              <>
+                <Link to="/profile" className="py-2 text-foreground" onClick={() => setMobileMenuOpen(false)}>
+                  {t('nav.profile')}
+                </Link>
+                <Link to="/my-bookings" className="py-2 text-foreground" onClick={() => setMobileMenuOpen(false)}>
+                  Le Mie Prenotazioni
+                </Link>
+                {hasBusinessRole && (
+                  <Link to="/dashboard" className="py-2 text-foreground" onClick={() => setMobileMenuOpen(false)}>
+                    Dashboard
+                  </Link>
+                )}
+              </>
+            )}
+          </nav>
+        </div>
+      )}
     </header>
   );
 };
