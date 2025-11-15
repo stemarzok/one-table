@@ -7,7 +7,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Menu, X, User, LogOut, LayoutDashboard, Calendar } from "lucide-react";
+import { Menu, X, User, LogOut, LayoutDashboard, Calendar, Heart } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useBusinessRole } from "@/hooks/useBusinessRole";
@@ -75,6 +75,10 @@ const Header = () => {
                   <Calendar className="mr-2 h-4 w-4" />
                   <span>Le Mie Prenotazioni</span>
                 </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate('/favorites')}>
+                  <Heart className="mr-2 h-4 w-4" />
+                  <span>I Miei Preferiti</span>
+                </DropdownMenuItem>
                 {hasBusinessRole && (
                   <DropdownMenuItem onClick={() => navigate('/dashboard')}>
                     <LayoutDashboard className="mr-2 h-4 w-4" />
@@ -130,6 +134,9 @@ const Header = () => {
                 </Link>
                 <Link to="/my-bookings" className="py-2 text-foreground" onClick={() => setMobileMenuOpen(false)}>
                   Le Mie Prenotazioni
+                </Link>
+                <Link to="/favorites" className="py-2 text-foreground" onClick={() => setMobileMenuOpen(false)}>
+                  I Miei Preferiti
                 </Link>
                 {hasBusinessRole && (
                   <Link to="/dashboard" className="py-2 text-foreground" onClick={() => setMobileMenuOpen(false)}>
