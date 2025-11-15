@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { useFavorites } from "@/hooks/useFavorites";
 
 interface RestaurantCardProps {
-  id: number;
+  id: string;
   name: string;
   cuisine: string;
   location: string;
