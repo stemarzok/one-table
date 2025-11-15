@@ -72,7 +72,7 @@ const Header = () => {
           ) : (
             <div className="flex items-center gap-3">
               <Link to="/auth">
-                <Button variant="outline" className="border-primary text-primary hover:bg-primary/10">
+                <Button variant="outline" className="border-foreground/20 text-foreground hover:bg-foreground/5 hover:border-foreground/40">
                   {t('nav.login')}
                 </Button>
               </Link>
