@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { LanguageProvider } from "./contexts/LanguageContext";
 import { AuthProvider } from "./contexts/AuthContext";
+import CookieConsent from "./components/CookieConsent";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Business from "./pages/Business";
@@ -17,6 +18,10 @@ import BusinessRegistration from "./pages/BusinessRegistration";
 import Dashboard from "./pages/Dashboard";
 import AdminPanel from "./pages/AdminPanel";
 import AdminSetup from "./pages/AdminSetup";
+import Privacy from "./pages/Privacy";
+import Terms from "./pages/Terms";
+import Cookies from "./pages/Cookies";
+import GDPR from "./pages/GDPR";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -29,6 +34,7 @@ const App = () => (
           <Toaster />
           <Sonner />
           <BrowserRouter>
+            <CookieConsent />
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/auth" element={<Auth />} />
@@ -40,8 +46,12 @@ const App = () => (
               <Route path="/restaurant-registration" element={<RestaurantRegistration />} />
               <Route path="/business-registration" element={<BusinessRegistration />} />
               <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/admin" element={<AdminPanel />} />
-          <Route path="/admin-setup" element={<AdminSetup />} />
+              <Route path="/admin" element={<AdminPanel />} />
+              <Route path="/admin-setup" element={<AdminSetup />} />
+              <Route path="/privacy" element={<Privacy />} />
+              <Route path="/terms" element={<Terms />} />
+              <Route path="/cookies" element={<Cookies />} />
+              <Route path="/gdpr" element={<GDPR />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
