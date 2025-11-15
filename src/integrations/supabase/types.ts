@@ -14,6 +14,107 @@ export type Database = {
   }
   public: {
     Tables: {
+      business_applications: {
+        Row: {
+          business_address: string
+          business_email: string
+          business_name: string
+          business_phone: string
+          business_registration_number: string
+          city: string
+          created_at: string
+          documents_url: string[] | null
+          id: string
+          legal_representative: string
+          postal_code: string | null
+          province: string | null
+          rejection_reason: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: Database["public"]["Enums"]["application_status"]
+          submitted_at: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          business_address: string
+          business_email: string
+          business_name: string
+          business_phone: string
+          business_registration_number: string
+          city: string
+          created_at?: string
+          documents_url?: string[] | null
+          id?: string
+          legal_representative: string
+          postal_code?: string | null
+          province?: string | null
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["application_status"]
+          submitted_at?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          business_address?: string
+          business_email?: string
+          business_name?: string
+          business_phone?: string
+          business_registration_number?: string
+          city?: string
+          created_at?: string
+          documents_url?: string[] | null
+          id?: string
+          legal_representative?: string
+          postal_code?: string | null
+          province?: string | null
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["application_status"]
+          submitted_at?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      business_roles: {
+        Row: {
+          created_at: string
+          id: string
+          restaurant_id: string
+          role: Database["public"]["Enums"]["business_role"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          restaurant_id: string
+          role?: Database["public"]["Enums"]["business_role"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          restaurant_id?: string
+          role?: Database["public"]["Enums"]["business_role"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_roles_restaurant_id_fkey"
+            columns: ["restaurant_id"]
+            isOneToOne: false
+            referencedRelation: "restaurants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       menus: {
         Row: {
           category: string
@@ -141,6 +242,8 @@ export type Database = {
       restaurants: {
         Row: {
           address: string
+          business_name: string | null
+          business_registration_number: string | null
           city: string
           cover_image_url: string | null
           created_at: string
@@ -149,6 +252,8 @@ export type Database = {
           email: string
           id: string
           is_active: boolean
+          is_verified: boolean | null
+          legal_representative: string | null
           logo_url: string | null
           name: string
           opening_hours: Json | null
@@ -156,9 +261,14 @@ export type Database = {
           phone: string
           price_range: string | null
           updated_at: string
+          verification_status:
+            | Database["public"]["Enums"]["application_status"]
+            | null
         }
         Insert: {
           address: string
+          business_name?: string | null
+          business_registration_number?: string | null
           city: string
           cover_image_url?: string | null
           created_at?: string
@@ -167,6 +277,8 @@ export type Database = {
           email: string
           id?: string
           is_active?: boolean
+          is_verified?: boolean | null
+          legal_representative?: string | null
           logo_url?: string | null
           name: string
           opening_hours?: Json | null
@@ -174,9 +286,14 @@ export type Database = {
           phone: string
           price_range?: string | null
           updated_at?: string
+          verification_status?:
+            | Database["public"]["Enums"]["application_status"]
+            | null
         }
         Update: {
           address?: string
+          business_name?: string | null
+          business_registration_number?: string | null
           city?: string
           cover_image_url?: string | null
           created_at?: string
@@ -185,6 +302,8 @@ export type Database = {
           email?: string
           id?: string
           is_active?: boolean
+          is_verified?: boolean | null
+          legal_representative?: string | null
           logo_url?: string | null
           name?: string
           opening_hours?: Json | null
@@ -192,6 +311,9 @@ export type Database = {
           phone?: string
           price_range?: string | null
           updated_at?: string
+          verification_status?:
+            | Database["public"]["Enums"]["application_status"]
+            | null
         }
         Relationships: [
           {
@@ -208,10 +330,22 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_any_business_role: {
+        Args: { _restaurant_id: string; _user_id: string }
+        Returns: boolean
+      }
+      has_business_role: {
+        Args: {
+          _restaurant_id: string
+          _role: Database["public"]["Enums"]["business_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      application_status: "pending" | "approved" | "rejected"
+      business_role: "owner" | "manager" | "staff"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -338,6 +472,9 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      application_status: ["pending", "approved", "rejected"],
+      business_role: ["owner", "manager", "staff"],
+    },
   },
 } as const
