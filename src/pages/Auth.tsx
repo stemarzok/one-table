@@ -7,9 +7,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const { login } = useAuth();
+  const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -17,6 +21,14 @@ const Auth = () => {
     
     // Simulazione login - sostituire con vera implementazione
     setTimeout(() => {
+      login();
+      const redirectTo = sessionStorage.getItem('redirectTo');
+      if (redirectTo) {
+        sessionStorage.removeItem('redirectTo');
+        navigate(redirectTo);
+      } else {
+        navigate('/');
+      }
       toast.success("Accesso effettuato con successo!");
       setIsLoading(false);
     }, 1000);
@@ -28,6 +40,14 @@ const Auth = () => {
     
     // Simulazione registrazione - sostituire con vera implementazione
     setTimeout(() => {
+      login();
+      const redirectTo = sessionStorage.getItem('redirectTo');
+      if (redirectTo) {
+        sessionStorage.removeItem('redirectTo');
+        navigate(redirectTo);
+      } else {
+        navigate('/');
+      }
       toast.success("Registrazione completata! Benvenuto su OneTable!");
       setIsLoading(false);
     }, 1000);

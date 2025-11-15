@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { Star, MapPin, Phone, Mail, Clock } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -21,6 +21,10 @@ const RestaurantDetail = () => {
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
   const [review, setReview] = useState("");
   const [rating, setRating] = useState(5);
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' as ScrollBehavior });
+  }, [id]);
 
   const restaurant = {
     name: "La Terrazza del Sole",
@@ -81,6 +85,7 @@ const RestaurantDetail = () => {
     }
 
     if (!isLoggedIn) {
+      sessionStorage.setItem('redirectTo', `/restaurant/${id}?tab=booking`);
       toast({ title: "Accedi per prenotare", description: "Devi effettuare l'accesso o registrarti per completare la prenotazione." });
       navigate("/auth");
       return;
@@ -95,6 +100,7 @@ const RestaurantDetail = () => {
   const handleReviewSubmit = () => {
     if (!review.trim()) return;
     if (!isLoggedIn) {
+      sessionStorage.setItem('redirectTo', `/restaurant/${id}?tab=reviews`);
       toast({ title: "Accedi per recensire", description: "Devi effettuare l'accesso per lasciare una recensione." });
       navigate("/auth");
       return;
@@ -161,8 +167,8 @@ const RestaurantDetail = () => {
               <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                 <div id="tabs-top" />
                 <TabsList className="grid w-full grid-cols-3">
-                  <TabsTrigger value="menu">Menu</TabsTrigger>
                   <TabsTrigger value="booking">Prenotazione</TabsTrigger>
+                  <TabsTrigger value="menu">Menu</TabsTrigger>
                   <TabsTrigger value="reviews">Recensioni</TabsTrigger>
                 </TabsList>
                 
