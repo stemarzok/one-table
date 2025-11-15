@@ -1,6 +1,6 @@
-import { Button } from "@/components/ui/button";
 import { Star, Award, TrendingUp } from "lucide-react";
 import heroImage from "@/assets/hero-modern.jpg";
+import SearchBar from "./SearchBar";
 
 const Hero = () => {
   return (
@@ -17,49 +17,42 @@ const Hero = () => {
       <div className="container mx-auto px-4 z-10 relative">
         <div className="max-w-3xl">
           <div className="flex items-center gap-2 mb-6 animate-fade-in">
-            <Award className="w-6 h-6 text-accent" />
-            <span className="text-primary-foreground/90 font-medium">Sistema di Reputazione Innovativo</span>
+            <Award className="w-6 h-6 text-primary" />
+            <span className="text-white/90 font-medium">Sistema di Reputazione Innovativo</span>
           </div>
           
-          <h1 className="text-5xl md:text-7xl font-bold text-primary-foreground mb-6 leading-tight">
-            Prenota, Guadagna,
-            <span className="block bg-gradient-accent bg-clip-text text-transparent">
-              Goditi i Vantaggi
+          <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight">
+            Prenota, Risparmia,
+            <span className="block text-primary drop-shadow-lg">
+              Goditi i Vantaggi VIP
             </span>
           </h1>
           
-          <p className="text-xl text-primary-foreground/90 mb-8 leading-relaxed">
+          <p className="text-xl text-white/90 mb-12 leading-relaxed max-w-2xl">
             Più sei puntuale e affidabile, più vantaggi ottieni: upgrade di tavoli con vista migliore, 
             sconti esclusivi e trattamenti VIP nei migliori ristoranti.
           </p>
           
-          <div className="flex flex-wrap gap-4 mb-12">
-            <Button size="lg" className="bg-accent text-accent-foreground hover:bg-accent/90 shadow-elegant text-lg px-8">
-              Inizia Ora
-            </Button>
-            <Button size="lg" variant="outline" className="border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10 text-lg px-8">
-              Scopri Come Funziona
-            </Button>
-          </div>
+          <SearchBar />
           
-          <div className="flex flex-wrap gap-8">
+          <div className="flex flex-wrap gap-8 mt-12">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-full bg-accent/20 flex items-center justify-center">
-                <Star className="w-6 h-6 text-accent" fill="currentColor" />
+              <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center backdrop-blur-sm">
+                <Star className="w-6 h-6 text-primary" fill="currentColor" />
               </div>
               <div>
-                <div className="text-2xl font-bold text-primary-foreground">4.9/5</div>
-                <div className="text-sm text-primary-foreground/80">Valutazione Media</div>
+                <div className="text-2xl font-bold text-white">4.9/5</div>
+                <div className="text-sm text-white/80">Valutazione Media</div>
               </div>
             </div>
             
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-full bg-accent/20 flex items-center justify-center">
-                <TrendingUp className="w-6 h-6 text-accent" />
+              <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center backdrop-blur-sm">
+                <TrendingUp className="w-6 h-6 text-primary" />
               </div>
               <div>
-                <div className="text-2xl font-bold text-primary-foreground">500+</div>
-                <div className="text-sm text-primary-foreground/80">Ristoranti Partner</div>
+                <div className="text-2xl font-bold text-white">500+</div>
+                <div className="text-sm text-white/80">Ristoranti Partner</div>
               </div>
             </div>
           </div>

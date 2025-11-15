@@ -1,20 +1,22 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Languages } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [language, setLanguage] = useState("it");
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-lg border-b border-border/50 shadow-sm">
       <nav className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
-          <Link to="/" className="flex items-center gap-1">
-            <span className="text-2xl font-bold text-foreground">
+          <Link to="/" className="flex items-center">
+            <span className="text-2xl font-bold text-foreground drop-shadow-sm">
               One
             </span>
-            <span className="text-2xl font-bold text-primary">
+            <span className="text-2xl font-bold text-primary drop-shadow-sm">
               Table
             </span>
           </Link>
@@ -36,11 +38,22 @@ const Header = () => {
           </div>
 
           <div className="hidden md:flex items-center gap-4">
+            <Select value={language} onValueChange={setLanguage}>
+              <SelectTrigger className="w-[120px] border-0 bg-transparent">
+                <Languages className="w-4 h-4 mr-2" />
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="it">Italiano</SelectItem>
+                <SelectItem value="en">English</SelectItem>
+              </SelectContent>
+            </Select>
+            
             <Link to="/auth">
               <Button variant="ghost">Accedi</Button>
             </Link>
             <Link to="/auth">
-              <Button className="bg-gradient-hero text-primary-foreground hover:opacity-90">
+              <Button className="bg-primary hover:bg-primary/90 text-primary-foreground">
                 Registrati
               </Button>
             </Link>

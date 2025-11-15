@@ -4,8 +4,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { CheckCircle, TrendingDown, Users, Calendar, BarChart3, Shield } from "lucide-react";
 import heroBusinessImage from "@/assets/hero-business.jpg";
+import { useEffect } from "react";
 
 const Business = () => {
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   return (
     <div className="min-h-screen">
       <Header />
@@ -23,31 +28,36 @@ const Business = () => {
         
         <div className="container mx-auto px-4 z-10 relative">
           <div className="max-w-3xl">
-            <h1 className="text-5xl md:text-7xl font-bold text-primary-foreground mb-6 leading-tight">
+            <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight">
               Riduci i No-Show,
-              <span className="block bg-gradient-accent bg-clip-text text-transparent">
+              <span className="block text-primary drop-shadow-lg">
                 Aumenta i Ricavi
               </span>
             </h1>
             
-            <p className="text-xl text-primary-foreground/90 mb-8 leading-relaxed">
+            <p className="text-xl text-white/90 mb-8 leading-relaxed">
               Unisciti a OneTable e trasforma i tavoli vuoti in opportunità. Il nostro sistema di 
               reputazione incentiva i clienti affidabili e riduce drasticamente le mancate presentazioni.
             </p>
             
-            <div className="bg-background/10 backdrop-blur-sm rounded-lg p-6 mb-8 border border-primary-foreground/20">
+            <div className="bg-background/10 backdrop-blur-sm rounded-lg p-6 mb-8 border border-white/20">
               <div className="flex items-center gap-3 mb-2">
-                <TrendingDown className="w-8 h-8 text-accent" />
-                <div className="text-4xl font-bold text-primary-foreground">€16 Miliardi</div>
+                <TrendingDown className="w-8 h-8 text-primary" />
+                <div className="text-4xl font-bold text-white">€16 Miliardi</div>
               </div>
-              <p className="text-primary-foreground/90">
+              <p className="text-white/90">
                 Perdite annuali in Europa causate dai no-show nei ristoranti
               </p>
             </div>
             
-            <Button size="lg" className="bg-accent text-accent-foreground hover:bg-accent/90 shadow-elegant text-lg px-8">
-              Richiedi una Demo
-            </Button>
+            <div className="flex flex-wrap gap-4">
+              <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 shadow-elegant text-lg px-8">
+                Richiedi una Demo
+              </Button>
+              <Button size="lg" variant="outline" className="border-white/30 text-white hover:bg-white/10 text-lg px-8">
+                Scopri di Più
+              </Button>
+            </div>
           </div>
         </div>
       </section>
