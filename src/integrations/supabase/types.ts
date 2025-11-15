@@ -35,6 +35,72 @@ export type Database = {
         }
         Relationships: []
       }
+      bookings: {
+        Row: {
+          booking_date: string
+          booking_time: string
+          created_at: string
+          guests_count: number
+          id: string
+          restaurant_id: string
+          special_requests: string | null
+          status: string
+          table_id: string | null
+          updated_at: string
+          user_email: string
+          user_id: string
+          user_name: string
+          user_phone: string | null
+        }
+        Insert: {
+          booking_date: string
+          booking_time: string
+          created_at?: string
+          guests_count: number
+          id?: string
+          restaurant_id: string
+          special_requests?: string | null
+          status?: string
+          table_id?: string | null
+          updated_at?: string
+          user_email: string
+          user_id: string
+          user_name: string
+          user_phone?: string | null
+        }
+        Update: {
+          booking_date?: string
+          booking_time?: string
+          created_at?: string
+          guests_count?: number
+          id?: string
+          restaurant_id?: string
+          special_requests?: string | null
+          status?: string
+          table_id?: string | null
+          updated_at?: string
+          user_email?: string
+          user_id?: string
+          user_name?: string
+          user_phone?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bookings_restaurant_id_fkey"
+            columns: ["restaurant_id"]
+            isOneToOne: false
+            referencedRelation: "restaurants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookings_table_id_fkey"
+            columns: ["table_id"]
+            isOneToOne: false
+            referencedRelation: "restaurant_tables"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       business_applications: {
         Row: {
           business_address: string
@@ -346,6 +412,63 @@ export type Database = {
           },
         ]
       }
+      reviews: {
+        Row: {
+          ambiance_rating: number | null
+          booking_id: string | null
+          comment: string | null
+          created_at: string
+          food_rating: number | null
+          id: string
+          rating: number
+          restaurant_id: string
+          service_rating: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          ambiance_rating?: number | null
+          booking_id?: string | null
+          comment?: string | null
+          created_at?: string
+          food_rating?: number | null
+          id?: string
+          rating: number
+          restaurant_id: string
+          service_rating?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          ambiance_rating?: number | null
+          booking_id?: string | null
+          comment?: string | null
+          created_at?: string
+          food_rating?: number | null
+          id?: string
+          rating?: number
+          restaurant_id?: string
+          service_rating?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reviews_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_restaurant_id_fkey"
+            columns: ["restaurant_id"]
+            isOneToOne: false
+            referencedRelation: "restaurants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -354,6 +477,25 @@ export type Database = {
       approve_business_application: {
         Args: { _admin_id: string; _application_id: string }
         Returns: string
+      }
+      check_booking_availability: {
+        Args: {
+          _booking_date: string
+          _booking_time: string
+          _guests_count: number
+          _restaurant_id: string
+        }
+        Returns: boolean
+      }
+      get_restaurant_rating: {
+        Args: { restaurant_id_param: string }
+        Returns: {
+          avg_ambiance: number
+          avg_food: number
+          avg_rating: number
+          avg_service: number
+          total_reviews: number
+        }[]
       }
       has_any_business_role: {
         Args: { _restaurant_id: string; _user_id: string }
