@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { Star, MapPin, Phone, Mail, Clock } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -22,7 +22,6 @@ const RestaurantDetail = () => {
   const [review, setReview] = useState("");
   const [rating, setRating] = useState(5);
 
-  // Dati mock del ristorante
   const restaurant = {
     name: "La Terrazza del Sole",
     cuisine: "Cucina Italiana Gourmet",
@@ -89,7 +88,7 @@ const RestaurantDetail = () => {
     
     toast({
       title: "Prenotazione confermata!",
-      description: `Il tuo tavolo è prenotato per le ${selectedSlot}. Ti invieremo una email di conferma.",
+      description: `Il tuo tavolo è prenotato per le ${selectedSlot}. Ti invieremo una email di conferma.`,
     });
   };
 
@@ -111,7 +110,6 @@ const RestaurantDetail = () => {
       <Header />
       
       <main className="pt-16">
-        {/* Hero Image */}
         <div 
           className="h-96 bg-cover bg-center relative"
           style={{ backgroundImage: `url(${restaurant.image})` }}
@@ -159,7 +157,6 @@ const RestaurantDetail = () => {
           </Card>
 
           <div className="grid md:grid-cols-3 gap-8">
-            {/* Colonna principale */}
             <div className="md:col-span-2 space-y-8">
               <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                 <div id="tabs-top" />
@@ -177,12 +174,12 @@ const RestaurantDetail = () => {
                         <div key={idx}>
                           <h3 className="text-xl font-bold text-primary mb-3">{section.category}</h3>
                           <ul className="space-y-2">
-                        {section.items.map((item, i) => (
-                          <li key={i} className="flex items-center justify-between text-muted-foreground pl-4 border-l-2 border-primary/20">
-                            <span>{item.name}</span>
-                            <span className="text-foreground font-medium">€ {item.price.toFixed(2)}</span>
-                          </li>
-                        ))}
+                            {section.items.map((item, i) => (
+                              <li key={i} className="flex items-center justify-between text-muted-foreground pl-4 border-l-2 border-primary/20">
+                                <span>{item.name}</span>
+                                <span className="text-foreground font-medium">€ {item.price.toFixed(2)}</span>
+                              </li>
+                            ))}
                           </ul>
                         </div>
                       ))}
@@ -190,7 +187,7 @@ const RestaurantDetail = () => {
                   </Card>
                 </TabsContent>
                 
-                <TabsContent value="booking" id="booking" className="mt-6">
+                <TabsContent value="booking" className="mt-6">
                   <Card className="p-6">
                     <h2 className="text-2xl font-bold text-foreground mb-6">Prenota il Tuo Tavolo</h2>
                     
@@ -210,26 +207,12 @@ const RestaurantDetail = () => {
                           ))}
                         </div>
                       </div>
-                          {availableSlots.map((slot) => (
-                            <Button
-                              key={slot}
-                              variant={selectedSlot === slot ? "default" : "outline"}
-                              onClick={() => setSelectedSlot(slot)}
-                              className="w-full"
-                            >
-                              {slot}
-                            </Button>
-                          ))}
-                        </div>
-                      </div>
                       
-                      <Button 
-                        onClick={handleBooking}
-                        className="w-full bg-primary hover:bg-primary/90"
-                        size="lg"
-                      >
-                        Conferma Prenotazione
-                      </Button>
+                      <div className="flex justify-end">
+                        <Button className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-full" onClick={handleBooking}>
+                          Conferma Prenotazione
+                        </Button>
+                      </div>
                     </div>
                   </Card>
                 </TabsContent>
@@ -238,7 +221,6 @@ const RestaurantDetail = () => {
                   <Card className="p-6">
                     <h2 className="text-2xl font-bold text-foreground mb-6">Recensioni</h2>
                     
-                    {/* Form nuova recensione (solo per utenti loggati) */}
                     <div className="mb-8 p-4 bg-muted/30 rounded-lg">
                       <h3 className="font-semibold text-foreground mb-3">Lascia una recensione</h3>
                       <div className="flex gap-1 mb-3">
@@ -263,7 +245,6 @@ const RestaurantDetail = () => {
                       </Button>
                     </div>
                     
-                    {/* Lista recensioni */}
                     <div className="space-y-4">
                       {reviews.map((rev, idx) => (
                         <div key={idx} className="border-b border-border pb-4 last:border-0">
@@ -285,7 +266,6 @@ const RestaurantDetail = () => {
               </Tabs>
             </div>
 
-            {/* Sidebar contatti */}
             <div className="space-y-6">
               <Card className="p-6">
                 <h3 className="font-bold text-foreground mb-4">Contatti</h3>
@@ -327,14 +307,14 @@ const RestaurantDetail = () => {
                   </div>
                 </div>
               </Card>
-              
-              <Card className="p-6 bg-primary/5 border-primary/20">
-                <h3 className="font-bold text-foreground mb-2">Vantaggi OneTable</h3>
+
+              <Card className="p-6 bg-gradient-card border-primary/20">
+                <h3 className="font-bold text-foreground mb-2">Accedi ai Vantaggi</h3>
                 <p className="text-sm text-muted-foreground mb-4">
-                  Prenota con OneTable e ottieni vantaggi esclusivi basati sul tuo livello!
+                  Prenota come utente registrato e accumula punti per ottenere vantaggi esclusivi!
                 </p>
-                <Button variant="outline" className="w-full" onClick={() => navigate('/auth')}>
-                  Accedi per i Vantaggi
+                <Button className="w-full bg-primary hover:bg-primary/90">
+                  Scopri di Più
                 </Button>
               </Card>
             </div>
