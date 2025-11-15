@@ -61,7 +61,12 @@ const Business = () => {
               >
                 Registra il Tuo Ristorante
               </Button>
-              <Button size="lg" variant="outline" className="border-white/30 text-white hover:bg-white/10 text-lg px-8">
+              <Button 
+                size="lg" 
+                variant="outline" 
+                className="border-white/30 text-white hover:bg-white/10 text-lg px-8"
+                onClick={() => document.getElementById('benefits')?.scrollIntoView({ behavior: 'smooth' })}
+              >
                 Scopri di Più
               </Button>
             </div>
@@ -70,7 +75,7 @@ const Business = () => {
       </section>
 
       {/* Benefits Section */}
-      <section className="py-20 bg-background">
+      <section id="benefits" className="py-20 bg-background">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold mb-4">
@@ -152,78 +157,98 @@ const Business = () => {
             <h2 className="text-4xl md:text-5xl font-bold mb-4">
               Come Funziona per le Aziende
             </h2>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              Quattro semplici passaggi per iniziare a ridurre i no-show
+            </p>
           </div>
 
-          <div className="max-w-4xl mx-auto space-y-8">
-            <div className="flex gap-6 items-start">
-              <div className="flex-shrink-0 w-12 h-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xl font-bold">
-                1
-              </div>
-              <div>
-                <h3 className="text-2xl font-bold mb-2">Registrazione e Setup</h3>
-                <p className="text-muted-foreground">
-                  Crea il tuo profilo aziendale, configura i tavoli, gli orari e le politiche di prenotazione in pochi minuti
-                </p>
-              </div>
-            </div>
+          <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-6">
+            <Card className="shadow-card hover:shadow-elegant transition-shadow">
+              <CardHeader>
+                <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                  <div className="text-3xl font-bold text-primary">1</div>
+                </div>
+                <CardTitle className="text-2xl mb-2">Registrazione e Setup</CardTitle>
+                <CardDescription className="text-base">
+                  Crea il tuo profilo aziendale, configura i tavoli, gli orari e le politiche di prenotazione in pochi minuti. 
+                  Il nostro sistema intuitivo ti guiderà in ogni passaggio.
+                </CardDescription>
+              </CardHeader>
+            </Card>
 
-            <div className="flex gap-6 items-start">
-              <div className="flex-shrink-0 w-12 h-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xl font-bold">
-                2
-              </div>
-              <div>
-                <h3 className="text-2xl font-bold mb-2">Accetta Prenotazioni</h3>
-                <p className="text-muted-foreground">
-                  Ricevi prenotazioni dalla piattaforma e vedi automaticamente il livello di reputazione di ogni cliente
-                </p>
-              </div>
-            </div>
+            <Card className="shadow-card hover:shadow-elegant transition-shadow">
+              <CardHeader>
+                <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                  <div className="text-3xl font-bold text-primary">2</div>
+                </div>
+                <CardTitle className="text-2xl mb-2">Accetta Prenotazioni</CardTitle>
+                <CardDescription className="text-base">
+                  Ricevi prenotazioni dalla piattaforma e vedi automaticamente il livello di reputazione di ogni cliente. 
+                  Dai priorità ai clienti più affidabili.
+                </CardDescription>
+              </CardHeader>
+            </Card>
 
-            <div className="flex gap-6 items-start">
-              <div className="flex-shrink-0 w-12 h-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xl font-bold">
-                3
-              </div>
-              <div>
-                <h3 className="text-2xl font-bold mb-2">Valuta i Clienti</h3>
-                <p className="text-muted-foreground">
-                  Dopo ogni prenotazione, valuta semplicemente se il cliente si è presentato e se è stato puntuale
-                </p>
-              </div>
-            </div>
+            <Card className="shadow-card hover:shadow-elegant transition-shadow">
+              <CardHeader>
+                <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                  <div className="text-3xl font-bold text-primary">3</div>
+                </div>
+                <CardTitle className="text-2xl mb-2">Valuta i Clienti</CardTitle>
+                <CardDescription className="text-base">
+                  Dopo ogni prenotazione, valuta semplicemente se il cliente si è presentato e se è stato puntuale. 
+                  Il sistema aggiorna automaticamente la loro reputazione.
+                </CardDescription>
+              </CardHeader>
+            </Card>
 
-            <div className="flex gap-6 items-start">
-              <div className="flex-shrink-0 w-12 h-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xl font-bold">
-                4
-              </div>
-              <div>
-                <h3 className="text-2xl font-bold mb-2">Premia i Migliori</h3>
-                <p className="text-muted-foreground">
-                  Offri vantaggi personalizzati ai clienti con reputazione elevata: upgrade tavoli, sconti o drink di benvenuto
-                </p>
-              </div>
-            </div>
+            <Card className="shadow-card hover:shadow-elegant transition-shadow">
+              <CardHeader>
+                <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                  <div className="text-3xl font-bold text-primary">4</div>
+                </div>
+                <CardTitle className="text-2xl mb-2">Premia i Migliori</CardTitle>
+                <CardDescription className="text-base">
+                  Offri vantaggi personalizzati ai clienti con reputazione elevata: upgrade tavoli, sconti o drink di benvenuto. 
+                  Fidelizza i clienti migliori.
+                </CardDescription>
+              </CardHeader>
+            </Card>
           </div>
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-primary text-primary-foreground">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-4xl md:text-5xl font-bold mb-6">
+      <section className="relative py-32 overflow-hidden">
+        <div 
+          className="absolute inset-0 z-0"
+          style={{
+            backgroundImage: `linear-gradient(135deg, rgba(219, 112, 147, 0.92), rgba(219, 112, 147, 0.85)), url(${heroBusinessImage})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+          }}
+        />
+        <div className="container mx-auto px-4 text-center relative z-10">
+          <h2 className="text-4xl md:text-5xl font-bold mb-6 text-white">
             Inizia a Ridurre i No-Show Oggi
           </h2>
-          <p className="text-xl mb-8 text-primary-foreground/90 max-w-2xl mx-auto">
+          <p className="text-xl mb-10 text-white/95 max-w-2xl mx-auto leading-relaxed">
             Unisciti a centinaia di ristoranti che hanno già aumentato i loro ricavi con OneTable
           </p>
           <div className="flex flex-wrap gap-4 justify-center">
             <Button 
               size="lg" 
-              className="bg-accent text-accent-foreground hover:bg-accent/90 text-lg px-8"
+              className="bg-white text-primary hover:bg-white/90 shadow-elegant text-lg px-10 py-6 h-auto font-semibold"
               onClick={() => navigate('/restaurant-registration')}
             >
               Registra il Tuo Ristorante
             </Button>
-            <Button size="lg" variant="outline" className="border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10 text-lg px-8">
+            <Button 
+              size="lg" 
+              variant="outline" 
+              className="border-2 border-white text-white hover:bg-white/20 text-lg px-10 py-6 h-auto font-semibold"
+              onClick={() => window.open('/brochure.pdf', '_blank')}
+            >
               Scarica la Brochure
             </Button>
           </div>
