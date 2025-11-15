@@ -1,5 +1,7 @@
 import { Mail, Phone, MapPin, Facebook, Instagram, Linkedin, Twitter } from "lucide-react";
 
+const BUILD_VERSION = `v${new Date().toISOString().slice(0, 16).replace('T', '-')}`;
+
 const Footer = () => {
   return (
     <footer className="bg-foreground border-t border-border">
@@ -113,7 +115,15 @@ const Footer = () => {
         </div>
 
         <div className="border-t border-background/20 mt-8 pt-8 text-center text-sm text-background/60">
-          <p>&copy; {new Date().getFullYear()} OneTable. Tutti i diritti riservati.</p>
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <p>&copy; {new Date().getFullYear()} OneTable. Tutti i diritti riservati.</p>
+            <div className="flex items-center gap-3">
+              <a href="/status" className="hover:text-primary transition-colors text-xs">
+                Status
+              </a>
+              <span className="text-xs opacity-50">{BUILD_VERSION}</span>
+            </div>
+          </div>
         </div>
       </div>
     </footer>

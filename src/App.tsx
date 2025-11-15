@@ -22,6 +22,7 @@ import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 import Cookies from "./pages/Cookies";
 import GDPR from "./pages/GDPR";
+import Status from "./pages/Status";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -52,6 +53,7 @@ const App = () => (
               <Route path="/terms" element={<Terms />} />
               <Route path="/cookies" element={<Cookies />} />
               <Route path="/gdpr" element={<GDPR />} />
+              <Route path="/status" element={<Status />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
