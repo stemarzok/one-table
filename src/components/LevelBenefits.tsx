@@ -67,7 +67,7 @@ const LevelBenefits = () => {
           {t('levels.title')}
         </h2>
         
-        <div className="overflow-x-auto pb-4 -mx-4 px-4">
+        <div className="overflow-x-auto hide-scrollbar pb-4 -mx-4 px-4 cursor-grab active:cursor-grabbing">
           <div className="flex gap-6 min-w-max">
             {levels.map((level, index) => {
               const Icon = level.icon;
