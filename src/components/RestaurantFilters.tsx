@@ -161,51 +161,70 @@ const RestaurantFilters = ({ onFilterChange, restaurants }: RestaurantFiltersPro
       {/* Dialog Mappa */}
       {restaurants && (
         <Dialog open={showMap} onOpenChange={setShowMap}>
-          <DialogContent className="max-w-4xl h-[600px]">
+          <DialogContent className="max-w-6xl h-[80vh]">
             <DialogHeader>
               <DialogTitle>Ristoranti vicino a te</DialogTitle>
             </DialogHeader>
-            <div className="flex-1 relative">
-              {userLocation ? (
-                <div className="w-full h-full bg-muted rounded-lg flex items-center justify-center">
-                  <div className="text-center p-8">
-                    <MapPin className="w-12 h-12 mx-auto mb-4 text-primary" />
-                    <p className="text-lg font-semibold mb-2">La tua posizione</p>
-                    <p className="text-sm text-muted-foreground mb-4">
-                      Lat: {userLocation.lat.toFixed(4)}, Lng: {userLocation.lng.toFixed(4)}
-                    </p>
-                    <div className="space-y-2 mt-6">
-                      <p className="text-sm font-medium">Ristoranti nelle vicinanze:</p>
-                      <div className="max-h-64 overflow-y-auto space-y-2">
-                        {restaurants
-                          .filter(r => r.city === filters.city || filters.city === "all")
-                          .map(restaurant => {
-                            const distance = calculateDistance(
-                              userLocation.lat,
-                              userLocation.lng,
-                              restaurant.coordinates.lat,
-                              restaurant.coordinates.lng
-                            );
-                            return (
-                              <div key={restaurant.id} className="p-3 bg-card rounded-lg text-left border border-border">
-                                <p className="font-semibold">{restaurant.name}</p>
-                                <p className="text-sm text-muted-foreground">
-                                  Distanza: {distance.toFixed(1)} km
-                                </p>
-                              </div>
-                            );
-                          })
-                          .slice(0, 5)}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="w-full h-full flex items-center justify-center">
-                  <p className="text-muted-foreground">Caricamento posizione...</p>
-                </div>
-              )}
-            </div>
+            
+            {!mapToken ? (
+              <div className="flex flex-col items-center justify-center h-full space-y-4 p-8">
+                <MapPin className="w-16 h-16 text-primary" />
+                <h3 className="text-xl font-semibold">Inserisci il tuo Mapbox Token</h3>
+                <p className="text-muted-foreground text-center max-w-md">
+                  Per visualizzare la mappa, hai bisogno di un token pubblico Mapbox. 
+                  Puoi ottenerlo gratuitamente su{' '}
+                  <a 
+                    href="https://mapbox.com" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-primary underline"
+                  >
+                    mapbox.com
+                  </a>
+                </p>
+                <Input 
+                  type="text"
+                  placeholder="pk.eyJ1..."
+                  value={mapToken}
+                  onChange={(e) => setMapToken(e.target.value)}
+                  className="max-w-md"
+                />
+                <Button 
+                  onClick={() => {
+                    if (mapToken.startsWith('pk.')) {
+                      // Token valido, la mappa si caricherà
+                    } else {
+                      alert('Inserisci un token Mapbox valido che inizia con "pk."');
+                    }
+                  }}
+                  disabled={!mapToken.startsWith('pk.')}
+                >
+                  Continua
+                </Button>
+              </div>
+            ) : userLocation ? (
+              <div className="flex-1 h-full">
+                <Map 
+                  accessToken={mapToken}
+                  center={[userLocation.lng, userLocation.lat]}
+                  zoom={12}
+                  restaurants={restaurants.filter(r => {
+                    const distance = calculateDistance(
+                      userLocation.lat,
+                      userLocation.lng,
+                      r.coordinates.lat,
+                      r.coordinates.lng
+                    );
+                    return distance <= filters.radius;
+                  })}
+                  userLocation={userLocation}
+                />
+              </div>
+            ) : (
+              <div className="w-full h-full flex items-center justify-center">
+                <p className="text-muted-foreground">Caricamento posizione...</p>
+              </div>
+            )}
           </DialogContent>
         </Dialog>
       )}

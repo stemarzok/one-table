@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { Star, MapPin, Phone, Mail, Clock } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useEffect, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
@@ -19,6 +20,7 @@ const RestaurantDetail = () => {
   const { isLoggedIn, user } = useAuth();
   const [activeTab, setActiveTab] = useState<string>(searchParams.get("tab") ?? "booking");
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
+  const [guests, setGuests] = useState<number>(2);
   const [review, setReview] = useState("");
   const [rating, setRating] = useState(5);
 
@@ -93,7 +95,7 @@ const RestaurantDetail = () => {
     
     toast({
       title: "Prenotazione confermata!",
-      description: `Il tuo tavolo è prenotato per le ${selectedSlot}. Ti invieremo una email di conferma.`,
+      description: `Il tuo tavolo per ${guests} ${guests === 1 ? 'persona' : 'persone'} è prenotato per le ${selectedSlot}. Ti invieremo una email di conferma.`,
     });
   };
 
@@ -198,6 +200,22 @@ const RestaurantDetail = () => {
                     <h2 className="text-2xl font-bold text-foreground mb-6">Prenota il Tuo Tavolo</h2>
                     
                     <div className="space-y-6">
+                      <div>
+                        <h3 className="font-semibold text-foreground mb-3">Numero di Commensali</h3>
+                        <Select value={guests.toString()} onValueChange={(value) => setGuests(parseInt(value))}>
+                          <SelectTrigger className="w-full">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {[1, 2, 3, 4, 5, 6, 7, 8].map((num) => (
+                              <SelectItem key={num} value={num.toString()}>
+                                {num} {num === 1 ? 'persona' : 'persone'}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
                       <div>
                         <h3 className="font-semibold text-foreground mb-3">Seleziona Orario</h3>
                         <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">

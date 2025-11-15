@@ -112,12 +112,21 @@ const restaurants = [
  ];
  
 // Estendi la lista per mostrare più pagine (demo)
+const extraNames = [
+  "Il Giardino Segreto", "Ristorante Bella Vista", "Osteria del Mare", "Trattoria La Nonna",
+  "Pizzeria Da Vinci", "Ristorante Al Porto", "La Cucina del Re", "Osteria Moderna",
+  "Trattoria Il Borgo", "Ristorante Le Stelle", "La Locanda", "Pizzeria Napoletana",
+  "Ristorante Il Sole", "Osteria Toscana", "Trattoria Romana", "La Taverna",
+  "Ristorante Panorama", "Osteria del Centro", "Trattoria La Rustica", "Il Forno Antico",
+  "Ristorante La Perla", "Osteria Veneziana", "Trattoria Il Gusto", "La Brasserie"
+];
+
 const extraRestaurants = Array.from({ length: 24 }).map((_, idx) => {
   const base = restaurants[idx % restaurants.length];
   return {
     ...base,
     id: 100 + idx + 1,
-    name: `${base.name} ${idx + 1}`,
+    name: extraNames[idx],
     sponsored: (idx % 3) === 0,
   };
 });
