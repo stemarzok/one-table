@@ -14,6 +14,53 @@ export type Database = {
   }
   public: {
     Tables: {
+      menus: {
+        Row: {
+          category: string
+          created_at: string
+          description: string | null
+          id: string
+          image_url: string | null
+          is_available: boolean
+          name: string
+          price: number
+          restaurant_id: string
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          is_available?: boolean
+          name: string
+          price: number
+          restaurant_id: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          is_available?: boolean
+          name?: string
+          price?: number
+          restaurant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "menus_restaurant_id_fkey"
+            columns: ["restaurant_id"]
+            isOneToOne: false
+            referencedRelation: "restaurants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -49,6 +96,112 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      restaurant_tables: {
+        Row: {
+          created_at: string
+          id: string
+          is_available: boolean
+          location: string | null
+          restaurant_id: string
+          seats: number
+          table_number: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_available?: boolean
+          location?: string | null
+          restaurant_id: string
+          seats: number
+          table_number: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_available?: boolean
+          location?: string | null
+          restaurant_id?: string
+          seats?: number
+          table_number?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "restaurant_tables_restaurant_id_fkey"
+            columns: ["restaurant_id"]
+            isOneToOne: false
+            referencedRelation: "restaurants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      restaurants: {
+        Row: {
+          address: string
+          city: string
+          cover_image_url: string | null
+          created_at: string
+          cuisine_type: string | null
+          description: string | null
+          email: string
+          id: string
+          is_active: boolean
+          logo_url: string | null
+          name: string
+          opening_hours: Json | null
+          owner_id: string
+          phone: string
+          price_range: string | null
+          updated_at: string
+        }
+        Insert: {
+          address: string
+          city: string
+          cover_image_url?: string | null
+          created_at?: string
+          cuisine_type?: string | null
+          description?: string | null
+          email: string
+          id?: string
+          is_active?: boolean
+          logo_url?: string | null
+          name: string
+          opening_hours?: Json | null
+          owner_id: string
+          phone: string
+          price_range?: string | null
+          updated_at?: string
+        }
+        Update: {
+          address?: string
+          city?: string
+          cover_image_url?: string | null
+          created_at?: string
+          cuisine_type?: string | null
+          description?: string | null
+          email?: string
+          id?: string
+          is_active?: boolean
+          logo_url?: string | null
+          name?: string
+          opening_hours?: Json | null
+          owner_id?: string
+          phone?: string
+          price_range?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "restaurants_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

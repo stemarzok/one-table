@@ -5,8 +5,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { CheckCircle, TrendingDown, Users, Calendar, BarChart3, Shield } from "lucide-react";
 import heroBusinessImage from "@/assets/hero-business.jpg";
 import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 const Business = () => {
+  const navigate = useNavigate();
+  
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
@@ -51,8 +54,12 @@ const Business = () => {
             </div>
             
             <div className="flex flex-wrap gap-4">
-              <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 shadow-elegant text-lg px-8">
-                Richiedi una Demo
+              <Button 
+                size="lg" 
+                className="bg-primary text-primary-foreground hover:bg-primary/90 shadow-elegant text-lg px-8"
+                onClick={() => navigate('/restaurant-registration')}
+              >
+                Registra il Tuo Ristorante
               </Button>
               <Button size="lg" variant="outline" className="border-white/30 text-white hover:bg-white/10 text-lg px-8">
                 Scopri di Più
@@ -209,8 +216,12 @@ const Business = () => {
             Unisciti a centinaia di ristoranti che hanno già aumentato i loro ricavi con OneTable
           </p>
           <div className="flex flex-wrap gap-4 justify-center">
-            <Button size="lg" className="bg-accent text-accent-foreground hover:bg-accent/90 text-lg px-8">
-              Richiedi una Demo Gratuita
+            <Button 
+              size="lg" 
+              className="bg-accent text-accent-foreground hover:bg-accent/90 text-lg px-8"
+              onClick={() => navigate('/restaurant-registration')}
+            >
+              Registra il Tuo Ristorante
             </Button>
             <Button size="lg" variant="outline" className="border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10 text-lg px-8">
               Scarica la Brochure
