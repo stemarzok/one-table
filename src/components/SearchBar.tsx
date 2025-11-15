@@ -1,8 +1,10 @@
 import { Search, SlidersHorizontal } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 
 interface SearchBarProps {
   onSearch?: (query: string) => void;
@@ -11,29 +13,43 @@ interface SearchBarProps {
   variant?: 'default' | 'hero';
 }
 
-const mockSuggestions = [
-  "La Terrazza del Sole",
-  "Osteria Milano",
-  "Ristorante Venezia",
-  "Trattoria Roma",
-  "Pizzeria Napoli"
-];
+interface Restaurant {
+  id: string;
+  name: string;
+  city: string;
+  cuisine_type: string | null;
+}
 
 const SearchBar = ({ onSearch, showFilters, onToggleFilters, variant = 'default' }: SearchBarProps) => {
   const { t } = useLanguage();
+  const navigate = useNavigate();
   const [query, setQuery] = useState("");
-  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [suggestions, setSuggestions] = useState<Restaurant[]>([]);
+
+  useEffect(() => {
+    const searchRestaurants = async () => {
+      if (query.length > 0) {
+        const { data, error } = await supabase
+          .from('restaurants')
+          .select('id, name, city, cuisine_type')
+          .eq('is_active', true)
+          .or(`name.ilike.%${query}%,city.ilike.%${query}%,cuisine_type.ilike.%${query}%`)
+          .limit(5);
+        
+        if (data && !error) {
+          setSuggestions(data);
+        }
+      } else {
+        setSuggestions([]);
+      }
+    };
+
+    const debounce = setTimeout(searchRestaurants, 300);
+    return () => clearTimeout(debounce);
+  }, [query]);
 
   const handleInputChange = (value: string) => {
     setQuery(value);
-    if (value.length > 0) {
-      const filtered = mockSuggestions.filter(s => 
-        s.toLowerCase().includes(value.toLowerCase())
-      );
-      setSuggestions(filtered);
-    } else {
-      setSuggestions([]);
-    }
   };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -42,10 +58,10 @@ const SearchBar = ({ onSearch, showFilters, onToggleFilters, variant = 'default'
     setSuggestions([]);
   };
 
-  const handleSuggestionClick = (suggestion: string) => {
-    setQuery(suggestion);
-    onSearch?.(suggestion);
+  const handleSuggestionClick = (restaurant: Restaurant) => {
+    setQuery(restaurant.name);
     setSuggestions([]);
+    navigate(`/restaurant/${restaurant.id}`);
   };
 
   const isHero = variant === 'hero';
@@ -97,14 +113,17 @@ const SearchBar = ({ onSearch, showFilters, onToggleFilters, variant = 'default'
       
       {suggestions.length > 0 && (
         <div className="absolute top-full mt-2 w-full bg-card border border-border rounded-lg shadow-lg overflow-hidden z-50">
-          {suggestions.map((suggestion, idx) => (
+          {suggestions.map((restaurant) => (
             <button
-              key={idx}
+              key={restaurant.id}
               type="button"
-              onClick={() => handleSuggestionClick(suggestion)}
-              className="w-full px-6 py-3 text-left hover:bg-muted transition-colors text-foreground"
+              onClick={() => handleSuggestionClick(restaurant)}
+              className="w-full px-6 py-3 text-left hover:bg-muted transition-colors"
             >
-              {suggestion}
+              <div className="font-semibold text-foreground">{restaurant.name}</div>
+              <div className="text-sm text-muted-foreground">
+                {restaurant.city} {restaurant.cuisine_type && `• ${restaurant.cuisine_type}`}
+              </div>
             </button>
           ))}
         </div>

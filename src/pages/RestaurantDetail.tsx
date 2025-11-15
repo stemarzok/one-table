@@ -1,381 +1,219 @@
-import { useParams, useNavigate, useSearchParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Textarea } from "@/components/ui/textarea";
-import { Star, MapPin, Phone, Mail, Clock } from "lucide-react";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { MapPin, Phone, Mail, Clock } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/contexts/AuthContext";
-import { reviewSchema, guestCountSchema, getSafeRedirectUrl } from "@/lib/validation";
+import { supabase } from "@/integrations/supabase/client";
+import { BookingDialog } from "@/components/BookingDialog";
+import { ReviewDialog } from "@/components/ReviewDialog";
+import { ReviewsList } from "@/components/ReviewsList";
 
 const RestaurantDetail = () => {
   const { id } = useParams();
-  const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const { toast } = useToast();
-  const { isLoggedIn, profile } = useAuth();
-  const [activeTab, setActiveTab] = useState<string>(searchParams.get("tab") ?? "booking");
-  const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
-  const [guests, setGuests] = useState<number>(2);
-  const [review, setReview] = useState("");
-  const [rating, setRating] = useState(5);
+  const [activeTab, setActiveTab] = useState<string>("menu");
+  const [restaurant, setRestaurant] = useState<any>(null);
+  const [menuItems, setMenuItems] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' as ScrollBehavior });
+    fetchRestaurant();
   }, [id]);
 
-  const restaurant = {
-    name: "La Terrazza del Sole",
-    cuisine: "Cucina Italiana Gourmet",
-    location: "Centro Storico, Milano",
-    rating: 4.8,
-    priceRange: "€€€",
-    image: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=1200&q=80",
-    phone: "+39 02 1234 5678",
-    email: "info@terrazzadelsole.it",
-    address: "Via Roma 42, 20121 Milano",
-    hours: "Mar-Dom: 12:00-15:00, 19:00-23:00",
-    description: "Un'esperienza culinaria unica nel cuore di Milano. La nostra cucina combina tradizione e innovazione.",
-  };
-
-  const availableSlots = [
-    "12:00", "12:30", "13:00", "13:30", "14:00",
-    "19:00", "19:30", "20:00", "20:30", "21:00", "21:30"
-  ];
-
-  const menuItems = [
-    { category: "Antipasti", items: [
-      { name: "Carpaccio di manzo", price: 14 },
-      { name: "Burrata con pomodorini", price: 12 },
-      { name: "Tartare di salmone", price: 16 },
-    ]},
-    { category: "Primi", items: [
-      { name: "Risotto alla milanese", price: 18 },
-      { name: "Tagliatelle al tartufo", price: 22 },
-      { name: "Ravioli burro e salvia", price: 16 },
-    ]},
-    { category: "Secondi", items: [
-      { name: "Filetto di manzo", price: 26 },
-      { name: "Branzino al forno", price: 24 },
-      { name: "Ossobuco con gremolata", price: 28 },
-    ]},
-    { category: "Dolci", items: [
-      { name: "Tiramisù", price: 7 },
-      { name: "Panna cotta", price: 6 },
-      { name: "Torta della casa", price: 6 },
-    ]},
-  ];
-
-  const [reviews, setReviews] = useState([
-    { author: "Marco R.", rating: 5, date: "2 giorni fa", text: "Esperienza fantastica! Cibo eccellente e servizio impeccabile." },
-    { author: "Laura B.", rating: 4, date: "1 settimana fa", text: "Ottimo ristorante, ambiente elegante. Prezzi un po' alti ma ne vale la pena." },
-    { author: "Giuseppe T.", rating: 5, date: "2 settimane fa", text: "Il miglior ristorante di Milano! Tornerò sicuramente." }
-  ]);
-
-  const handleBooking = () => {
-    if (!selectedSlot) {
-      toast({
-        title: "Seleziona un orario",
-        description: "Scegli uno slot disponibile per procedere con la prenotazione.",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    // Validate guest count
-    try {
-      guestCountSchema.parse(guests);
-    } catch (error: any) {
-      toast({
-        title: "Numero di commensali non valido",
-        description: error.message,
-        variant: "destructive"
-      });
-      return;
-    }
-
-    if (!isLoggedIn) {
-      const redirectPath = `/restaurant/${id}?tab=booking`;
-      if (redirectPath) {
-        sessionStorage.setItem('redirectTo', redirectPath);
-      }
-      toast({ title: "Accedi per prenotare", description: "Devi effettuare l'accesso o registrarti per completare la prenotazione." });
-      navigate("/auth");
-      return;
-    }
+  const fetchRestaurant = async () => {
+    if (!id) return;
     
-    toast({
-      title: "Prenotazione confermata!",
-      description: `Il tuo tavolo per ${guests} ${guests === 1 ? 'persona' : 'persone'} è prenotato per le ${selectedSlot}. Ti invieremo una email di conferma.`,
-    });
-  };
-
-  const handleReviewSubmit = () => {
-    if (!isLoggedIn) {
-      toast({ title: "Accedi per recensire", description: "Devi effettuare l'accesso per lasciare una recensione." });
-      navigate("/auth");
-      return;
-    }
-    
-    // Validate review
     try {
-      reviewSchema.parse(review);
-    } catch (error: any) {
-      toast({ 
-        title: "Recensione non valida", 
-        description: error.message,
-        variant: "destructive" 
-      });
-      return;
-    }
+      const { data: restaurantData, error: restaurantError } = await supabase
+        .from('restaurants')
+        .select('*')
+        .eq('id', id)
+        .single();
 
-    setReviews((prev) => [{ author: profile?.name ?? "Utente", rating, date: "oggi", text: review }, ...prev]);
-    toast({ title: "Recensione pubblicata!", description: "Grazie per il tuo feedback." });
-    setReview("");
+      if (restaurantError) throw restaurantError;
+      setRestaurant(restaurantData);
+
+      const { data: menuData } = await supabase
+        .from('menus')
+        .select('*')
+        .eq('restaurant_id', id)
+        .eq('is_available', true);
+
+      setMenuItems(menuData || []);
+    } catch (error) {
+      console.error('Error fetching restaurant:', error);
+    } finally {
+      setLoading(false);
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <main className="pt-24 pb-16">
+          <div className="container mx-auto px-4 text-center">
+            <p className="text-lg text-muted-foreground">Caricamento...</p>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (!restaurant) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <main className="pt-24 pb-16">
+          <div className="container mx-auto px-4 text-center">
+            <p className="text-lg text-muted-foreground">Ristorante non trovato</p>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  const groupedMenu = menuItems.reduce((acc, item) => {
+    if (!acc[item.category]) {
+      acc[item.category] = [];
+    }
+    acc[item.category].push(item);
+    return acc;
+  }, {} as Record<string, any[]>);
 
   return (
     <div className="min-h-screen bg-background">
       <Header />
       
-      <main className="pt-16">
-        <div 
-          className="h-96 bg-cover bg-center relative"
-          style={{ backgroundImage: `url(${restaurant.image})` }}
-        >
+      <main className="pt-24 pb-16">
+        <div className="relative h-[60vh] overflow-hidden">
+          <img 
+            src={restaurant.cover_image_url || restaurant.logo_url || "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=1200&q=80"} 
+            alt={restaurant.name}
+            className="w-full h-full object-cover"
+          />
           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
-        </div>
-
-        <div className="container mx-auto px-4 -mt-32 relative z-10 pb-16">
-          <Card className="p-8 mb-8">
-            <div className="flex flex-col md:flex-row justify-between items-start gap-6">
-              <div className="flex-1">
-                <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-2">
-                  {restaurant.name}
-                </h1>
-                <p className="text-xl text-muted-foreground mb-4">{restaurant.cuisine}</p>
-                
-                <div className="flex flex-wrap gap-4 mb-6">
-                  <div className="flex items-center gap-1">
-                    <Star className="w-5 h-5 text-primary fill-primary" />
-                    <span className="font-bold text-foreground">{restaurant.rating}</span>
-                  </div>
-                  <Badge variant="outline">{restaurant.priceRange}</Badge>
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <MapPin className="w-4 h-4" />
-                    <span>{restaurant.location}</span>
+          
+          <div className="absolute bottom-0 left-0 right-0 p-8">
+            <div className="container mx-auto">
+              <div className="flex flex-wrap items-end justify-between gap-4">
+                <div>
+                  <h1 className="text-4xl md:text-5xl font-bold text-white mb-2">{restaurant.name}</h1>
+                  <div className="flex flex-wrap items-center gap-4 text-white/90">
+                    {restaurant.cuisine_type && (
+                      <Badge variant="secondary" className="text-base">
+                        {restaurant.cuisine_type}
+                      </Badge>
+                    )}
+                    <div className="flex items-center gap-1">
+                      <MapPin className="w-5 h-5" />
+                      <span>{restaurant.city}</span>
+                    </div>
                   </div>
                 </div>
-                
-                <p className="text-muted-foreground leading-relaxed">
-                  {restaurant.description}
-                </p>
+                <BookingDialog restaurantId={id!} restaurantName={restaurant.name} />
               </div>
-              
-              <Button 
-                size="lg" 
-                className="bg-primary hover:bg-primary/90 min-w-[200px]"
-                onClick={() => {
-                  setActiveTab("booking");
-                  document.getElementById('tabs-top')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }}
-              >
-                Prenota Ora
-              </Button>
-            </div>
-          </Card>
-
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="md:col-span-2 space-y-8">
-              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                <div id="tabs-top" />
-                <TabsList className="grid w-full grid-cols-3">
-                  <TabsTrigger value="booking">Prenotazione</TabsTrigger>
-                  <TabsTrigger value="menu">Menu</TabsTrigger>
-                  <TabsTrigger value="reviews">Recensioni</TabsTrigger>
-                </TabsList>
-                
-                <TabsContent value="menu" className="mt-6">
-                  <Card className="p-6">
-                    <h2 className="text-2xl font-bold text-foreground mb-6">Il Nostro Menu</h2>
-                    <div className="space-y-6">
-                      {menuItems.map((section, idx) => (
-                        <div key={idx}>
-                          <h3 className="text-xl font-bold text-primary mb-3">{section.category}</h3>
-                          <ul className="space-y-2">
-                            {section.items.map((item, i) => (
-                              <li key={i} className="flex items-center justify-between text-muted-foreground pl-4 border-l-2 border-primary/20">
-                                <span>{item.name}</span>
-                                <span className="text-foreground font-medium">€ {item.price.toFixed(2)}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      ))}
-                    </div>
-                  </Card>
-                </TabsContent>
-                
-                <TabsContent value="booking" className="mt-6">
-                  <Card className="p-6">
-                    <h2 className="text-2xl font-bold text-foreground mb-6">Prenota il Tuo Tavolo</h2>
-                    
-                    <div className="space-y-6">
-                      <div>
-                        <h3 className="font-semibold text-foreground mb-3">Numero di Commensali</h3>
-                        <Select value={guests.toString()} onValueChange={(value) => setGuests(parseInt(value))}>
-                          <SelectTrigger className="w-full">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {[1, 2, 3, 4, 5, 6, 7, 8].map((num) => (
-                              <SelectItem key={num} value={num.toString()}>
-                                {num} {num === 1 ? 'persona' : 'persone'}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      <div>
-                        <h3 className="font-semibold text-foreground mb-3">Seleziona Orario</h3>
-                        <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
-                          {availableSlots.map((slot) => (
-                            <Button
-                              key={slot}
-                              variant={selectedSlot === slot ? "default" : "outline"}
-                              className="rounded-full"
-                              onClick={() => setSelectedSlot(slot)}
-                            >
-                              {slot}
-                            </Button>
-                          ))}
-                        </div>
-                      </div>
-                      
-                      <div className="flex justify-end">
-                        <Button className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-full" onClick={handleBooking}>
-                          Conferma Prenotazione
-                        </Button>
-                      </div>
-                    </div>
-                  </Card>
-                </TabsContent>
-                
-                <TabsContent value="reviews" className="mt-6">
-                  <Card className="p-6">
-                    <h2 className="text-2xl font-bold text-foreground mb-6">Recensioni</h2>
-                    
-                    <div className="mb-8 p-4 bg-muted/30 rounded-lg">
-                      <h3 className="font-semibold text-foreground mb-3">Lascia una recensione</h3>
-                      <div className="flex gap-1 mb-3">
-                        {[1, 2, 3, 4, 5].map((star) => (
-                          <Star
-                            key={star}
-                            className={`w-6 h-6 cursor-pointer ${
-                              star <= rating ? "text-primary fill-primary" : "text-muted-foreground"
-                            }`}
-                            onClick={() => setRating(star)}
-                          />
-                        ))}
-                      </div>
-                      <Textarea
-                        placeholder="Condividi la tua esperienza... (10-1000 caratteri)"
-                        value={review}
-                        onChange={(e) => setReview(e.target.value)}
-                        className="mb-3"
-                        maxLength={1000}
-                      />
-                      <p className="text-xs text-muted-foreground mb-3 text-right">
-                        {review.length}/1000 caratteri
-                      </p>
-                      <Button onClick={handleReviewSubmit} className="bg-primary hover:bg-primary/90">
-                        Pubblica Recensione
-                      </Button>
-                    </div>
-                    
-                    <div className="space-y-4">
-                      {reviews.map((rev, idx) => (
-                        <div key={idx} className="border-b border-border pb-4 last:border-0">
-                          <div className="flex items-center justify-between mb-2">
-                            <span className="font-semibold text-foreground">{rev.author}</span>
-                            <span className="text-sm text-muted-foreground">{rev.date}</span>
-                          </div>
-                          <div className="flex gap-1 mb-2">
-                            {[...Array(rev.rating)].map((_, i) => (
-                              <Star key={i} className="w-4 h-4 text-primary fill-primary" />
-                            ))}
-                          </div>
-                          <p className="text-muted-foreground">{rev.text}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </Card>
-                </TabsContent>
-              </Tabs>
-            </div>
-
-            <div className="space-y-6">
-              <Card className="p-6">
-                <h3 className="font-bold text-foreground mb-4">Contatti</h3>
-                <div className="space-y-4">
-                  <div className="flex items-start gap-3">
-                    <Phone className="w-5 h-5 text-primary mt-0.5" />
-                    <div>
-                      <p className="text-sm text-muted-foreground">Telefono</p>
-                      <a href={`tel:${restaurant.phone}`} className="text-foreground hover:text-primary">
-                        {restaurant.phone}
-                      </a>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-start gap-3">
-                    <Mail className="w-5 h-5 text-primary mt-0.5" />
-                    <div>
-                      <p className="text-sm text-muted-foreground">Email</p>
-                      <a href={`mailto:${restaurant.email}`} className="text-foreground hover:text-primary break-all">
-                        {restaurant.email}
-                      </a>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-start gap-3">
-                    <MapPin className="w-5 h-5 text-primary mt-0.5" />
-                    <div>
-                      <p className="text-sm text-muted-foreground">Indirizzo</p>
-                      <p className="text-foreground">{restaurant.address}</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-start gap-3">
-                    <Clock className="w-5 h-5 text-primary mt-0.5" />
-                    <div>
-                      <p className="text-sm text-muted-foreground">Orari</p>
-                      <p className="text-foreground">{restaurant.hours}</p>
-                    </div>
-                  </div>
-                </div>
-              </Card>
-
-              <Card className="p-6 bg-gradient-card border-primary/20">
-                <h3 className="font-bold text-foreground mb-2">Accedi ai Vantaggi</h3>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Prenota come utente registrato e accumula punti per ottenere vantaggi esclusivi!
-                </p>
-                <Button className="w-full bg-primary hover:bg-primary/90">
-                  Scopri di Più
-                </Button>
-              </Card>
             </div>
           </div>
         </div>
+
+        <div className="container mx-auto px-4 mt-8">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
+            <TabsList className="grid w-full max-w-md mx-auto grid-cols-3">
+              <TabsTrigger value="menu">Menu</TabsTrigger>
+              <TabsTrigger value="reviews">Recensioni</TabsTrigger>
+              <TabsTrigger value="info">Info</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="menu" className="space-y-8">
+              {Object.keys(groupedMenu).length === 0 ? (
+                <Card className="p-12 text-center">
+                  <p className="text-muted-foreground">Nessun piatto disponibile al momento</p>
+                </Card>
+              ) : (
+                Object.entries(groupedMenu).map(([category, items]: [string, any[]]) => (
+                  <Card key={category} className="p-6">
+                    <h3 className="text-2xl font-semibold mb-6">{category}</h3>
+                    <div className="space-y-4">
+                      {items.map((item: any) => (
+                        <div key={item.id} className="flex justify-between items-start pb-4 border-b border-border last:border-0">
+                          <div className="flex-1">
+                            <h4 className="font-semibold">{item.name}</h4>
+                            {item.description && (
+                              <p className="text-sm text-muted-foreground mt-1">{item.description}</p>
+                            )}
+                          </div>
+                          <span className="font-semibold text-primary ml-4">€{item.price}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </Card>
+                ))
+              )}
+            </TabsContent>
+
+            <TabsContent value="reviews" className="space-y-6">
+              <div className="flex justify-end mb-4">
+                <ReviewDialog restaurantId={id!} onReviewSubmitted={fetchRestaurant} />
+              </div>
+              <ReviewsList restaurantId={id!} />
+            </TabsContent>
+
+            <TabsContent value="info" className="space-y-6">
+              <Card className="p-6">
+                <h3 className="text-2xl font-semibold mb-6">Informazioni</h3>
+                <div className="space-y-4">
+                  {restaurant.description && (
+                    <p className="text-muted-foreground">{restaurant.description}</p>
+                  )}
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div className="flex items-center gap-3">
+                      <Phone className="w-5 h-5 text-primary" />
+                      <div>
+                        <p className="text-sm text-muted-foreground">Telefono</p>
+                        <p className="font-medium">{restaurant.phone}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <Mail className="w-5 h-5 text-primary" />
+                      <div>
+                        <p className="text-sm text-muted-foreground">Email</p>
+                        <p className="font-medium">{restaurant.email}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <MapPin className="w-5 h-5 text-primary" />
+                      <div>
+                        <p className="text-sm text-muted-foreground">Indirizzo</p>
+                        <p className="font-medium">{restaurant.address}</p>
+                      </div>
+                    </div>
+                    {restaurant.opening_hours && (
+                      <div className="flex items-center gap-3">
+                        <Clock className="w-5 h-5 text-primary" />
+                        <div>
+                          <p className="text-sm text-muted-foreground">Orari</p>
+                          <p className="font-medium">
+                            {typeof restaurant.opening_hours === 'string' 
+                              ? restaurant.opening_hours 
+                              : JSON.stringify(restaurant.opening_hours)}
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </Card>
+            </TabsContent>
+          </Tabs>
+        </div>
       </main>
-      
+
       <Footer />
     </div>
   );
