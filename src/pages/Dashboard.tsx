@@ -19,6 +19,8 @@ import {
   Megaphone,
   AlertCircle
 } from "lucide-react";
+import { TablesManagement } from "@/components/dashboard/TablesManagement";
+import { MenuManagement } from "@/components/dashboard/MenuManagement";
 
 const Dashboard = () => {
   const { isLoggedIn, profile } = useAuth();
@@ -26,6 +28,10 @@ const Dashboard = () => {
   const { t } = useLanguage();
   const navigate = useNavigate();
   const [restaurant, setRestaurant] = useState<any>(null);
+  const [stats, setStats] = useState({
+    tables: 0,
+    menuItems: 0,
+  });
 
   useEffect(() => {
     if (!isLoggedIn) {
@@ -45,6 +51,7 @@ const Dashboard = () => {
 
         if (data) {
           setRestaurant(data);
+          fetchStats(data.id);
         }
       }
     };
@@ -53,6 +60,18 @@ const Dashboard = () => {
       fetchRestaurant();
     }
   }, [businessRoles, loading]);
+
+  const fetchStats = async (restaurantId: string) => {
+    const [tablesResult, menuResult] = await Promise.all([
+      supabase.from('restaurant_tables').select('id', { count: 'exact' }).eq('restaurant_id', restaurantId),
+      supabase.from('menus').select('id', { count: 'exact' }).eq('restaurant_id', restaurantId),
+    ]);
+
+    setStats({
+      tables: tablesResult.count || 0,
+      menuItems: menuResult.count || 0,
+    });
+  };
 
   if (loading) {
     return (
@@ -139,7 +158,7 @@ const Dashboard = () => {
                 <Table2 className="w-10 h-10 text-primary" />
                 <div>
                   <p className="text-sm text-muted-foreground">Tavoli Totali</p>
-                  <p className="text-2xl font-bold">24</p>
+                  <p className="text-2xl font-bold">{stats.tables}</p>
                 </div>
               </div>
             </Card>
@@ -177,9 +196,16 @@ const Dashboard = () => {
             <TabsContent value="overview">
               <Card className="p-8">
                 <h2 className="text-2xl font-bold mb-6">{t('dashboard.overview')}</h2>
-                <p className="text-muted-foreground">
-                  Dashboard overview - Qui vedrai le statistiche principali del tuo ristorante
-                </p>
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-2">Totale Tavoli</p>
+                    <p className="text-3xl font-bold">{stats.tables}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-2">Piatti nel Menu</p>
+                    <p className="text-3xl font-bold">{stats.menuItems}</p>
+                  </div>
+                </div>
               </Card>
             </TabsContent>
 
@@ -211,27 +237,11 @@ const Dashboard = () => {
             </TabsContent>
 
             <TabsContent value="tables">
-              <Card className="p-8">
-                <div className="flex justify-between items-center mb-6">
-                  <h2 className="text-2xl font-bold">{t('dashboard.manageTables')}</h2>
-                  <Button>{t('dashboard.addTable')}</Button>
-                </div>
-                <p className="text-muted-foreground">
-                  Qui potrai gestire i tavoli del tuo ristorante
-                </p>
-              </Card>
+              {restaurant && <TablesManagement restaurantId={restaurant.id} />}
             </TabsContent>
 
             <TabsContent value="menu">
-              <Card className="p-8">
-                <div className="flex justify-between items-center mb-6">
-                  <h2 className="text-2xl font-bold">{t('dashboard.manageMenu')}</h2>
-                  <Button>{t('dashboard.addDish')}</Button>
-                </div>
-                <p className="text-muted-foreground">
-                  Qui potrai gestire il menu del tuo ristorante
-                </p>
-              </Card>
+              {restaurant && <MenuManagement restaurantId={restaurant.id} />}
             </TabsContent>
 
             <TabsContent value="bookings">
