@@ -57,7 +57,7 @@ const Business = () => {
               <Button 
                 size="lg" 
                 className="bg-primary text-primary-foreground hover:bg-primary/90 shadow-elegant text-lg px-8"
-                onClick={() => navigate('/restaurant-registration')}
+                onClick={() => navigate('/business-registration')}
               >
                 Registra il Tuo Ristorante
               </Button>
