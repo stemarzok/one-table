@@ -1,7 +1,8 @@
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Star, MapPin, Clock } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Star, MapPin } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface RestaurantCardProps {
   name: string;
@@ -22,6 +23,8 @@ const RestaurantCard = ({
   image,
   available 
 }: RestaurantCardProps) => {
+  const navigate = useNavigate();
+
   return (
     <Card className="overflow-hidden hover:shadow-elegant transition-all duration-300 hover:-translate-y-1 bg-gradient-card border-border/50">
       <div className="relative h-48 overflow-hidden">
@@ -31,8 +34,7 @@ const RestaurantCard = ({
           className="w-full h-full object-cover"
         />
         {available && (
-          <Badge className="absolute top-4 right-4 bg-accent text-accent-foreground">
-            <Clock className="w-3 h-3 mr-1" />
+          <Badge className="absolute top-4 right-4 bg-primary text-primary-foreground">
             Disponibile
           </Badge>
         )}
@@ -44,8 +46,8 @@ const RestaurantCard = ({
             <h3 className="text-xl font-bold text-card-foreground mb-1">{name}</h3>
             <p className="text-sm text-muted-foreground">{cuisine}</p>
           </div>
-          <div className="flex items-center gap-1 bg-accent/10 px-2 py-1 rounded-lg">
-            <Star className="w-4 h-4 text-accent" fill="currentColor" />
+          <div className="flex items-center gap-1 bg-primary/10 px-2 py-1 rounded-lg">
+            <Star className="w-4 h-4 text-primary" fill="currentColor" />
             <span className="font-semibold text-sm">{rating}</span>
           </div>
         </div>
@@ -57,7 +59,10 @@ const RestaurantCard = ({
         
         <div className="flex items-center justify-between">
           <span className="text-lg font-semibold text-primary">{priceRange}</span>
-          <Button className="bg-gradient-hero text-primary-foreground hover:opacity-90">
+          <Button 
+            onClick={() => navigate('/restaurant/1')}
+            className="bg-primary text-primary-foreground hover:bg-primary/90"
+          >
             Prenota Ora
           </Button>
         </div>

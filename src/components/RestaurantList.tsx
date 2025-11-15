@@ -1,4 +1,8 @@
 import RestaurantCard from "./RestaurantCard";
+import RestaurantFilters from "./RestaurantFilters";
+import { Input } from "@/components/ui/input";
+import { Search } from "lucide-react";
+import { useState } from "react";
 
 const restaurants = [
   {
@@ -58,17 +62,35 @@ const restaurants = [
 ];
 
 const RestaurantList = () => {
+  const [searchQuery, setSearchQuery] = useState("");
+
   return (
     <section id="ristoranti" className="py-24 bg-muted/30">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-16">
+        <div className="text-center mb-12">
           <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
             Ristoranti Partner in Evidenza
           </h2>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
             Scopri i migliori ristoranti e prenota il tuo tavolo con un click
           </p>
+          
+          {/* Barra di ricerca */}
+          <div className="max-w-2xl mx-auto mb-8">
+            <div className="relative">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+              <Input
+                type="text"
+                placeholder="Cerca ristoranti per nome o cucina..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-12 h-12 text-lg"
+              />
+            </div>
+          </div>
         </div>
+        
+        <RestaurantFilters />
         
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {restaurants.map((restaurant, index) => (

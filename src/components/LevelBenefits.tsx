@@ -6,8 +6,8 @@ const levels = [
   {
     name: "Bronzo",
     icon: Star,
-    color: "text-amber-700",
-    bgColor: "bg-amber-100 dark:bg-amber-950",
+    color: "text-primary",
+    bgColor: "bg-primary/10",
     range: "0-100 punti",
     benefits: [
       "Prenotazioni standard",
@@ -18,8 +18,8 @@ const levels = [
   {
     name: "Argento",
     icon: Sparkles,
-    color: "text-slate-500",
-    bgColor: "bg-slate-100 dark:bg-slate-900",
+    color: "text-primary",
+    bgColor: "bg-primary/10",
     range: "101-300 punti",
     benefits: [
       "Priorità nelle prenotazioni",
@@ -30,8 +30,8 @@ const levels = [
   {
     name: "Oro",
     icon: Crown,
-    color: "text-accent",
-    bgColor: "bg-accent/10",
+    color: "text-primary",
+    bgColor: "bg-primary/10",
     range: "301-600 punti",
     benefits: [
       "Prenotazioni garantite",
