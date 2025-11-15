@@ -1,10 +1,13 @@
 import { Star, Award, TrendingUp } from "lucide-react";
 import heroImage from "@/assets/hero-modern.jpg";
 import SearchBar from "./SearchBar";
+import RestaurantFilters from "./RestaurantFilters";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useState } from "react";
 
 const Hero = () => {
   const { t } = useLanguage();
+  const [showFilters, setShowFilters] = useState(false);
   
   return (
     <section className="relative min-h-screen flex items-center overflow-hidden pt-16">
@@ -36,9 +39,21 @@ const Hero = () => {
               {t('hero.description')}
             </p>
             
-            <SearchBar />
+            <div className="mb-6">
+              <SearchBar 
+                variant="hero"
+                showFilters={showFilters}
+                onToggleFilters={() => setShowFilters(!showFilters)}
+              />
+            </div>
+            
+            {showFilters && (
+              <div className="mb-8 animate-fade-in">
+                <RestaurantFilters />
+              </div>
+            )}
           
-            <div className="flex flex-wrap justify-center gap-8 mt-12">
+            <div className="flex flex-wrap justify-center gap-8 mt-8">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center backdrop-blur-sm">
                   <Star className="w-6 h-6 text-primary" fill="currentColor" />
