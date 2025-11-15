@@ -1,18 +1,24 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Calendar } from "lucide-react";
+import { Calendar, Users, Clock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { Badge } from "@/components/ui/badge";
 
 interface BookingDialogProps {
   restaurantId: string;
   restaurantName: string;
+}
+
+interface TimeSlot {
+  time: string;
+  available: boolean;
 }
 
 export const BookingDialog = ({ restaurantId, restaurantName }: BookingDialogProps) => {
@@ -20,6 +26,7 @@ export const BookingDialog = ({ restaurantId, restaurantName }: BookingDialogPro
   const { t } = useLanguage();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [availableSlots, setAvailableSlots] = useState<TimeSlot[]>([]);
   const [formData, setFormData] = useState({
     date: "",
     time: "",
@@ -27,11 +34,46 @@ export const BookingDialog = ({ restaurantId, restaurantName }: BookingDialogPro
     specialRequests: "",
   });
 
+  const guestOptions = [1, 2, 3, 4, 5, 6, 7, 8];
+  const timeSlots = ["18:00", "18:30", "19:00", "19:30", "20:00", "20:30", "21:00", "21:30", "22:00"];
+
+  useEffect(() => {
+    if (formData.date) {
+      checkAvailableSlots();
+    }
+  }, [formData.date, formData.guests]);
+
+  const checkAvailableSlots = async () => {
+    const slots: TimeSlot[] = [];
+    
+    for (const time of timeSlots) {
+      try {
+        const { data: isAvailable } = await supabase.rpc("check_booking_availability", {
+          _restaurant_id: restaurantId,
+          _booking_date: formData.date,
+          _booking_time: time,
+          _guests_count: formData.guests,
+        });
+        
+        slots.push({ time, available: !!isAvailable });
+      } catch (error) {
+        slots.push({ time, available: false });
+      }
+    }
+    
+    setAvailableSlots(slots);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!user || !profile) {
       toast.error(t("booking.pleaseLoginToBook"));
+      return;
+    }
+
+    if (!formData.time) {
+      toast.error("Seleziona un orario disponibile");
       return;
     }
 
@@ -111,44 +153,82 @@ export const BookingDialog = ({ restaurantId, restaurantName }: BookingDialogPro
           {t("booking.bookTable")}
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-2xl">
         <DialogHeader>
-          <DialogTitle>{t("booking.bookTable")}</DialogTitle>
+          <DialogTitle className="text-2xl">{t("booking.bookTable")}</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Numero Commensali */}
           <div>
-            <Label htmlFor="date">{t("booking.date")}</Label>
+            <Label className="flex items-center gap-2 text-base mb-3">
+              <Users className="w-5 h-5" />
+              {t("booking.numberOfGuests")}
+            </Label>
+            <div className="grid grid-cols-4 gap-2">
+              {guestOptions.map((num) => (
+                <Button
+                  key={num}
+                  type="button"
+                  variant={formData.guests === num ? "default" : "outline"}
+                  onClick={() => setFormData({ ...formData, guests: num })}
+                  className="h-12"
+                >
+                  {num} {num === 1 ? 'persona' : 'persone'}
+                </Button>
+              ))}
+            </div>
+          </div>
+
+          {/* Data */}
+          <div>
+            <Label htmlFor="date" className="flex items-center gap-2 text-base mb-3">
+              <Calendar className="w-5 h-5" />
+              {t("booking.date")}
+            </Label>
             <Input
               id="date"
               type="date"
               min={minDate}
               value={formData.date}
-              onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+              onChange={(e) => setFormData({ ...formData, date: e.target.value, time: "" })}
               required
+              className="h-12 text-base"
             />
           </div>
-          <div>
-            <Label htmlFor="time">{t("booking.time")}</Label>
-            <Input
-              id="time"
-              type="time"
-              value={formData.time}
-              onChange={(e) => setFormData({ ...formData, time: e.target.value })}
-              required
-            />
-          </div>
-          <div>
-            <Label htmlFor="guests">{t("booking.numberOfGuests")}</Label>
-            <Input
-              id="guests"
-              type="number"
-              min="1"
-              max="20"
-              value={formData.guests}
-              onChange={(e) => setFormData({ ...formData, guests: parseInt(e.target.value) })}
-              required
-            />
-          </div>
+
+          {/* Orari Disponibili */}
+          {formData.date && (
+            <div>
+              <Label className="flex items-center gap-2 text-base mb-3">
+                <Clock className="w-5 h-5" />
+                Slot Disponibili
+              </Label>
+              <div className="grid grid-cols-3 gap-2">
+                {availableSlots.map((slot) => (
+                  <Button
+                    key={slot.time}
+                    type="button"
+                    variant={formData.time === slot.time ? "default" : "outline"}
+                    onClick={() => slot.available && setFormData({ ...formData, time: slot.time })}
+                    disabled={!slot.available}
+                    className="h-12 relative"
+                  >
+                    {slot.time}
+                    {!slot.available && (
+                      <Badge 
+                        variant="destructive" 
+                        className="absolute -top-1 -right-1 text-xs px-1"
+                      >
+                        Full
+                      </Badge>
+                    )}
+                  </Button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Richieste Speciali */}
           <div>
             <Label htmlFor="requests">{t("booking.specialRequests")}</Label>
             <Textarea
@@ -159,7 +239,8 @@ export const BookingDialog = ({ restaurantId, restaurantName }: BookingDialogPro
               rows={3}
             />
           </div>
-          <Button type="submit" className="w-full" disabled={loading}>
+
+          <Button type="submit" className="w-full h-12 text-base" disabled={loading || !formData.time}>
             {loading ? t("booking.confirming") : t("booking.confirmBooking")}
           </Button>
         </form>

@@ -20,19 +20,19 @@ const UserLevel = () => {
                 </div>
                 
                 <div>
-                  <div className="flex items-center gap-3 mb-2">
-                    <h3 className="text-2xl font-bold text-card-foreground">Il Tuo Livello</h3>
-                    <Badge className="bg-slate-100 dark:bg-slate-900 text-slate-500">Argento</Badge>
-                  </div>
+                  <h3 className="text-2xl font-bold text-card-foreground mb-2">Il Tuo Livello</h3>
                   <p className="text-muted-foreground">Continua così per sbloccare nuovi vantaggi!</p>
                 </div>
               </div>
               
-              <div className="flex items-center gap-3 bg-muted/50 px-6 py-4 rounded-xl">
-                <TrendingUp className="w-6 h-6 text-accent" />
-                <div>
-                  <div className="text-3xl font-bold text-card-foreground">{currentPoints}</div>
-                  <div className="text-sm text-muted-foreground">Punti Totali</div>
+              <div className="flex items-center gap-4">
+                <Badge className="bg-slate-100 dark:bg-slate-900 text-slate-500 text-lg px-4 py-2">Argento</Badge>
+                <div className="flex items-center gap-3 bg-muted/50 px-6 py-4 rounded-xl">
+                  <TrendingUp className="w-6 h-6 text-accent" />
+                  <div>
+                    <div className="text-3xl font-bold text-card-foreground">{currentPoints}</div>
+                    <div className="text-sm text-muted-foreground">Punti Totali</div>
+                  </div>
                 </div>
               </div>
             </div>
