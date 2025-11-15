@@ -9,10 +9,15 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
+import { useBusinessRole } from "@/hooks/useBusinessRole";
+import { useAdminRole } from "@/hooks/useAdminRole";
+import { Shield, LayoutDashboard } from "lucide-react";
 
 const Header = () => {
   const { language, setLanguage, t } = useLanguage();
   const { isLoggedIn, profile, logout } = useAuth();
+  const { hasRole } = useBusinessRole();
+  const { isAdmin } = useAdminRole();
   const location = useLocation();
 
   return (
@@ -63,6 +68,22 @@ const Header = () => {
                     {t('nav.profile')}
                   </Link>
                 </DropdownMenuItem>
+                {hasRole() && (
+                  <DropdownMenuItem asChild>
+                    <Link to="/dashboard" className="cursor-pointer flex items-center gap-2">
+                      <LayoutDashboard className="w-4 h-4" />
+                      Dashboard
+                    </Link>
+                  </DropdownMenuItem>
+                )}
+                {isAdmin && (
+                  <DropdownMenuItem asChild>
+                    <Link to="/admin" className="cursor-pointer flex items-center gap-2">
+                      <Shield className="w-4 h-4" />
+                      Admin Panel
+                    </Link>
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuItem onClick={logout}>
                   {t('nav.logout')}
                 </DropdownMenuItem>

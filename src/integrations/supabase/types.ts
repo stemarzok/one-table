@@ -14,6 +14,27 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_roles: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       business_applications: {
         Row: {
           business_address: string
@@ -330,6 +351,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      approve_business_application: {
+        Args: { _admin_id: string; _application_id: string }
+        Returns: string
+      }
       has_any_business_role: {
         Args: { _restaurant_id: string; _user_id: string }
         Returns: boolean
@@ -341,6 +366,11 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      is_admin: { Args: { _user_id: string }; Returns: boolean }
+      reject_business_application: {
+        Args: { _admin_id: string; _application_id: string; _reason: string }
+        Returns: undefined
       }
     }
     Enums: {
