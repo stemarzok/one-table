@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useState } from "react";
+import { Globe } from "lucide-react";
 
 const Header = () => {
   const { language, setLanguage, t } = useLanguage();
@@ -27,25 +28,24 @@ const Header = () => {
             {t('nav.forBusiness')}
           </Link>
           
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setLanguage('it')}
-              className={`px-2 py-1 text-sm transition-colors ${
-                language === 'it' ? 'text-primary font-semibold' : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              Italiano
-            </button>
-            <span className="text-muted-foreground">|</span>
-            <button
-              onClick={() => setLanguage('en')}
-              className={`px-2 py-1 text-sm transition-colors ${
-                language === 'en' ? 'text-primary font-semibold' : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              English
-            </button>
-          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="flex items-center gap-2 text-foreground hover:text-primary transition-colors">
+                <Globe className="w-4 h-4" />
+                <span className="text-sm font-medium">
+                  {language === 'it' ? 'Italiano' : 'English'}
+                </span>
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => setLanguage('it')}>
+                Italiano
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setLanguage('en')}>
+                English
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
 
           {isLoggedIn ? (
             <DropdownMenu>
@@ -70,11 +70,18 @@ const Header = () => {
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-            <Link to="/auth">
-              <Button className="bg-primary hover:bg-primary/90 text-foreground font-semibold">
-                {t('nav.login')}
-              </Button>
-            </Link>
+            <div className="flex items-center gap-3">
+              <Link to="/auth">
+                <Button variant="outline" className="border-primary text-primary hover:bg-primary/10">
+                  {t('nav.login')}
+                </Button>
+              </Link>
+              <Link to="/auth">
+                <Button className="bg-primary hover:bg-primary/90 text-background font-semibold">
+                  Registrati
+                </Button>
+              </Link>
+            </div>
           )}
         </nav>
       </div>

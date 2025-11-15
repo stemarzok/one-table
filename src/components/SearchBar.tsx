@@ -1,4 +1,4 @@
-import { Search, Filter } from "lucide-react";
+import { Search, SlidersHorizontal } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
@@ -8,6 +8,7 @@ interface SearchBarProps {
   onSearch?: (query: string) => void;
   showFilters?: boolean;
   onToggleFilters?: () => void;
+  variant?: 'default' | 'hero';
 }
 
 const mockSuggestions = [
@@ -18,7 +19,7 @@ const mockSuggestions = [
   "Pizzeria Napoli"
 ];
 
-const SearchBar = ({ onSearch, showFilters, onToggleFilters }: SearchBarProps) => {
+const SearchBar = ({ onSearch, showFilters, onToggleFilters, variant = 'default' }: SearchBarProps) => {
   const { t } = useLanguage();
   const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState<string[]>([]);
@@ -47,33 +48,49 @@ const SearchBar = ({ onSearch, showFilters, onToggleFilters }: SearchBarProps) =
     setSuggestions([]);
   };
 
+  const isHero = variant === 'hero';
+  
   return (
     <form onSubmit={handleSubmit} className="w-full max-w-3xl mx-auto relative">
-      <div className="flex gap-2 bg-background/95 backdrop-blur-sm rounded-full p-2 shadow-2xl border-2 border-primary/20">
-        <Input
-          type="text"
-          value={query}
-          onChange={(e) => handleInputChange(e.target.value)}
-          placeholder={t('hero.search')}
-          className="flex-1 border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 text-lg px-6"
-        />
+      <div className={`flex gap-2 rounded-full p-2 ${
+        isHero 
+          ? 'bg-white/10 backdrop-blur-md border border-white/20' 
+          : 'bg-background/95 backdrop-blur-sm shadow-2xl border-2 border-primary/20'
+      }`}>
+        <div className="flex-1 relative">
+          <Search className={`absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 ${
+            isHero ? 'text-white/60' : 'text-muted-foreground'
+          }`} />
+          <Input
+            type="text"
+            value={query}
+            onChange={(e) => handleInputChange(e.target.value)}
+            placeholder={t('hero.search')}
+            className={`pl-12 border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 text-lg ${
+              isHero ? 'text-white placeholder:text-white/60' : 'text-foreground'
+            }`}
+          />
+        </div>
         {showFilters !== undefined && (
           <Button 
             type="button"
             onClick={onToggleFilters}
             size="lg" 
-            variant="outline"
-            className="rounded-full"
+            variant={isHero ? "ghost" : "outline"}
+            className={`rounded-full ${isHero ? 'text-white hover:bg-white/20' : ''}`}
           >
-            <Filter className="w-5 h-5" />
+            <SlidersHorizontal className="w-5 h-5" />
           </Button>
         )}
         <Button 
           type="submit" 
           size="lg" 
-          className="rounded-full bg-primary hover:bg-primary/90 px-8 font-semibold"
+          className={`rounded-full px-8 font-semibold ${
+            isHero 
+              ? 'bg-primary hover:bg-primary/90 text-background' 
+              : 'bg-primary hover:bg-primary/90'
+          }`}
         >
-          <Search className="w-5 h-5 mr-2" />
           {t('hero.searchButton')}
         </Button>
       </div>
