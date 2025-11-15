@@ -18,7 +18,7 @@ const RestaurantDetail = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
-  const { isLoggedIn, user } = useAuth();
+  const { isLoggedIn, profile } = useAuth();
   const [activeTab, setActiveTab] = useState<string>(searchParams.get("tab") ?? "booking");
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
   const [guests, setGuests] = useState<number>(2);
@@ -134,7 +134,7 @@ const RestaurantDetail = () => {
       return;
     }
 
-    setReviews((prev) => [{ author: user?.name ?? "Utente", rating, date: "oggi", text: review }, ...prev]);
+    setReviews((prev) => [{ author: profile?.name ?? "Utente", rating, date: "oggi", text: review }, ...prev]);
     toast({ title: "Recensione pubblicata!", description: "Grazie per il tuo feedback." });
     setReview("");
   };
