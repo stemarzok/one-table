@@ -139,7 +139,7 @@ const RestaurantList = () => {
               {paginatedRestaurants.map((restaurant) => (
                 <RestaurantCard 
                   key={restaurant.id}
-                  id={parseInt(restaurant.id) || 0}
+                  id={restaurant.id}
                   name={restaurant.name}
                   cuisine={restaurant.cuisine_type || 'Cucina Italiana'}
                   location={restaurant.address}
