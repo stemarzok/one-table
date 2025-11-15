@@ -66,7 +66,7 @@ const RestaurantCard = ({
         <div className="flex items-center justify-between">
           <span className="text-lg font-semibold text-primary">{priceRange}</span>
           <Button 
-            onClick={() => navigate(`/restaurant/${id}`)}
+            onClick={() => navigate(`/restaurant/${id}?tab=booking`)}
             className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-full"
           >
             Prenota Ora

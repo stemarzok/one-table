@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -8,12 +8,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { useState } from "react";
-import { Globe } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Header = () => {
   const { language, setLanguage, t } = useLanguage();
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // TODO: Connect to actual auth
+  const { isLoggedIn, user, logout } = useAuth();
+  const location = useLocation();
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border">
@@ -24,14 +24,13 @@ const Header = () => {
         </Link>
         
         <nav className="hidden md:flex items-center gap-6">
-          <Link to="/business" className="text-foreground hover:text-primary transition-colors">
-            {t('nav.forBusiness')}
+          <Link to={location.pathname === '/business' ? '/' : '/business'} className="text-foreground hover:text-primary transition-colors">
+            {location.pathname === '/business' ? 'Home' : t('nav.forBusiness')}
           </Link>
           
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button className="flex items-center gap-2 text-foreground hover:text-primary transition-colors">
-                <Globe className="w-4 h-4" />
                 <span className="text-sm font-medium">
                   {language === 'it' ? 'Italiano' : 'English'}
                 </span>
@@ -64,7 +63,7 @@ const Header = () => {
                     {t('nav.profile')}
                   </Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setIsLoggedIn(false)}>
+                <DropdownMenuItem onClick={logout}>
                   {t('nav.logout')}
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -72,12 +71,12 @@ const Header = () => {
           ) : (
             <div className="flex items-center gap-3">
               <Link to="/auth">
-                <Button variant="outline" className="border-foreground/20 text-foreground hover:bg-foreground/5 hover:border-foreground/40">
+                <Button variant="outline" className="border-foreground/30 text-foreground hover:bg-foreground/5 hover:border-foreground/50 rounded-full">
                   {t('nav.login')}
                 </Button>
               </Link>
               <Link to="/auth">
-                <Button className="bg-primary hover:bg-primary/90 text-background font-semibold">
+                <Button className="bg-primary hover:bg-primary/90 text-background font-semibold rounded-full">
                   Registrati
                 </Button>
               </Link>

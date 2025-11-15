@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -7,13 +7,17 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { Star, MapPin, Phone, Mail, Clock } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 
 const RestaurantDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { toast } = useToast();
+  const { isLoggedIn, user } = useAuth();
+  const [activeTab, setActiveTab] = useState<string>(searchParams.get("tab") ?? "booking");
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
   const [review, setReview] = useState("");
   const [rating, setRating] = useState(5);
@@ -39,17 +43,33 @@ const RestaurantDetail = () => {
   ];
 
   const menuItems = [
-    { category: "Antipasti", items: ["Carpaccio di manzo", "Burrata con pomodorini", "Tartare di salmone"] },
-    { category: "Primi", items: ["Risotto alla milanese", "Tagliatelle al tartufo", "Ravioli burro e salvia"] },
-    { category: "Secondi", items: ["Filetto di manzo", "Branzino al forno", "Ossobuco con gremolata"] },
-    { category: "Dolci", items: ["Tiramisù", "Panna cotta", "Torta della casa"] }
+    { category: "Antipasti", items: [
+      { name: "Carpaccio di manzo", price: 14 },
+      { name: "Burrata con pomodorini", price: 12 },
+      { name: "Tartare di salmone", price: 16 },
+    ]},
+    { category: "Primi", items: [
+      { name: "Risotto alla milanese", price: 18 },
+      { name: "Tagliatelle al tartufo", price: 22 },
+      { name: "Ravioli burro e salvia", price: 16 },
+    ]},
+    { category: "Secondi", items: [
+      { name: "Filetto di manzo", price: 26 },
+      { name: "Branzino al forno", price: 24 },
+      { name: "Ossobuco con gremolata", price: 28 },
+    ]},
+    { category: "Dolci", items: [
+      { name: "Tiramisù", price: 7 },
+      { name: "Panna cotta", price: 6 },
+      { name: "Torta della casa", price: 6 },
+    ]},
   ];
 
-  const reviews = [
+  const [reviews, setReviews] = useState([
     { author: "Marco R.", rating: 5, date: "2 giorni fa", text: "Esperienza fantastica! Cibo eccellente e servizio impeccabile." },
     { author: "Laura B.", rating: 4, date: "1 settimana fa", text: "Ottimo ristorante, ambiente elegante. Prezzi un po' alti ma ne vale la pena." },
     { author: "Giuseppe T.", rating: 5, date: "2 settimane fa", text: "Il miglior ristorante di Milano! Tornerò sicuramente." }
-  ];
+  ]);
 
   const handleBooking = () => {
     if (!selectedSlot) {
@@ -60,20 +80,29 @@ const RestaurantDetail = () => {
       });
       return;
     }
+
+    if (!isLoggedIn) {
+      toast({ title: "Accedi per prenotare", description: "Devi effettuare l'accesso o registrarti per completare la prenotazione." });
+      navigate("/auth");
+      return;
+    }
     
     toast({
       title: "Prenotazione confermata!",
-      description: `Il tuo tavolo è prenotato per le ${selectedSlot}. Riceverai una email di conferma.`,
+      description: `Il tuo tavolo è prenotato per le ${selectedSlot}. Ti invieremo una email di conferma.",
     });
   };
 
   const handleReviewSubmit = () => {
     if (!review.trim()) return;
-    
-    toast({
-      title: "Recensione pubblicata!",
-      description: "Grazie per il tuo feedback.",
-    });
+    if (!isLoggedIn) {
+      toast({ title: "Accedi per recensire", description: "Devi effettuare l'accesso per lasciare una recensione." });
+      navigate("/auth");
+      return;
+    }
+
+    setReviews((prev) => [{ author: user?.name ?? "Utente", rating, date: "oggi", text: review }, ...prev]);
+    toast({ title: "Recensione pubblicata!", description: "Grazie per il tuo feedback." });
     setReview("");
   };
 
@@ -119,7 +148,10 @@ const RestaurantDetail = () => {
               <Button 
                 size="lg" 
                 className="bg-primary hover:bg-primary/90 min-w-[200px]"
-                onClick={() => document.getElementById('booking')?.scrollIntoView({ behavior: 'smooth' })}
+                onClick={() => {
+                  setActiveTab("booking");
+                  document.getElementById('tabs-top')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }}
               >
                 Prenota Ora
               </Button>
@@ -129,7 +161,8 @@ const RestaurantDetail = () => {
           <div className="grid md:grid-cols-3 gap-8">
             {/* Colonna principale */}
             <div className="md:col-span-2 space-y-8">
-              <Tabs defaultValue="menu" className="w-full">
+              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                <div id="tabs-top" />
                 <TabsList className="grid w-full grid-cols-3">
                   <TabsTrigger value="menu">Menu</TabsTrigger>
                   <TabsTrigger value="booking">Prenotazione</TabsTrigger>
@@ -144,11 +177,12 @@ const RestaurantDetail = () => {
                         <div key={idx}>
                           <h3 className="text-xl font-bold text-primary mb-3">{section.category}</h3>
                           <ul className="space-y-2">
-                            {section.items.map((item, i) => (
-                              <li key={i} className="text-muted-foreground pl-4 border-l-2 border-primary/20">
-                                {item}
-                              </li>
-                            ))}
+                        {section.items.map((item, i) => (
+                          <li key={i} className="flex items-center justify-between text-muted-foreground pl-4 border-l-2 border-primary/20">
+                            <span>{item.name}</span>
+                            <span className="text-foreground font-medium">€ {item.price.toFixed(2)}</span>
+                          </li>
+                        ))}
                           </ul>
                         </div>
                       ))}
@@ -164,6 +198,18 @@ const RestaurantDetail = () => {
                       <div>
                         <h3 className="font-semibold text-foreground mb-3">Seleziona Orario</h3>
                         <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                          {availableSlots.map((slot) => (
+                            <Button
+                              key={slot}
+                              variant={selectedSlot === slot ? "default" : "outline"}
+                              className="rounded-full"
+                              onClick={() => setSelectedSlot(slot)}
+                            >
+                              {slot}
+                            </Button>
+                          ))}
+                        </div>
+                      </div>
                           {availableSlots.map((slot) => (
                             <Button
                               key={slot}
