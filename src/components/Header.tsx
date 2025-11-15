@@ -1,118 +1,83 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, X, Languages } from "lucide-react";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Link } from "react-router-dom";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { useState } from "react";
 
 const Header = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [language, setLanguage] = useState("it");
+  const { language, setLanguage, t } = useLanguage();
+  const [isLoggedIn, setIsLoggedIn] = useState(false); // TODO: Connect to actual auth
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-lg border-b border-border/50 shadow-sm">
-      <nav className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-16">
-          <Link to="/" className="flex items-center">
-            <span className="text-2xl font-bold text-foreground drop-shadow-sm">
-              One
-            </span>
-            <span className="text-2xl font-bold text-primary drop-shadow-sm">
-              Table
-            </span>
+    <header className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border">
+      <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+        <Link to="/" className="flex items-center gap-0">
+          <span className="text-2xl font-bold text-foreground">One</span>
+          <span className="text-2xl font-bold text-primary">Table</span>
+        </Link>
+        
+        <nav className="hidden md:flex items-center gap-6">
+          <Link to="/business" className="text-foreground hover:text-primary transition-colors">
+            {t('nav.forBusiness')}
           </Link>
-
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-8">
-            <a href="/#come-funziona" className="text-foreground hover:text-primary transition-colors">
-              Come Funziona
-            </a>
-            <a href="/#livelli" className="text-foreground hover:text-primary transition-colors">
-              Livelli
-            </a>
-            <a href="/#ristoranti" className="text-foreground hover:text-primary transition-colors">
-              Ristoranti
-            </a>
-            <Link to="/business" className="text-foreground hover:text-primary transition-colors font-medium">
-              Per Aziende
-            </Link>
+          
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setLanguage('it')}
+              className={`px-2 py-1 text-sm transition-colors ${
+                language === 'it' ? 'text-primary font-semibold' : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              Italiano
+            </button>
+            <span className="text-muted-foreground">|</span>
+            <button
+              onClick={() => setLanguage('en')}
+              className={`px-2 py-1 text-sm transition-colors ${
+                language === 'en' ? 'text-primary font-semibold' : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              English
+            </button>
           </div>
 
-          <div className="hidden md:flex items-center gap-4">
-            <Select value={language} onValueChange={setLanguage}>
-              <SelectTrigger className="w-[120px] border-0 bg-transparent">
-                <Languages className="w-4 h-4 mr-2" />
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="it">Italiano</SelectItem>
-                <SelectItem value="en">English</SelectItem>
-              </SelectContent>
-            </Select>
-            
+          {isLoggedIn ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="focus:outline-none">
+                  <Avatar className="w-10 h-10 cursor-pointer border-2 border-primary hover:border-primary/80 transition-colors">
+                    <AvatarFallback className="bg-primary/10 text-primary font-semibold">
+                      U
+                    </AvatarFallback>
+                  </Avatar>
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem asChild>
+                  <Link to="/profile" className="cursor-pointer">
+                    {t('nav.profile')}
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setIsLoggedIn(false)}>
+                  {t('nav.logout')}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
             <Link to="/auth">
-              <Button variant="ghost">Accedi</Button>
-            </Link>
-            <Link to="/auth">
-              <Button className="bg-primary hover:bg-primary/90 text-primary-foreground">
-                Registrati
+              <Button className="bg-primary hover:bg-primary/90 text-foreground font-semibold">
+                {t('nav.login')}
               </Button>
             </Link>
-          </div>
-
-          {/* Mobile Menu Button */}
-          <button
-            className="md:hidden"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            aria-label="Toggle menu"
-          >
-            {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-          </button>
-        </div>
-
-        {/* Mobile Navigation */}
-        {isMenuOpen && (
-          <div className="md:hidden py-4 space-y-4">
-            <a
-              href="/#come-funziona"
-              className="block py-2 text-foreground hover:text-primary transition-colors"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Come Funziona
-            </a>
-            <a
-              href="/#livelli"
-              className="block py-2 text-foreground hover:text-primary transition-colors"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Livelli
-            </a>
-            <a
-              href="/#ristoranti"
-              className="block py-2 text-foreground hover:text-primary transition-colors"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Ristoranti
-            </a>
-            <Link
-              to="/business"
-              className="block py-2 text-foreground hover:text-primary transition-colors font-medium"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Per Aziende
-            </Link>
-            <div className="flex flex-col gap-2 pt-4">
-              <Link to="/auth" onClick={() => setIsMenuOpen(false)}>
-                <Button variant="ghost" className="w-full">Accedi</Button>
-              </Link>
-              <Link to="/auth" onClick={() => setIsMenuOpen(false)}>
-                <Button className="w-full bg-gradient-hero text-primary-foreground hover:opacity-90">
-                  Registrati
-                </Button>
-              </Link>
-            </div>
-          </div>
-        )}
-      </nav>
+          )}
+        </nav>
+      </div>
     </header>
   );
 };
