@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Trophy, TrendingUp, Mail, User, Upload, Lock, Star, Calendar } from "lucide-react";
+import { Trophy, TrendingUp, Mail, User, Upload, Lock, Star, Calendar, Heart } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
@@ -114,7 +114,7 @@ const Profile = () => {
         <div className="container mx-auto px-4 max-w-4xl">
           <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-8">{t('profile.title')}</h1>
           
-          <div className="grid gap-6 md:grid-cols-2 mb-8">
+          <div className="grid gap-6 md:grid-cols-3 mb-8">
             <Card className="p-6 hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate('/my-bookings')}>
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
@@ -123,6 +123,18 @@ const Profile = () => {
                 <div>
                   <h3 className="font-semibold">Le Mie Prenotazioni</h3>
                   <p className="text-sm text-muted-foreground">Gestisci le tue prenotazioni</p>
+                </div>
+              </div>
+            </Card>
+
+            <Card className="p-6 hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate('/favorites')}>
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Heart className="w-6 h-6 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-semibold">I Miei Preferiti</h3>
+                  <p className="text-sm text-muted-foreground">Ristoranti salvati</p>
                 </div>
               </div>
             </Card>

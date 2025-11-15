@@ -2,3 +2,6 @@ project_id = "kwqevxerxywplccgtybz"
 
 [functions.send-booking-confirmation]
 verify_jwt = false
+
+[functions.send-booking-reminders]
+verify_jwt = false

@@ -1,8 +1,9 @@
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Star, MapPin } from "lucide-react";
+import { Star, MapPin, Heart } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useFavorites } from "@/hooks/useFavorites";
 
 interface RestaurantCardProps {
   id: number;
@@ -30,6 +31,7 @@ const RestaurantCard = ({
   sponsored
 }: RestaurantCardProps) => {
   const navigate = useNavigate();
+  const { toggleFavorite, isFavorite } = useFavorites();
 
   return (
     <Card className="overflow-hidden hover:shadow-elegant transition-all duration-300 hover:-translate-y-1 bg-gradient-card border-border/50">
@@ -44,6 +46,19 @@ const RestaurantCard = ({
             Sponsorizzato
           </Badge>
         )}
+        <Button
+          size="icon"
+          variant="secondary"
+          className="absolute top-4 left-4 bg-background/90 hover:bg-background"
+          onClick={(e) => {
+            e.stopPropagation();
+            toggleFavorite(String(id));
+          }}
+        >
+          <Heart 
+            className={`w-5 h-5 ${isFavorite(String(id)) ? 'fill-primary text-primary' : ''}`} 
+          />
+        </Button>
       </div>
       
       <div className="p-6">
