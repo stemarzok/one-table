@@ -30,13 +30,15 @@ const RestaurantFilters = ({ onFilterChange, restaurants }: RestaurantFiltersPro
   const [radius, setRadius] = useState([5]);
   const [showMap, setShowMap] = useState(false);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
-  const [mapToken, setMapToken] = useState("");
   const [filters, setFilters] = useState<FilterState>({
     city: "all",
     radius: 5,
     priceRange: "all",
     sortBy: "rating-desc"
   });
+
+  // Get Mapbox token from environment variable
+  const mapboxToken = import.meta.env.VITE_MAPBOX_TOKEN || "";
 
   const handleFilterChange = (key: keyof FilterState, value: string | number) => {
     const newFilters = { ...filters, [key]: value };
@@ -56,7 +58,9 @@ const RestaurantFilters = ({ onFilterChange, restaurants }: RestaurantFiltersPro
           setShowMap(true);
         },
         (error) => {
-          console.error("Errore geolocalizzazione:", error);
+          if (import.meta.env.DEV) {
+            console.error("Geolocation error:", error);
+          }
           alert("Non è stato possibile ottenere la tua posizione. Verifica le autorizzazioni del browser.");
         }
       );
@@ -166,46 +170,20 @@ const RestaurantFilters = ({ onFilterChange, restaurants }: RestaurantFiltersPro
               <DialogTitle>Ristoranti vicino a te</DialogTitle>
             </DialogHeader>
             
-            {!mapToken ? (
+            {!mapboxToken ? (
               <div className="flex flex-col items-center justify-center h-full space-y-4 p-8">
                 <MapPin className="w-16 h-16 text-primary" />
-                <h3 className="text-xl font-semibold">Inserisci il tuo Mapbox Token</h3>
+                <h3 className="text-xl font-semibold">Token Mapbox Mancante</h3>
                 <p className="text-muted-foreground text-center max-w-md">
-                  Per visualizzare la mappa, hai bisogno di un token pubblico Mapbox. 
-                  Puoi ottenerlo gratuitamente su{' '}
-                  <a 
-                    href="https://mapbox.com" 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="text-primary underline"
-                  >
-                    mapbox.com
-                  </a>
+                  La visualizzazione della mappa richiede un token Mapbox configurato.
+                  <br />
+                  Contatta l'amministratore del sito per abilitare questa funzionalità.
                 </p>
-                <Input 
-                  type="text"
-                  placeholder="pk.eyJ1..."
-                  value={mapToken}
-                  onChange={(e) => setMapToken(e.target.value)}
-                  className="max-w-md"
-                />
-                <Button 
-                  onClick={() => {
-                    if (mapToken.startsWith('pk.')) {
-                      // Token valido, la mappa si caricherà
-                    } else {
-                      alert('Inserisci un token Mapbox valido che inizia con "pk."');
-                    }
-                  }}
-                  disabled={!mapToken.startsWith('pk.')}
-                >
-                  Continua
-                </Button>
               </div>
             ) : userLocation ? (
               <div className="flex-1 h-full">
                 <Map 
-                  accessToken={mapToken}
+                  accessToken={mapboxToken}
                   center={[userLocation.lng, userLocation.lat]}
                   zoom={12}
                   restaurants={restaurants.filter(r => {

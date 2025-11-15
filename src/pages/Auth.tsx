@@ -9,6 +9,7 @@ import Footer from "@/components/Footer";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { emailSchema, passwordSchema, nameSchema, phoneSchema, getSafeRedirectUrl } from "@/lib/validation";
 
 const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -19,16 +20,29 @@ const Auth = () => {
     e.preventDefault();
     setIsLoading(true);
     
+    const formData = new FormData(e.currentTarget);
+    const email = formData.get('email') as string;
+    const password = formData.get('password') as string;
+
+    // Validate inputs
+    try {
+      emailSchema.parse(email);
+      // For login, we just check password exists, not full requirements
+      if (!password || password.length < 1) {
+        throw new Error("Password richiesta");
+      }
+    } catch (error: any) {
+      toast.error(error.message || "Dati non validi");
+      setIsLoading(false);
+      return;
+    }
+    
     // Simulazione login - sostituire con vera implementazione
     setTimeout(() => {
       login();
-      const redirectTo = sessionStorage.getItem('redirectTo');
-      if (redirectTo) {
-        sessionStorage.removeItem('redirectTo');
-        navigate(redirectTo);
-      } else {
-        navigate('/');
-      }
+      const redirectTo = getSafeRedirectUrl(sessionStorage.getItem('redirectTo'));
+      sessionStorage.removeItem('redirectTo');
+      navigate(redirectTo);
       toast.success("Accesso effettuato con successo!");
       setIsLoading(false);
     }, 1000);
@@ -38,16 +52,30 @@ const Auth = () => {
     e.preventDefault();
     setIsLoading(true);
     
+    const formData = new FormData(e.currentTarget);
+    const name = formData.get('name') as string;
+    const email = formData.get('email') as string;
+    const password = formData.get('password') as string;
+    const phone = formData.get('phone') as string;
+
+    // Validate inputs
+    try {
+      nameSchema.parse(name);
+      emailSchema.parse(email);
+      passwordSchema.parse(password);
+      phoneSchema.parse(phone);
+    } catch (error: any) {
+      toast.error(error.message || "Dati non validi");
+      setIsLoading(false);
+      return;
+    }
+    
     // Simulazione registrazione - sostituire con vera implementazione
     setTimeout(() => {
       login();
-      const redirectTo = sessionStorage.getItem('redirectTo');
-      if (redirectTo) {
-        sessionStorage.removeItem('redirectTo');
-        navigate(redirectTo);
-      } else {
-        navigate('/');
-      }
+      const redirectTo = getSafeRedirectUrl(sessionStorage.getItem('redirectTo'));
+      sessionStorage.removeItem('redirectTo');
+      navigate(redirectTo);
       toast.success("Registrazione completata! Benvenuto su OneTable!");
       setIsLoading(false);
     }, 1000);
@@ -77,8 +105,10 @@ const Auth = () => {
                     <Label htmlFor="login-email">Email</Label>
                     <Input
                       id="login-email"
+                      name="email"
                       type="email"
                       placeholder="tua@email.com"
+                      maxLength={255}
                       required
                     />
                   </div>
@@ -86,8 +116,10 @@ const Auth = () => {
                     <Label htmlFor="login-password">Password</Label>
                     <Input
                       id="login-password"
+                      name="password"
                       type="password"
                       placeholder="••••••••"
+                      maxLength={128}
                       required
                     />
                   </div>
@@ -107,8 +139,10 @@ const Auth = () => {
                     <Label htmlFor="signup-name">Nome completo</Label>
                     <Input
                       id="signup-name"
+                      name="name"
                       type="text"
                       placeholder="Mario Rossi"
+                      maxLength={100}
                       required
                     />
                   </div>
@@ -116,8 +150,10 @@ const Auth = () => {
                     <Label htmlFor="signup-email">Email</Label>
                     <Input
                       id="signup-email"
+                      name="email"
                       type="email"
                       placeholder="tua@email.com"
+                      maxLength={255}
                       required
                     />
                   </div>
@@ -125,18 +161,25 @@ const Auth = () => {
                     <Label htmlFor="signup-password">Password</Label>
                     <Input
                       id="signup-password"
+                      name="password"
                       type="password"
                       placeholder="••••••••"
-                      required
                       minLength={8}
+                      maxLength={128}
+                      required
                     />
+                    <p className="text-xs text-muted-foreground">
+                      Minimo 8 caratteri, con maiuscola, minuscola e numero
+                    </p>
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="signup-phone">Telefono</Label>
                     <Input
                       id="signup-phone"
+                      name="phone"
                       type="tel"
                       placeholder="+39 123 456 7890"
+                      maxLength={20}
                       required
                     />
                   </div>

@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useEffect, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
+import { reviewSchema, guestCountSchema, getSafeRedirectUrl } from "@/lib/validation";
 
 const RestaurantDetail = () => {
   const { id } = useParams();
@@ -86,8 +87,23 @@ const RestaurantDetail = () => {
       return;
     }
 
+    // Validate guest count
+    try {
+      guestCountSchema.parse(guests);
+    } catch (error: any) {
+      toast({
+        title: "Numero di commensali non valido",
+        description: error.message,
+        variant: "destructive"
+      });
+      return;
+    }
+
     if (!isLoggedIn) {
-      sessionStorage.setItem('redirectTo', `/restaurant/${id}?tab=booking`);
+      const redirectPath = `/restaurant/${id}?tab=booking`;
+      if (redirectPath) {
+        sessionStorage.setItem('redirectTo', redirectPath);
+      }
       toast({ title: "Accedi per prenotare", description: "Devi effettuare l'accesso o registrarti per completare la prenotazione." });
       navigate("/auth");
       return;
@@ -100,11 +116,21 @@ const RestaurantDetail = () => {
   };
 
   const handleReviewSubmit = () => {
-    if (!review.trim()) return;
     if (!isLoggedIn) {
-      sessionStorage.setItem('redirectTo', `/restaurant/${id}?tab=reviews`);
       toast({ title: "Accedi per recensire", description: "Devi effettuare l'accesso per lasciare una recensione." });
       navigate("/auth");
+      return;
+    }
+    
+    // Validate review
+    try {
+      reviewSchema.parse(review);
+    } catch (error: any) {
+      toast({ 
+        title: "Recensione non valida", 
+        description: error.message,
+        variant: "destructive" 
+      });
       return;
     }
 
@@ -259,11 +285,15 @@ const RestaurantDetail = () => {
                         ))}
                       </div>
                       <Textarea
-                        placeholder="Condividi la tua esperienza..."
+                        placeholder="Condividi la tua esperienza... (10-1000 caratteri)"
                         value={review}
                         onChange={(e) => setReview(e.target.value)}
                         className="mb-3"
+                        maxLength={1000}
                       />
+                      <p className="text-xs text-muted-foreground mb-3 text-right">
+                        {review.length}/1000 caratteri
+                      </p>
                       <Button onClick={handleReviewSubmit} className="bg-primary hover:bg-primary/90">
                         Pubblica Recensione
                       </Button>
