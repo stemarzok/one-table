@@ -1,6 +1,8 @@
 import { Card } from "@/components/ui/card";
-import { UserPlus, Search, Trophy, Gift } from "lucide-react";
+import { UserPlus, Search, Award, Sparkles } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import earnPointsImage from "@/assets/earn-points.jpg";
+import vipBenefitsImage from "@/assets/vip-benefits.jpg";
 
 const HowItWorksEnhanced = () => {
   const { t } = useLanguage();
@@ -19,16 +21,16 @@ const HowItWorksEnhanced = () => {
       image: "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=400&q=80"
     },
     {
-      icon: Trophy,
+      icon: Award,
       title: t('howItWorks.step3.title'),
       description: t('howItWorks.step3.desc'),
-      image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&q=80"
+      image: earnPointsImage
     },
     {
-      icon: Gift,
+      icon: Sparkles,
       title: t('howItWorks.step4.title'),
       description: t('howItWorks.step4.desc'),
-      image: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=400&q=80"
+      image: vipBenefitsImage
     }
   ];
 
@@ -55,8 +57,8 @@ const HowItWorksEnhanced = () => {
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-foreground/80 to-transparent" />
                   <div className="absolute bottom-4 left-4">
-                    <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center">
-                      <Icon className="w-6 h-6 text-foreground" />
+                    <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center shadow-lg">
+                      <Icon className="w-6 h-6 text-background" />
                     </div>
                   </div>
                 </div>
