@@ -7,22 +7,28 @@ import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Trophy, TrendingUp, Mail, User } from "lucide-react";
-import { useState, useEffect } from "react";
+import { Trophy, TrendingUp, Mail, User, Upload, Lock } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 
 const Profile = () => {
   const { t } = useLanguage();
   const { toast } = useToast();
-  const { isLoggedIn, profile, updateProfile } = useAuth();
+  const { isLoggedIn, profile, updateProfile, user } = useAuth();
   const navigate = useNavigate();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     if (!isLoggedIn) {
@@ -46,9 +52,86 @@ const Profile = () => {
   const handleSaveProfile = async () => {
     await updateProfile({ name, phone });
     toast({
-      title: "Profilo aggiornato",
-      description: "Le tue modifiche sono state salvate con successo.",
+      title: t('profile.profileUpdated'),
+      description: t('profile.profileUpdated'),
     });
+  };
+
+  const handleChangePassword = async () => {
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      toast({
+        title: "Errore",
+        description: t('profile.fillAllPasswordFields'),
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      toast({
+        title: "Errore",
+        description: t('profile.passwordsMustMatch'),
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const { error } = await supabase.auth.updateUser({
+      password: newPassword
+    });
+
+    if (error) {
+      toast({
+        title: "Errore",
+        description: error.message,
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: t('profile.passwordUpdated'),
+        description: t('profile.passwordUpdated'),
+      });
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+    }
+  };
+
+  const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !user) return;
+
+    setUploading(true);
+
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}/${Math.random()}.${fileExt}`;
+
+      const { error: uploadError, data } = await supabase.storage
+        .from('avatars')
+        .upload(fileName, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(fileName);
+
+      await updateProfile({ avatar_url: publicUrl });
+
+      toast({
+        title: t('profile.avatarUpdated'),
+        description: t('profile.avatarUpdated'),
+      });
+    } catch (error: any) {
+      toast({
+        title: "Errore",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setUploading(false);
+    }
   };
 
   return (
@@ -70,6 +153,21 @@ const Profile = () => {
                       {name?.charAt(0).toUpperCase() || <User className="w-12 h-12" />}
                     </AvatarFallback>
                   </Avatar>
+                  <Button
+                    size="icon"
+                    className="absolute bottom-0 right-0 rounded-full"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploading}
+                  >
+                    <Upload className="w-4 h-4" />
+                  </Button>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleAvatarUpload}
+                  />
                 </div>
                 
                 <div className="flex-1 space-y-4">
@@ -97,11 +195,11 @@ const Profile = () => {
                         className="pl-10" 
                       />
                     </div>
-                    <p className="text-xs text-muted-foreground mt-1">L'email non può essere modificata</p>
+                    <p className="text-xs text-muted-foreground mt-1">{t('profile.emailNotEditable')}</p>
                   </div>
                   
                   <div>
-                    <Label htmlFor="phone">Telefono</Label>
+                    <Label htmlFor="phone">{t('profile.phone')}</Label>
                     <Input 
                       id="phone" 
                       type="tel"
@@ -122,6 +220,53 @@ const Profile = () => {
               </div>
             </Card>
 
+            {/* Card Cambio Password */}
+            <Card className="p-8">
+              <h2 className="text-2xl font-bold text-foreground mb-6 flex items-center gap-2">
+                <Lock className="w-6 h-6 text-primary" />
+                {t('profile.changePassword')}
+              </h2>
+              
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="currentPassword">{t('profile.currentPassword')}</Label>
+                  <Input 
+                    id="currentPassword" 
+                    type="password"
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                    className="mt-2"
+                  />
+                </div>
+                
+                <div>
+                  <Label htmlFor="newPassword">{t('profile.newPassword')}</Label>
+                  <Input 
+                    id="newPassword" 
+                    type="password"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    className="mt-2"
+                  />
+                </div>
+                
+                <div>
+                  <Label htmlFor="confirmPassword">{t('profile.confirmPassword')}</Label>
+                  <Input 
+                    id="confirmPassword" 
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className="mt-2"
+                  />
+                </div>
+                
+                <Button onClick={handleChangePassword} className="w-full md:w-auto">
+                  {t('profile.changePassword')}
+                </Button>
+              </div>
+            </Card>
+
             {/* Card Livello Fedeltà */}
             <Card className="p-8">
               <div className="flex items-center justify-between mb-6">
@@ -138,12 +283,12 @@ const Profile = () => {
                 <div>
                   <div className="flex justify-between text-sm mb-2">
                     <span className="text-muted-foreground">{t('profile.progress')}</span>
-                    <span className="font-semibold text-foreground">{userPoints} / {currentLevel === "Bronze" ? "301" : currentLevel === "Argento" ? "601" : "1001"} punti</span>
+                    <span className="font-semibold text-foreground">{userPoints} / {currentLevel === "Bronze" ? "301" : currentLevel === "Argento" ? "601" : "1001"} {t('profile.points')}</span>
                   </div>
                   <Progress value={progress} className="h-3" />
                   <p className="text-sm text-muted-foreground mt-2">
                     {pointsToNext > 0 
-                      ? `${pointsToNext} punti al livello ${nextLevel}` 
+                      ? `${pointsToNext} ${t('profile.points')} ${t('profile.toReach')} ${nextLevel}` 
                       : "Massimo livello raggiunto!"
                     }
                   </p>
