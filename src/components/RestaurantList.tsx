@@ -1,7 +1,7 @@
 import RestaurantCard from "./RestaurantCard";
 import RestaurantFilters, { FilterState } from "./RestaurantFilters";
 import SearchBar from "./SearchBar";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 
 const restaurants = [
   {
@@ -108,9 +108,19 @@ const restaurants = [
     sponsored: false,
     coordinates: { lat: 43.7696, lng: 11.2558 }
   }
-];
-
-const RestaurantList = () => {
+ ];
+ 
+ // Estendi la lista per mostrare più pagine (demo)
+ const extraRestaurants = Array.from({ length: 24 }).map((_, idx) => {
+   const base = restaurants[idx % restaurants.length];
+   return {
+     ...base,
+     id: 100 + idx + 1,
+     name: `${base.name} ${idx + 1}`,
+     sponsored: (idx % 3) === 0,
+   };
+ });
+ const allRestaurants = [...restaurants, ...extraRestaurants];
   const [searchQuery, setSearchQuery] = useState("");
   const [filters, setFilters] = useState<FilterState>({
     city: "all",

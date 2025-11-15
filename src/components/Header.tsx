@@ -23,8 +23,8 @@ const Header = () => {
           <span className="text-2xl font-bold text-primary">Table</span>
         </Link>
         
-        <nav className="hidden md:flex items-center gap-6">
-          <Link to={location.pathname === '/business' ? '/' : '/business'} className="text-foreground hover:text-primary transition-colors">
+        <nav className="hidden md:flex items-center gap-8">
+          <Link to={location.pathname === '/business' ? '/' : '/business'} className="text-sm font-medium text-foreground hover:text-primary transition-colors mr-2">
             {location.pathname === '/business' ? 'Home' : t('nav.forBusiness')}
           </Link>
           
