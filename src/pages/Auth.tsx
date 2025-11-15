@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,11 +10,21 @@ import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { emailSchema, passwordSchema, nameSchema, phoneSchema, getSafeRedirectUrl } from "@/lib/validation";
+import { supabase } from "@/integrations/supabase/client";
 
 const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const { login } = useAuth();
+  const { isLoggedIn } = useAuth();
   const navigate = useNavigate();
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (isLoggedIn) {
+      const redirectTo = getSafeRedirectUrl(sessionStorage.getItem('redirectTo'));
+      sessionStorage.removeItem('redirectTo');
+      navigate(redirectTo);
+    }
+  }, [isLoggedIn, navigate]);
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -27,7 +37,6 @@ const Auth = () => {
     // Validate inputs
     try {
       emailSchema.parse(email);
-      // For login, we just check password exists, not full requirements
       if (!password || password.length < 1) {
         throw new Error("Password richiesta");
       }
@@ -37,15 +46,24 @@ const Auth = () => {
       return;
     }
     
-    // Simulazione login - sostituire con vera implementazione
-    setTimeout(() => {
-      login();
-      const redirectTo = getSafeRedirectUrl(sessionStorage.getItem('redirectTo'));
-      sessionStorage.removeItem('redirectTo');
-      navigate(redirectTo);
-      toast.success("Accesso effettuato con successo!");
+    // Authenticate with Supabase
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) {
+      if (error.message.includes("Invalid login credentials")) {
+        toast.error("Email o password non corretti");
+      } else {
+        toast.error(error.message);
+      }
       setIsLoading(false);
-    }, 1000);
+      return;
+    }
+
+    toast.success("Accesso effettuato con successo!");
+    setIsLoading(false);
   };
 
   const handleSignup = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -70,15 +88,32 @@ const Auth = () => {
       return;
     }
     
-    // Simulazione registrazione - sostituire con vera implementazione
-    setTimeout(() => {
-      login();
-      const redirectTo = getSafeRedirectUrl(sessionStorage.getItem('redirectTo'));
-      sessionStorage.removeItem('redirectTo');
-      navigate(redirectTo);
-      toast.success("Registrazione completata! Benvenuto su OneTable!");
+    // Sign up with Supabase
+    const redirectUrl = `${window.location.origin}/`;
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        emailRedirectTo: redirectUrl,
+        data: {
+          name,
+          phone,
+        },
+      },
+    });
+
+    if (error) {
+      if (error.message.includes("User already registered")) {
+        toast.error("Questa email è già registrata. Prova ad accedere.");
+      } else {
+        toast.error(error.message);
+      }
       setIsLoading(false);
-    }, 1000);
+      return;
+    }
+
+    toast.success("Registrazione completata! Benvenuto su OneTable!");
+    setIsLoading(false);
   };
 
   return (

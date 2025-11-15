@@ -1,45 +1,105 @@
-import React, { createContext, useContext, useMemo, useState } from "react";
+import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { User, Session } from "@supabase/supabase-js";
 
-interface User {
+interface Profile {
   id: string;
   name: string;
-  email?: string;
+  email: string;
+  phone?: string;
   level?: string;
-  avatarUrl?: string;
+  points?: number;
+  avatar_url?: string;
 }
 
 interface AuthContextType {
   isLoggedIn: boolean;
   user: User | null;
-  login: (user?: Partial<User>) => void;
-  logout: () => void;
-  updateProfile: (updates: Partial<User>) => void;
+  profile: Profile | null;
+  session: Session | null;
+  logout: () => Promise<void>;
+  updateProfile: (updates: Partial<Profile>) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
 
-  const login = (u?: Partial<User>) => {
-    setUser({
-      id: u?.id ?? "demo-user",
-      name: u?.name ?? "Utente",
-      email: u?.email ?? "",
-      level: u?.level ?? "Bronze",
-      avatarUrl: u?.avatarUrl,
+  useEffect(() => {
+    // Set up auth state listener FIRST
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setSession(session);
+        setUser(session?.user ?? null);
+        
+        // Defer profile fetching with setTimeout
+        if (session?.user) {
+          setTimeout(() => {
+            fetchProfile(session.user.id);
+          }, 0);
+        } else {
+          setProfile(null);
+        }
+      }
+    );
+
+    // THEN check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      if (session?.user) {
+        fetchProfile(session.user.id);
+      }
     });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const fetchProfile = async (userId: string) => {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', userId)
+      .maybeSingle();
+
+    if (!error && data) {
+      setProfile(data);
+    }
   };
 
-  const logout = () => setUser(null);
+  const logout = async () => {
+    await supabase.auth.signOut();
+    setUser(null);
+    setSession(null);
+    setProfile(null);
+  };
 
-  const updateProfile = (updates: Partial<User>) => {
-    setUser((prev) => (prev ? { ...prev, ...updates } : prev));
+  const updateProfile = async (updates: Partial<Profile>) => {
+    if (!user) return;
+
+    const { error } = await supabase
+      .from('profiles')
+      .update(updates)
+      .eq('id', user.id);
+
+    if (!error) {
+      setProfile((prev) => (prev ? { ...prev, ...updates } : prev));
+    }
   };
 
   const value = useMemo(
-    () => ({ isLoggedIn: !!user, user, login, logout, updateProfile }),
-    [user]
+    () => ({ 
+      isLoggedIn: !!user, 
+      user, 
+      profile,
+      session,
+      logout, 
+      updateProfile 
+    }),
+    [user, profile, session]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

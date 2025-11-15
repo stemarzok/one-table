@@ -12,7 +12,7 @@ import { useAuth } from "@/contexts/AuthContext";
 
 const Header = () => {
   const { language, setLanguage, t } = useLanguage();
-  const { isLoggedIn, user, logout } = useAuth();
+  const { isLoggedIn, profile, logout } = useAuth();
   const location = useLocation();
 
   return (
@@ -52,7 +52,7 @@ const Header = () => {
                 <button className="focus:outline-none">
                   <Avatar className="w-10 h-10 cursor-pointer border-2 border-primary hover:border-primary/80 transition-colors">
                     <AvatarFallback className="bg-primary/10 text-primary font-semibold">
-                      U
+                      {profile?.name?.charAt(0).toUpperCase() ?? 'U'}
                     </AvatarFallback>
                   </Avatar>
                 </button>
