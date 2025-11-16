@@ -110,10 +110,13 @@ const MyBookings = () => {
 
   const cancelBooking = async (bookingId: string) => {
     try {
+      if (!user) throw new Error('Not authenticated');
       const { error } = await supabase
         .from("bookings")
         .update({ status: "cancelled" })
-        .eq("id", bookingId);
+        .eq("id", bookingId)
+        .eq("user_id", user.id)
+        .eq("status", "pending");
 
       if (error) throw error;
 
