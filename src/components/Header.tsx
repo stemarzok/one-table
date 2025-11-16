@@ -18,11 +18,14 @@ import { useState } from "react";
 const Header = () => {
   const { language, setLanguage, t } = useLanguage();
   const { isLoggedIn, profile, logout } = useAuth();
-  const { hasRole: hasBusinessRole } = useBusinessRole();
-  const { isAdmin } = useAdminRole();
+  const { hasRole: hasBusinessRole, loading: businessRoleLoading } = useBusinessRole();
+  const { isAdmin, loading: adminRoleLoading } = useAdminRole();
   const location = useLocation();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  
+  const showDashboard = hasBusinessRole() && !businessRoleLoading;
+  const showAdminPanel = isAdmin && !adminRoleLoading;
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border">
@@ -79,13 +82,13 @@ const Header = () => {
                   <Heart className="mr-2 h-4 w-4" />
                   <span>I Miei Preferiti</span>
                 </DropdownMenuItem>
-                {hasBusinessRole && (
+                {showDashboard && (
                   <DropdownMenuItem onClick={() => navigate('/dashboard')}>
                     <LayoutDashboard className="mr-2 h-4 w-4" />
                     <span>Dashboard</span>
                   </DropdownMenuItem>
                 )}
-                {isAdmin && (
+                {showAdminPanel && (
                   <DropdownMenuItem onClick={() => navigate('/admin')}>
                     <Shield className="mr-2 h-4 w-4" />
                     <span>Admin Panel</span>
@@ -138,9 +141,14 @@ const Header = () => {
                 <Link to="/favorites" className="py-2 text-foreground" onClick={() => setMobileMenuOpen(false)}>
                   I Miei Preferiti
                 </Link>
-                {hasBusinessRole && (
+                {showDashboard && (
                   <Link to="/dashboard" className="py-2 text-foreground" onClick={() => setMobileMenuOpen(false)}>
                     Dashboard
+                  </Link>
+                )}
+                {showAdminPanel && (
+                  <Link to="/admin" className="py-2 text-foreground" onClick={() => setMobileMenuOpen(false)}>
+                    Admin Panel
                   </Link>
                 )}
               </>
