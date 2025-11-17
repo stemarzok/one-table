@@ -29,6 +29,8 @@ const Profile = () => {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [uploading, setUploading] = useState(false);
+  const [newEmail, setNewEmail] = useState("");
+  const [passwordForEmail, setPasswordForEmail] = useState("");
 
   useEffect(() => {
     if (!isLoggedIn) {
@@ -77,6 +79,36 @@ const Profile = () => {
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
+    }
+  };
+
+  const handleEmailChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!newEmail || !passwordForEmail) {
+      toast({ title: "Errore", description: "Inserisci la nuova email e la password", variant: "destructive" });
+      return;
+    }
+
+    // Verify password first
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email: profile?.email || '',
+      password: passwordForEmail,
+    });
+
+    if (signInError) {
+      toast({ title: "Errore", description: "Password non corretta", variant: "destructive" });
+      return;
+    }
+
+    const { error } = await supabase.auth.updateUser({ email: newEmail });
+
+    if (error) {
+      toast({ title: "Errore", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Email aggiornata", description: "Controlla la nuova email per confermare il cambiamento" });
+      setNewEmail("");
+      setPasswordForEmail("");
     }
   };
 
@@ -259,6 +291,44 @@ const Profile = () => {
                 </div>
 
                 <Button type="submit" className="w-full">{t('profile.changePassword')}</Button>
+              </form>
+            </Card>
+
+            {/* Email Change Form */}
+            <Card className="p-8">
+              <h3 className="text-xl font-semibold mb-6">Cambia Email</h3>
+              <form onSubmit={handleEmailChange} className="space-y-6">
+                <div className="space-y-2">
+                  <Label htmlFor="newEmail">Nuova Email</Label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
+                    <Input
+                      id="newEmail"
+                      type="email"
+                      value={newEmail}
+                      onChange={(e) => setNewEmail(e.target.value)}
+                      placeholder="nuova@email.com"
+                      className="pl-10"
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="passwordForEmail">Password Attuale</Label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
+                    <Input
+                      id="passwordForEmail"
+                      type="password"
+                      value={passwordForEmail}
+                      onChange={(e) => setPasswordForEmail(e.target.value)}
+                      placeholder="••••••••"
+                      className="pl-10"
+                    />
+                  </div>
+                </div>
+                <Button type="submit" className="w-full">
+                  Cambia Email
+                </Button>
               </form>
             </Card>
           </div>

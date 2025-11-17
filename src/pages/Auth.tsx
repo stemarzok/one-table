@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Checkbox } from "@/components/ui/checkbox";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { toast } from "sonner";
@@ -17,7 +18,6 @@ const Auth = () => {
   const { isLoggedIn } = useAuth();
   const navigate = useNavigate();
 
-  // Redirect if already logged in
   useEffect(() => {
     if (isLoggedIn) {
       const redirectTo = getSafeRedirectUrl(sessionStorage.getItem('redirectTo'));
@@ -34,7 +34,6 @@ const Auth = () => {
     const email = formData.get('email') as string;
     const password = formData.get('password') as string;
 
-    // Validate inputs
     try {
       emailSchema.parse(email);
       if (!password || password.length < 1) {
@@ -46,7 +45,6 @@ const Auth = () => {
       return;
     }
     
-    // Authenticate with Supabase
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -55,6 +53,8 @@ const Auth = () => {
     if (error) {
       if (error.message.includes("Invalid login credentials")) {
         toast.error("Email o password non corretti");
+      } else if (error.message.includes("Email not confirmed")) {
+        toast.error("Conferma la tua email prima di accedere");
       } else {
         toast.error(error.message);
       }
@@ -63,6 +63,34 @@ const Auth = () => {
     }
 
     toast.success("Accesso effettuato con successo!");
+    setIsLoading(false);
+  };
+
+  const handlePasswordReset = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsLoading(true);
+    
+    const formData = new FormData(e.currentTarget);
+    const email = formData.get('reset-email') as string;
+
+    try {
+      emailSchema.parse(email);
+    } catch (error: any) {
+      toast.error(error.message || "Email non valida");
+      setIsLoading(false);
+      return;
+    }
+    
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/auth`,
+    });
+
+    if (error) {
+      toast.error(error.message);
+    } else {
+      toast.success("Email di recupero inviata! Controlla la tua casella di posta.");
+    }
+    
     setIsLoading(false);
   };
 
@@ -76,7 +104,6 @@ const Auth = () => {
     const password = formData.get('password') as string;
     const phone = formData.get('phone') as string;
 
-    // Validate inputs
     try {
       nameSchema.parse(name);
       emailSchema.parse(email);
@@ -88,7 +115,6 @@ const Auth = () => {
       return;
     }
     
-    // Sign up with Supabase
     const redirectUrl = `${window.location.origin}/`;
     const { error } = await supabase.auth.signUp({
       email,
@@ -112,7 +138,7 @@ const Auth = () => {
       return;
     }
 
-    toast.success("Registrazione completata! Benvenuto su OneTable!");
+    toast.success("Registrazione completata! Controlla la tua email per confermare l'account.");
     setIsLoading(false);
   };
 
@@ -121,46 +147,56 @@ const Auth = () => {
       <Header />
       <main className="flex-1 container mx-auto px-4 py-24 flex items-center justify-center">
         <Card className="w-full max-w-md shadow-elegant">
-          <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl font-bold text-center">Benvenuto su OneTable</CardTitle>
-            <CardDescription className="text-center">
-              Accedi o crea un account per iniziare a guadagnare vantaggi
+          <CardHeader className="text-center">
+            <CardTitle className="text-3xl font-bold bg-gradient-to-r from-primary to-primary-glow bg-clip-text text-transparent">
+              Benvenuto su OneTable
+            </CardTitle>
+            <CardDescription className="text-base">
+              Accedi o registrati per prenotare il tuo tavolo
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="login" className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
+              <TabsList className="grid w-full grid-cols-3 mb-6">
                 <TabsTrigger value="login">Accedi</TabsTrigger>
                 <TabsTrigger value="signup">Registrati</TabsTrigger>
+                <TabsTrigger value="reset">Recupera</TabsTrigger>
               </TabsList>
               
               <TabsContent value="login">
                 <form onSubmit={handleLogin} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="login-email">Email</Label>
+                    <Label htmlFor="email">Email</Label>
                     <Input
-                      id="login-email"
+                      id="email"
                       name="email"
                       type="email"
-                      placeholder="tua@email.com"
-                      maxLength={255}
                       required
+                      placeholder="tua@email.com"
                     />
                   </div>
+                  
                   <div className="space-y-2">
-                    <Label htmlFor="login-password">Password</Label>
+                    <Label htmlFor="password">Password</Label>
                     <Input
-                      id="login-password"
+                      id="password"
                       name="password"
                       type="password"
-                      placeholder="••••••••"
-                      maxLength={128}
                       required
+                      placeholder="••••••••"
                     />
                   </div>
+                  
+                  <div className="flex items-center space-x-2">
+                    <Checkbox id="rememberMe" name="rememberMe" />
+                    <Label htmlFor="rememberMe" className="text-sm cursor-pointer font-normal">
+                      Ricordami
+                    </Label>
+                  </div>
+                  
                   <Button
                     type="submit"
-                    className="w-full bg-gradient-hero text-primary-foreground hover:opacity-90"
+                    className="w-full"
                     disabled={isLoading}
                   >
                     {isLoading ? "Accesso in corso..." : "Accedi"}
@@ -171,59 +207,82 @@ const Auth = () => {
               <TabsContent value="signup">
                 <form onSubmit={handleSignup} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="signup-name">Nome completo</Label>
+                    <Label htmlFor="name">Nome completo</Label>
                     <Input
-                      id="signup-name"
+                      id="name"
                       name="name"
                       type="text"
-                      placeholder="Mario Rossi"
-                      maxLength={100}
                       required
+                      placeholder="Mario Rossi"
                     />
                   </div>
+                  
                   <div className="space-y-2">
                     <Label htmlFor="signup-email">Email</Label>
                     <Input
                       id="signup-email"
                       name="email"
                       type="email"
-                      placeholder="tua@email.com"
-                      maxLength={255}
                       required
+                      placeholder="tua@email.com"
                     />
                   </div>
+                  
                   <div className="space-y-2">
                     <Label htmlFor="signup-password">Password</Label>
                     <Input
                       id="signup-password"
                       name="password"
                       type="password"
+                      required
                       placeholder="••••••••"
                       minLength={8}
-                      maxLength={128}
-                      required
                     />
                     <p className="text-xs text-muted-foreground">
                       Minimo 8 caratteri, con maiuscola, minuscola e numero
                     </p>
                   </div>
+                  
                   <div className="space-y-2">
-                    <Label htmlFor="signup-phone">Telefono</Label>
+                    <Label htmlFor="phone">Telefono</Label>
                     <Input
-                      id="signup-phone"
+                      id="phone"
                       name="phone"
                       type="tel"
-                      placeholder="+39 123 456 7890"
-                      maxLength={20}
                       required
+                      placeholder="+39 123 456 7890"
                     />
                   </div>
+                  
                   <Button
                     type="submit"
-                    className="w-full bg-gradient-hero text-primary-foreground hover:opacity-90"
+                    className="w-full"
                     disabled={isLoading}
                   >
                     {isLoading ? "Registrazione in corso..." : "Registrati"}
+                  </Button>
+                </form>
+              </TabsContent>
+
+              <TabsContent value="reset">
+                <form onSubmit={handlePasswordReset} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="reset-email">Email</Label>
+                    <Input
+                      id="reset-email"
+                      name="reset-email"
+                      type="email"
+                      required
+                      placeholder="tua@email.com"
+                    />
+                  </div>
+                  
+                  <Button
+                    type="submit"
+                    className="w-full"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? "Invio in corso..." : "Invia email di recupero"}
                   </Button>
                 </form>
               </TabsContent>

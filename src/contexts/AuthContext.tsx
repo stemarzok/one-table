@@ -79,15 +79,19 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
 
   const updateProfile = async (updates: Partial<Profile>) => {
     if (!user) return;
-
+    
     const { error } = await supabase
       .from('profiles')
       .update(updates)
       .eq('id', user.id);
 
-    if (!error) {
-      setProfile((prev) => (prev ? { ...prev, ...updates } : prev));
+    if (error) {
+      console.error('Error updating profile:', error);
+      throw error;
     }
+
+    // Refetch the complete profile to ensure all data is current
+    await fetchProfile(user.id);
   };
 
   const value = useMemo(

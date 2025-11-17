@@ -111,6 +111,11 @@ const MyBookings = () => {
   const cancelBooking = async (bookingId: string) => {
     try {
       if (!user) throw new Error('Not authenticated');
+      
+      // Get booking details for email
+      const booking = bookings.find(b => b.id === bookingId);
+      if (!booking) throw new Error('Booking not found');
+
       const { error } = await supabase
         .from("bookings")
         .update({ status: "cancelled" })
@@ -120,7 +125,19 @@ const MyBookings = () => {
 
       if (error) throw error;
 
-      toast.success("Prenotazione annullata");
+      // Send cancellation email
+      await supabase.functions.invoke('send-cancellation-email', {
+        body: {
+          bookingId,
+          userEmail: booking.restaurants.name,
+          userName: user.email || '',
+          restaurantName: booking.restaurants.name,
+          bookingDate: booking.booking_date,
+          bookingTime: booking.booking_time,
+        }
+      });
+
+      toast.success("Prenotazione annullata. Controlla la tua email.");
       fetchBookings();
     } catch (error) {
       console.error("Error canceling booking:", error);
