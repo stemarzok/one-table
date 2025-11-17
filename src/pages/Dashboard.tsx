@@ -10,10 +10,11 @@ import { useBusinessRole } from "@/hooks/useBusinessRole";
 import { useAdminRole } from "@/hooks/useAdminRole";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
-import { LayoutDashboard, Store, Table2, UtensilsCrossed, Calendar, AlertCircle } from "lucide-react";
+import { LayoutDashboard, Store, Table2, UtensilsCrossed, Calendar, AlertCircle, Info } from "lucide-react";
 import { TablesManagement } from "@/components/dashboard/TablesManagement";
 import { MenuManagement } from "@/components/dashboard/MenuManagement";
 import { BookingsManagement } from "@/components/dashboard/BookingsManagement";
+import { RestaurantInfo } from "@/components/dashboard/RestaurantInfo";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const Dashboard = () => {
@@ -109,16 +110,16 @@ const Dashboard = () => {
             </div>
           </div>
           <Tabs defaultValue="overview" className="space-y-8">
-            <TabsList className="grid w-full grid-cols-2 lg:grid-cols-6">
+            <TabsList className="grid w-full grid-cols-2 lg:grid-cols-5">
               <TabsTrigger value="overview"><LayoutDashboard className="w-4 h-4 mr-2" /><span className="hidden sm:inline">{t('dashboard.overview')}</span></TabsTrigger>
+              <TabsTrigger value="info"><Info className="w-4 h-4 mr-2" /><span className="hidden sm:inline">Info & Foto</span></TabsTrigger>
               <TabsTrigger value="bookings"><Calendar className="w-4 h-4 mr-2" /><span className="hidden sm:inline">Prenotazioni</span></TabsTrigger>
-              <TabsTrigger value="restaurant"><Store className="w-4 h-4 mr-2" /><span className="hidden sm:inline">{t('dashboard.restaurant')}</span></TabsTrigger>
               <TabsTrigger value="tables"><Table2 className="w-4 h-4 mr-2" /><span className="hidden sm:inline">{t('dashboard.tables')}</span></TabsTrigger>
               <TabsTrigger value="menu"><UtensilsCrossed className="w-4 h-4 mr-2" /><span className="hidden sm:inline">{t('dashboard.menu')}</span></TabsTrigger>
             </TabsList>
             <TabsContent value="overview"><div className="grid gap-6 md:grid-cols-2"><Card className="p-6"><div className="flex items-center gap-4"><Table2 className="w-10 h-10 text-primary" /><div><p className="text-sm text-muted-foreground">Totale Tavoli</p><p className="text-3xl font-bold">{stats.tables}</p></div></div></Card><Card className="p-6"><div className="flex items-center gap-4"><UtensilsCrossed className="w-10 h-10 text-primary" /><div><p className="text-sm text-muted-foreground">Piatti nel Menu</p><p className="text-3xl font-bold">{stats.menuItems}</p></div></div></Card></div></TabsContent>
+            <TabsContent value="info">{restaurant && <RestaurantInfo restaurant={restaurant} onUpdate={() => setSelectedRestaurantId(selectedRestaurantId)} />}</TabsContent>
             <TabsContent value="bookings">{selectedRestaurantId && <BookingsManagement restaurantId={selectedRestaurantId} />}</TabsContent>
-            <TabsContent value="restaurant"><Card className="p-6"><h2 className="text-2xl font-bold mb-6">{t('dashboard.restaurantInfo')}</h2>{restaurant && <div className="space-y-4"><div><p className="text-sm text-muted-foreground">Nome</p><p className="text-lg font-medium">{restaurant.name}</p></div><div><p className="text-sm text-muted-foreground">Indirizzo</p><p className="text-lg font-medium">{restaurant.address}, {restaurant.city}</p></div></div>}</Card></TabsContent>
             <TabsContent value="tables">{selectedRestaurantId && <TablesManagement restaurantId={selectedRestaurantId} />}</TabsContent>
             <TabsContent value="menu">{selectedRestaurantId && <MenuManagement restaurantId={selectedRestaurantId} />}</TabsContent>
           </Tabs>

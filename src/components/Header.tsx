@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -63,6 +63,9 @@ const Header = () => {
               <DropdownMenuTrigger asChild>
                 <button className="focus:outline-none">
                   <Avatar className="w-10 h-10 cursor-pointer border-2 border-primary hover:border-primary/80 transition-colors">
+                    {profile?.avatar_url && (
+                      <AvatarImage src={profile.avatar_url} alt={profile?.name || 'User'} />
+                    )}
                     <AvatarFallback className="bg-primary/10 text-primary font-semibold">
                       {profile?.name?.charAt(0).toUpperCase() ?? 'U'}
                     </AvatarFallback>

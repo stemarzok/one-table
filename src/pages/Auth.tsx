@@ -166,7 +166,7 @@ const Auth = () => {
               <TabsContent value="login">
                 <form onSubmit={handleLogin} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
+                    <Label htmlFor="email">Email <span className="text-destructive">*</span></Label>
                     <Input
                       id="email"
                       name="email"
@@ -177,7 +177,7 @@ const Auth = () => {
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="password">Password</Label>
+                    <Label htmlFor="password">Password <span className="text-destructive">*</span></Label>
                     <Input
                       id="password"
                       name="password"
@@ -187,10 +187,10 @@ const Auth = () => {
                     />
                   </div>
                   
-                  <div className="flex items-center space-x-2">
-                    <Checkbox id="rememberMe" name="rememberMe" />
+                  <div className="flex items-center space-x-2 py-1">
+                    <Checkbox id="rememberMe" name="rememberMe" className="border-2" />
                     <Label htmlFor="rememberMe" className="text-sm cursor-pointer font-normal">
-                      Ricordami
+                      Ricordami per il prossimo accesso
                     </Label>
                   </div>
                   
@@ -207,7 +207,7 @@ const Auth = () => {
               <TabsContent value="signup">
                 <form onSubmit={handleSignup} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="name">Nome completo</Label>
+                    <Label htmlFor="name">Nome completo <span className="text-destructive">*</span></Label>
                     <Input
                       id="name"
                       name="name"
@@ -218,7 +218,7 @@ const Auth = () => {
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="signup-email">Email</Label>
+                    <Label htmlFor="signup-email">Email <span className="text-destructive">*</span></Label>
                     <Input
                       id="signup-email"
                       name="email"
@@ -229,7 +229,7 @@ const Auth = () => {
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="signup-password">Password</Label>
+                    <Label htmlFor="signup-password">Password <span className="text-destructive">*</span></Label>
                     <Input
                       id="signup-password"
                       name="password"
@@ -244,7 +244,7 @@ const Auth = () => {
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="phone">Telefono</Label>
+                    <Label htmlFor="phone">Telefono <span className="text-destructive">*</span></Label>
                     <Input
                       id="phone"
                       name="phone"
@@ -267,7 +267,7 @@ const Auth = () => {
               <TabsContent value="reset">
                 <form onSubmit={handlePasswordReset} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="reset-email">Email</Label>
+                    <Label htmlFor="reset-email">Email <span className="text-destructive">*</span></Label>
                     <Input
                       id="reset-email"
                       name="reset-email"
