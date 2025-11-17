@@ -70,7 +70,7 @@ const BusinessRegistration = () => {
   const uploadDocuments = async (): Promise<string[]> => {
     if (!profile?.id || documents.length === 0) return [];
 
-    const urls: string[] = [];
+    const fileNames: string[] = [];
 
     for (const file of documents) {
       const fileExt = file.name.split('.').pop();
@@ -82,14 +82,11 @@ const BusinessRegistration = () => {
 
       if (uploadError) throw uploadError;
 
-      const { data: { publicUrl } } = supabase.storage
-        .from('business-documents')
-        .getPublicUrl(fileName);
-
-      urls.push(publicUrl);
+      // Store file names instead of URLs - admins will generate signed URLs when needed
+      fileNames.push(fileName);
     }
 
-    return urls;
+    return fileNames;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
