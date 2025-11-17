@@ -95,6 +95,26 @@ const AdminPanel = () => {
     }
   }, [isAdmin]);
 
+  const viewDocument = async (fileName: string) => {
+    try {
+      const { data, error } = await supabase.storage
+        .from('business-documents')
+        .createSignedUrl(fileName, 3600); // 1 hour expiry
+
+      if (error) throw error;
+
+      if (data?.signedUrl) {
+        window.open(data.signedUrl, '_blank');
+      }
+    } catch (error: any) {
+      toast({
+        title: "Errore",
+        description: "Impossibile accedere al documento",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleApprove = async (application: Application) => {
     if (!profile?.id) return;
 
@@ -269,12 +289,12 @@ const AdminPanel = () => {
                         <div className="mb-4">
                           <p className="text-sm text-muted-foreground mb-2">Documenti</p>
                           <div className="flex flex-wrap gap-2">
-                            {app.documents_url.map((url, index) => (
+                            {app.documents_url.map((fileName, index) => (
                               <Button
                                 key={index}
                                 variant="outline"
                                 size="sm"
-                                onClick={() => window.open(url, '_blank')}
+                                onClick={() => viewDocument(fileName)}
                               >
                                 <FileText className="w-4 h-4 mr-2" />
                                 Documento {index + 1}
