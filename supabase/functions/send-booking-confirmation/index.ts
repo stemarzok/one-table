@@ -1,5 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.81.1";
 import { Resend } from "https://esm.sh/resend@2.0.0";
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
@@ -8,14 +10,23 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-interface BookingConfirmationRequest {
-  userEmail: string;
-  userName: string;
-  restaurantName: string;
-  bookingDate: string;
-  bookingTime: string;
-  guestsCount: number;
-  specialRequests?: string;
+const BookingConfirmationSchema = z.object({
+  userEmail: z.string().email().max(255),
+  userName: z.string().trim().min(1).max(100),
+  restaurantName: z.string().trim().min(1).max(200),
+  bookingDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  bookingTime: z.string().regex(/^\d{2}:\d{2}$/),
+  guestsCount: z.number().int().min(1).max(20),
+  specialRequests: z.string().max(1000).optional(),
+});
+
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -24,6 +35,33 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
+    // Verify JWT authentication
+    const authHeader = req.headers.get("authorization");
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ error: "Missing authorization header" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      return new Response(
+        JSON.stringify({ error: "Unauthorized" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Parse and validate input
+    const body = await req.json();
+    const validated = BookingConfirmationSchema.parse(body);
+    
     const {
       userEmail,
       userName,
@@ -32,19 +70,19 @@ const handler = async (req: Request): Promise<Response> => {
       bookingTime,
       guestsCount,
       specialRequests,
-    }: BookingConfirmationRequest = await req.json();
+    } = validated;
 
     console.log("Sending booking confirmation to:", userEmail);
 
     const emailResponse = await resend.emails.send({
       from: "OneTable <onboarding@resend.dev>",
       to: [userEmail],
-      subject: `Conferma Prenotazione - ${restaurantName}`,
+      subject: `Conferma Prenotazione - ${escapeHtml(restaurantName)}`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <h1 style="color: #2c3e50;">Prenotazione Confermata!</h1>
-          <p>Ciao ${userName},</p>
-          <p>La tua prenotazione presso <strong>${restaurantName}</strong> è stata confermata.</p>
+          <p>Ciao ${escapeHtml(userName)},</p>
+          <p>La tua prenotazione presso <strong>${escapeHtml(restaurantName)}</strong> è stata confermata.</p>
           
           <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
             <h2 style="color: #2c3e50; margin-top: 0;">Dettagli Prenotazione</h2>
@@ -54,9 +92,9 @@ const handler = async (req: Request): Promise<Response> => {
               month: 'long', 
               day: 'numeric' 
             })}</p>
-            <p><strong>Ora:</strong> ${bookingTime}</p>
+            <p><strong>Ora:</strong> ${escapeHtml(bookingTime)}</p>
             <p><strong>Numero di ospiti:</strong> ${guestsCount}</p>
-            ${specialRequests ? `<p><strong>Richieste speciali:</strong> ${specialRequests}</p>` : ''}
+            ${specialRequests ? `<p><strong>Richieste speciali:</strong> ${escapeHtml(specialRequests)}</p>` : ''}
           </div>
           
           <p>Ti aspettiamo! Se hai bisogno di modificare o cancellare la prenotazione, contatta direttamente il ristorante.</p>
@@ -79,12 +117,17 @@ const handler = async (req: Request): Promise<Response> => {
     });
   } catch (error: any) {
     console.error("Error sending booking confirmation:", error);
+    
+    if (error instanceof z.ZodError) {
+      return new Response(
+        JSON.stringify({ error: "Invalid input", details: error.errors }),
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
+    
     return new Response(
       JSON.stringify({ error: error.message }),
-      {
-        status: 500,
-        headers: { "Content-Type": "application/json", ...corsHeaders },
-      }
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } }
     );
   }
 };
