@@ -9,6 +9,7 @@ import CookieConsent from "./components/CookieConsent";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Business from "./pages/Business";
+import BusinessLogin from "./pages/BusinessLogin";
 import Profile from "./pages/Profile";
 import RestaurantDetail from "./pages/RestaurantDetail";
 import MyBookings from "./pages/MyBookings";
@@ -40,6 +41,7 @@ const App = () => (
               <Route path="/" element={<Index />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/business" element={<Business />} />
+              <Route path="/business-login" element={<BusinessLogin />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/restaurant/:id" element={<RestaurantDetail />} />
               <Route path="/my-bookings" element={<MyBookings />} />
