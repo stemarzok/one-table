@@ -14,14 +14,11 @@ const AdminSetup = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  // Password di bootstrap - in produzione dovrebbe essere un secret
-  const BOOTSTRAP_PASSWORD = "onetable-admin-2024";
-
   const handleSetup = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (bootstrapPassword !== BOOTSTRAP_PASSWORD) {
-      toast.error("Password di bootstrap non corretta");
+    if (!bootstrapPassword) {
+      toast.error("Inserisci la password di bootstrap");
       return;
     }
 
@@ -33,50 +30,21 @@ const AdminSetup = () => {
     setLoading(true);
 
     try {
-      // Verifica che l'utente esista
-      const { data: profile, error: profileError } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('email', userEmail)
-        .maybeSingle();
+      const { data, error } = await supabase.functions.invoke("create-admin", {
+        body: {
+          bootstrapPassword,
+          userEmail,
+        },
+      });
 
-      if (profileError || !profile) {
-        toast.error("Utente non trovato. Assicurati che l'utente sia registrato.");
+      if (error) {
+        toast.error(error.message || "Errore durante la creazione dell'admin");
         setLoading(false);
         return;
       }
 
-      // Verifica se è già admin
-      const { data: existingAdmin, error: checkError } = await supabase
-        .from('admin_roles')
-        .select('id')
-        .eq('user_id', profile.id)
-        .maybeSingle();
-
-      if (checkError) {
-        console.error("Errore verifica admin:", checkError);
-        toast.error("Errore durante la verifica");
-        setLoading(false);
-        return;
-      }
-
-      if (existingAdmin) {
-        toast.info("Questo utente è già un amministratore");
-        setLoading(false);
-        return;
-      }
-
-      // Crea il ruolo admin
-      const { error: insertError } = await supabase
-        .from('admin_roles')
-        .insert({
-          user_id: profile.id,
-          created_by: profile.id
-        });
-
-      if (insertError) {
-        console.error("Errore creazione admin:", insertError);
-        toast.error("Errore durante la creazione dell'admin");
+      if (data?.error) {
+        toast.error(data.error);
         setLoading(false);
         return;
       }
@@ -129,7 +97,7 @@ const AdminSetup = () => {
                 />
               </div>
               <p className="text-xs text-muted-foreground">
-                Password: onetable-admin-2024
+                Contatta l'amministratore di sistema per la password
               </p>
             </div>
 
