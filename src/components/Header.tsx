@@ -27,18 +27,26 @@ const Header = () => {
   const showDashboard = hasBusinessRole() && !businessRoleLoading;
   const showAdminPanel = isAdmin && !adminRoleLoading;
 
+  const getLogoLink = () => {
+    if (!isLoggedIn) return "/";
+    if (showDashboard || showAdminPanel) return "/dashboard";
+    return "/restaurants";
+  };
+
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-        <div className="flex items-center gap-0">
+        <Link to={getLogoLink()} className="flex items-center gap-0">
           <span className="text-2xl font-bold text-foreground">One</span>
           <span className="text-2xl font-bold text-primary">Table</span>
-        </div>
+        </Link>
         
         <nav className="hidden md:flex items-center gap-8">
-          <Link to={location.pathname === '/business' ? '/' : '/business'} className="text-sm font-medium text-foreground hover:text-primary transition-colors mr-2">
-            {location.pathname === '/business' ? 'Home' : t('nav.forBusiness')}
-          </Link>
+          {!isLoggedIn && (
+            <Link to={location.pathname === '/business' ? '/' : '/business'} className="text-sm font-medium text-foreground hover:text-primary transition-colors mr-2">
+              {location.pathname === '/business' ? 'Home' : t('nav.forBusiness')}
+            </Link>
+          )}
           
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -105,12 +113,12 @@ const Header = () => {
             </DropdownMenu>
           ) : (
             <div className="flex items-center gap-3">
-              <Link to={location.pathname === '/business' ? '/business-login' : '/auth'}>
+              <Link to={location.pathname === '/business' || location.pathname === '/business-login' ? '/business-login' : '/auth'}>
                 <Button variant="outline" className="border-foreground/30 text-foreground hover:bg-foreground/5 hover:border-foreground/50 rounded-full">
                   {t('nav.login')}
                 </Button>
               </Link>
-              <Link to={location.pathname === '/business' ? '/business-registration' : '/auth'}>
+              <Link to={location.pathname === '/business' || location.pathname === '/business-login' ? '/business-registration' : '/auth'}>
                 <Button className="bg-primary hover:bg-primary/90 text-background font-semibold rounded-full">
                   Registrati
                 </Button>
@@ -130,9 +138,11 @@ const Header = () => {
       {mobileMenuOpen && (
         <div className="md:hidden border-t border-border bg-background">
           <nav className="container mx-auto px-4 py-4 flex flex-col gap-2">
-            <Link to={location.pathname === '/business' ? '/' : '/business'} className="py-2 text-foreground" onClick={() => setMobileMenuOpen(false)}>
-              {location.pathname === '/business' ? 'Home' : t('nav.forBusiness')}
-            </Link>
+            {!isLoggedIn && (
+              <Link to={location.pathname === '/business' ? '/' : '/business'} className="py-2 text-foreground" onClick={() => setMobileMenuOpen(false)}>
+                {location.pathname === '/business' ? 'Home' : t('nav.forBusiness')}
+              </Link>
+            )}
             {isLoggedIn && (
               <>
                 <Link to="/profile" className="py-2 text-foreground" onClick={() => setMobileMenuOpen(false)}>
