@@ -10,7 +10,7 @@ import { useBusinessRole } from "@/hooks/useBusinessRole";
 import { useAdminRole } from "@/hooks/useAdminRole";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
-import { LayoutDashboard, Store, Table2, UtensilsCrossed, Calendar, AlertCircle, Info } from "lucide-react";
+import { LayoutDashboard, Store, Table2, UtensilsCrossed, Calendar, AlertCircle, Info, CheckCircle, Clock, XCircle } from "lucide-react";
 import { TablesManagement } from "@/components/dashboard/TablesManagement";
 import { MenuManagement } from "@/components/dashboard/MenuManagement";
 import { BookingsManagement } from "@/components/dashboard/BookingsManagement";
@@ -24,7 +24,14 @@ const Dashboard = () => {
   const { t } = useLanguage();
   const navigate = useNavigate();
   const [restaurant, setRestaurant] = useState<any>(null);
-  const [stats, setStats] = useState({ tables: 0, menuItems: 0 });
+  const [stats, setStats] = useState({ 
+    tables: 0, 
+    menuItems: 0,
+    totalBookings: 0,
+    confirmedBookings: 0,
+    pendingBookings: 0,
+    cancelledBookings: 0
+  });
   const [allRestaurants, setAllRestaurants] = useState<any[]>([]);
   const [selectedRestaurantId, setSelectedRestaurantId] = useState<string>("");
   
@@ -66,11 +73,25 @@ const Dashboard = () => {
         const { data } = await supabase.from('restaurants').select('*').eq('id', selectedRestaurantId).maybeSingle();
         if (data) {
           setRestaurant(data);
-          const [tablesResult, menuResult] = await Promise.all([
+          const [tablesResult, menuResult, bookingsResult] = await Promise.all([
             supabase.from('restaurant_tables').select('id', { count: 'exact' }).eq('restaurant_id', data.id),
             supabase.from('menus').select('id', { count: 'exact' }).eq('restaurant_id', data.id),
+            supabase.from('bookings').select('id, status').eq('restaurant_id', data.id),
           ]);
-          setStats({ tables: tablesResult.count || 0, menuItems: menuResult.count || 0 });
+          
+          const bookings = bookingsResult.data || [];
+          const confirmedCount = bookings.filter(b => b.status === 'confirmed').length;
+          const pendingCount = bookings.filter(b => b.status === 'pending').length;
+          const cancelledCount = bookings.filter(b => b.status === 'cancelled').length;
+          
+          setStats({ 
+            tables: tablesResult.count || 0, 
+            menuItems: menuResult.count || 0,
+            totalBookings: bookings.length,
+            confirmedBookings: confirmedCount,
+            pendingBookings: pendingCount,
+            cancelledBookings: cancelledCount
+          });
         }
       }
     };
@@ -117,7 +138,64 @@ const Dashboard = () => {
               <TabsTrigger value="tables"><Table2 className="w-4 h-4 mr-2" /><span className="hidden sm:inline">{t('dashboard.tables')}</span></TabsTrigger>
               <TabsTrigger value="menu"><UtensilsCrossed className="w-4 h-4 mr-2" /><span className="hidden sm:inline">{t('dashboard.menu')}</span></TabsTrigger>
             </TabsList>
-            <TabsContent value="overview"><div className="grid gap-6 md:grid-cols-2"><Card className="p-6"><div className="flex items-center gap-4"><Table2 className="w-10 h-10 text-primary" /><div><p className="text-sm text-muted-foreground">Totale Tavoli</p><p className="text-3xl font-bold">{stats.tables}</p></div></div></Card><Card className="p-6"><div className="flex items-center gap-4"><UtensilsCrossed className="w-10 h-10 text-primary" /><div><p className="text-sm text-muted-foreground">Piatti nel Menu</p><p className="text-3xl font-bold">{stats.menuItems}</p></div></div></Card></div></TabsContent>
+            <TabsContent value="overview">
+              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                <Card className="p-6">
+                  <div className="flex items-center gap-4">
+                    <Calendar className="w-10 h-10 text-primary" />
+                    <div>
+                      <p className="text-sm text-muted-foreground">Totale Prenotazioni</p>
+                      <p className="text-3xl font-bold">{stats.totalBookings}</p>
+                    </div>
+                  </div>
+                </Card>
+                <Card className="p-6">
+                  <div className="flex items-center gap-4">
+                    <CheckCircle className="w-10 h-10 text-green-500" />
+                    <div>
+                      <p className="text-sm text-muted-foreground">Confermate</p>
+                      <p className="text-3xl font-bold">{stats.confirmedBookings}</p>
+                    </div>
+                  </div>
+                </Card>
+                <Card className="p-6">
+                  <div className="flex items-center gap-4">
+                    <Clock className="w-10 h-10 text-yellow-500" />
+                    <div>
+                      <p className="text-sm text-muted-foreground">In Attesa</p>
+                      <p className="text-3xl font-bold">{stats.pendingBookings}</p>
+                    </div>
+                  </div>
+                </Card>
+                <Card className="p-6">
+                  <div className="flex items-center gap-4">
+                    <XCircle className="w-10 h-10 text-red-500" />
+                    <div>
+                      <p className="text-sm text-muted-foreground">Cancellate</p>
+                      <p className="text-3xl font-bold">{stats.cancelledBookings}</p>
+                    </div>
+                  </div>
+                </Card>
+                <Card className="p-6">
+                  <div className="flex items-center gap-4">
+                    <Table2 className="w-10 h-10 text-primary" />
+                    <div>
+                      <p className="text-sm text-muted-foreground">Totale Tavoli</p>
+                      <p className="text-3xl font-bold">{stats.tables}</p>
+                    </div>
+                  </div>
+                </Card>
+                <Card className="p-6">
+                  <div className="flex items-center gap-4">
+                    <UtensilsCrossed className="w-10 h-10 text-primary" />
+                    <div>
+                      <p className="text-sm text-muted-foreground">Piatti nel Menu</p>
+                      <p className="text-3xl font-bold">{stats.menuItems}</p>
+                    </div>
+                  </div>
+                </Card>
+              </div>
+            </TabsContent>
             <TabsContent value="info">{restaurant && <RestaurantInfo restaurant={restaurant} onUpdate={() => setSelectedRestaurantId(selectedRestaurantId)} />}</TabsContent>
             <TabsContent value="bookings">{selectedRestaurantId && <BookingsManagement restaurantId={selectedRestaurantId} />}</TabsContent>
             <TabsContent value="tables">{selectedRestaurantId && <TablesManagement restaurantId={selectedRestaurantId} />}</TabsContent>
