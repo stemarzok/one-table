@@ -12,6 +12,7 @@ import Business from "./pages/Business";
 import BusinessLogin from "./pages/BusinessLogin";
 import Profile from "./pages/Profile";
 import RestaurantDetail from "./pages/RestaurantDetail";
+import RestaurantsApp from "./pages/RestaurantsApp";
 import MyBookings from "./pages/MyBookings";
 import Favorites from "./pages/Favorites";
 import RestaurantRegistration from "./pages/RestaurantRegistration";
@@ -42,6 +43,7 @@ const App = () => (
               <Route path="/auth" element={<Auth />} />
               <Route path="/business" element={<Business />} />
               <Route path="/business-login" element={<BusinessLogin />} />
+              <Route path="/restaurants" element={<RestaurantsApp />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/restaurant/:id" element={<RestaurantDetail />} />
               <Route path="/my-bookings" element={<MyBookings />} />
