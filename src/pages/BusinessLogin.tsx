@@ -20,14 +20,13 @@ const BusinessLogin = () => {
   useEffect(() => {
     const checkBusinessRole = async () => {
       if (isLoggedIn && user) {
-        // Check if user has business role
-        const { data } = await supabase
-          .from('business_roles')
-          .select('*')
-          .eq('user_id', user.id)
-          .maybeSingle();
+        // Check if user is admin or has business role
+        const [businessRoleResult, adminRoleResult] = await Promise.all([
+          supabase.from('business_roles').select('*').eq('user_id', user.id).maybeSingle(),
+          supabase.from('admin_roles').select('*').eq('user_id', user.id).maybeSingle()
+        ]);
         
-        if (data) {
+        if (businessRoleResult.data || adminRoleResult.data) {
           navigate('/dashboard');
         }
       }
@@ -72,15 +71,14 @@ const BusinessLogin = () => {
       return;
     }
 
-    // Check if user has business role
+    // Check if user is admin or has business role
     if (authData.user) {
-      const { data: businessRole } = await supabase
-        .from('business_roles')
-        .select('*')
-        .eq('user_id', authData.user.id)
-        .maybeSingle();
+      const [businessRoleResult, adminRoleResult] = await Promise.all([
+        supabase.from('business_roles').select('*').eq('user_id', authData.user.id).maybeSingle(),
+        supabase.from('admin_roles').select('*').eq('user_id', authData.user.id).maybeSingle()
+      ]);
       
-      if (!businessRole) {
+      if (!businessRoleResult.data && !adminRoleResult.data) {
         await supabase.auth.signOut();
         toast.error("Questo account non è associato a nessun ristorante. Completa prima la registrazione business.");
         setIsLoading(false);
