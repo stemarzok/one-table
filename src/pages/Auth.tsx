@@ -22,7 +22,7 @@ const Auth = () => {
     if (isLoggedIn) {
       const redirectTo = getSafeRedirectUrl(sessionStorage.getItem('redirectTo'));
       sessionStorage.removeItem('redirectTo');
-      navigate(redirectTo);
+      navigate(redirectTo === '/' ? '/restaurants' : redirectTo);
     }
   }, [isLoggedIn, navigate]);
 

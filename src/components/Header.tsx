@@ -30,10 +30,10 @@ const Header = () => {
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-        <Link to="/" className="flex items-center gap-0">
+        <div className="flex items-center gap-0">
           <span className="text-2xl font-bold text-foreground">One</span>
           <span className="text-2xl font-bold text-primary">Table</span>
-        </Link>
+        </div>
         
         <nav className="hidden md:flex items-center gap-8">
           <Link to={location.pathname === '/business' ? '/' : '/business'} className="text-sm font-medium text-foreground hover:text-primary transition-colors mr-2">
