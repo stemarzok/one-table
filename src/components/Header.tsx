@@ -27,9 +27,17 @@ const Header = () => {
   const showDashboard = hasBusinessRole() && !businessRoleLoading;
   const showAdminPanel = isAdmin && !adminRoleLoading;
 
+  // Determine if user is in business section based on current route
+  const isInBusinessSection = location.pathname.startsWith('/dashboard') || 
+                               location.pathname.startsWith('/business');
+
   const getLogoLink = () => {
     if (!isLoggedIn) return "/";
-    if (showDashboard || showAdminPanel) return "/dashboard";
+    // If in business section and has business/admin role, go to dashboard
+    if (isInBusinessSection && (showDashboard || showAdminPanel)) return "/dashboard";
+    // If has business/admin role but not in business section, stay in user section
+    if (showDashboard || showAdminPanel) return "/restaurants";
+    // Regular users always go to restaurants
     return "/restaurants";
   };
 
