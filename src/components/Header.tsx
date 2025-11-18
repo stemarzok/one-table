@@ -105,12 +105,12 @@ const Header = () => {
             </DropdownMenu>
           ) : (
             <div className="flex items-center gap-3">
-              <Link to="/auth">
+              <Link to={location.pathname === '/business' ? '/business-login' : '/auth'}>
                 <Button variant="outline" className="border-foreground/30 text-foreground hover:bg-foreground/5 hover:border-foreground/50 rounded-full">
                   {t('nav.login')}
                 </Button>
               </Link>
-              <Link to="/auth">
+              <Link to={location.pathname === '/business' ? '/business-registration' : '/auth'}>
                 <Button className="bg-primary hover:bg-primary/90 text-background font-semibold rounded-full">
                   Registrati
                 </Button>

@@ -64,15 +64,7 @@ const Business = () => {
               <Button 
                 size="lg" 
                 variant="outline" 
-                className="border-white/30 text-white hover:bg-white/10 text-lg px-8"
-                onClick={() => navigate('/business-login')}
-              >
-                Accedi come Ristoratore
-              </Button>
-              <Button 
-                size="lg" 
-                variant="ghost" 
-                className="text-white hover:bg-white/10 text-lg px-8"
+                className="border-white text-white hover:bg-white/10 text-lg px-8"
                 onClick={() => document.getElementById('benefits')?.scrollIntoView({ behavior: 'smooth' })}
               >
                 Scopri di Più
