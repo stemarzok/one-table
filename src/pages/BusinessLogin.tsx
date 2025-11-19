@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { toast } from "sonner";
@@ -14,8 +16,24 @@ import { Store, Lock, Mail } from "lucide-react";
 
 const BusinessLogin = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
+  const [showPasswordReset, setShowPasswordReset] = useState(false);
   const { isLoggedIn, user } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    // Load saved credentials if remember me was checked
+    const savedEmail = localStorage.getItem('businessRememberedEmail');
+    const savedPassword = localStorage.getItem('businessRememberedPassword');
+    if (savedEmail && savedPassword) {
+      setRememberMe(true);
+      const emailInput = document.querySelector('input[name="email"]') as HTMLInputElement;
+      const passwordInput = document.querySelector('input[name="password"]') as HTMLInputElement;
+      if (emailInput) emailInput.value = savedEmail;
+      if (passwordInput) passwordInput.value = savedPassword;
+    }
+  }, []);
 
   useEffect(() => {
     const checkBusinessRole = async () => {
@@ -52,6 +70,15 @@ const BusinessLogin = () => {
       toast.error(error.message || "Dati non validi");
       setIsLoading(false);
       return;
+    }
+
+    // Save credentials if remember me is checked
+    if (rememberMe) {
+      localStorage.setItem('businessRememberedEmail', email);
+      localStorage.setItem('businessRememberedPassword', password);
+    } else {
+      localStorage.removeItem('businessRememberedEmail');
+      localStorage.removeItem('businessRememberedPassword');
     }
     
     const { data: authData, error } = await supabase.auth.signInWithPassword({
@@ -92,12 +119,8 @@ const BusinessLogin = () => {
     setIsLoading(false);
   };
 
-  const handlePasswordReset = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const handlePasswordReset = async (email: string) => {
     setIsLoading(true);
-    
-    const formData = new FormData(e.currentTarget);
-    const email = formData.get('reset-email') as string;
 
     try {
       emailSchema.parse(email);
@@ -115,6 +138,7 @@ const BusinessLogin = () => {
       toast.error(error.message);
     } else {
       toast.success("Email di recupero inviata! Controlla la tua casella di posta.");
+      setShowPasswordReset(false);
     }
     
     setIsLoading(false);
@@ -167,6 +191,27 @@ const BusinessLogin = () => {
                   className="h-11"
                 />
               </div>
+
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <Checkbox 
+                    id="rememberMe" 
+                    checked={rememberMe}
+                    onCheckedChange={(checked) => setRememberMe(checked as boolean)}
+                    className="border-2" 
+                  />
+                  <Label htmlFor="rememberMe" className="text-sm cursor-pointer font-normal">
+                    Ricordami
+                  </Label>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowPasswordReset(true)}
+                  className="text-sm text-primary hover:underline"
+                >
+                  Password dimenticata?
+                </button>
+              </div>
               
               <Button
                 type="submit"
@@ -188,6 +233,43 @@ const BusinessLogin = () => {
             </form>
           </CardContent>
         </Card>
+
+        {/* Password Reset Dialog */}
+        <Dialog open={showPasswordReset} onOpenChange={setShowPasswordReset}>
+          <DialogContent onOpenAutoFocus={(e) => { e.preventDefault(); window.scrollTo(0, 0); }}>
+            <DialogHeader>
+              <DialogTitle>Recupera Password</DialogTitle>
+              <DialogDescription>
+                Inserisci la tua email e ti invieremo un link per reimpostare la password
+              </DialogDescription>
+            </DialogHeader>
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              const formData = new FormData(e.currentTarget);
+              const email = formData.get('reset-email') as string;
+              handlePasswordReset(email);
+            }} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="reset-email">Email <span className="text-destructive">*</span></Label>
+                <Input
+                  id="reset-email"
+                  name="reset-email"
+                  type="email"
+                  required
+                  placeholder="ristorante@email.com"
+                />
+              </div>
+              
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={isLoading}
+              >
+                {isLoading ? "Invio in corso..." : "Invia Link di Recupero"}
+              </Button>
+            </form>
+          </DialogContent>
+        </Dialog>
       </main>
       <Footer />
     </div>
