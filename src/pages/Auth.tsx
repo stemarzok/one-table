@@ -28,10 +28,19 @@ const Auth = () => {
     const savedPassword = localStorage.getItem('rememberedPassword');
     if (savedEmail && savedPassword) {
       setRememberMe(true);
-      const emailInput = document.querySelector('input[name="email"]') as HTMLInputElement;
-      const passwordInput = document.querySelector('input[name="password"]') as HTMLInputElement;
-      if (emailInput) emailInput.value = savedEmail;
-      if (passwordInput) passwordInput.value = savedPassword;
+      // Wait for the form to render before setting values
+      setTimeout(() => {
+        const emailInput = document.querySelector('input[name="email"]') as HTMLInputElement;
+        const passwordInput = document.querySelector('input[name="password"]') as HTMLInputElement;
+        if (emailInput) emailInput.value = savedEmail;
+        if (passwordInput) passwordInput.value = savedPassword;
+      }, 100);
+    }
+
+    // Open signup tab if hash is #signup
+    if (window.location.hash === '#signup') {
+      const signupTab = document.querySelector('[value="signup"]') as HTMLButtonElement;
+      if (signupTab) signupTab.click();
     }
   }, []);
 
