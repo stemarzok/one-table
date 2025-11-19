@@ -32,6 +32,9 @@ const Header = () => {
                                location.pathname.startsWith('/business');
 
   const getLogoLink = () => {
+    // If not logged in and in business section, return to business page
+    if (!isLoggedIn && isInBusinessSection) return "/business";
+    // If not logged in and not in business section, return to home
     if (!isLoggedIn) return "/";
     // If in business section and has business/admin role, go to dashboard
     if (isInBusinessSection && (showDashboard || showAdminPanel)) return "/dashboard";
@@ -134,7 +137,7 @@ const Header = () => {
                   {t('nav.login')}
                 </Button>
               </Link>
-              <Link to={location.pathname === '/business' || location.pathname === '/business-login' ? '/business-registration' : '/auth'}>
+              <Link to={location.pathname === '/business' || location.pathname === '/business-login' ? '/business-registration' : '/auth#signup'}>
                 <Button className="bg-primary hover:bg-primary/90 text-background font-semibold rounded-full">
                   Registrati
                 </Button>
@@ -165,7 +168,7 @@ const Header = () => {
                       {t('nav.login')}
                     </Button>
                   </Link>
-                  <Link to={location.pathname === '/business' || location.pathname === '/business-login' ? '/business-registration' : '/auth'} onClick={() => setMobileMenuOpen(false)}>
+                  <Link to={location.pathname === '/business' || location.pathname === '/business-login' ? '/business-registration' : '/auth#signup'} onClick={() => setMobileMenuOpen(false)}>
                     <Button className="w-full bg-primary hover:bg-primary/90 text-background font-semibold">
                       Registrati
                     </Button>
