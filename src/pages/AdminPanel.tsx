@@ -12,6 +12,9 @@ import { useAdminRole } from "@/hooks/useAdminRole";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { AlertCircle, CheckCircle, XCircle, FileText, Clock } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { PromoteUserPanel } from "@/components/admin/PromoteUserPanel";
+import { GlobalStats } from "@/components/admin/GlobalStats";
 
 interface Application {
   id: string;
@@ -204,8 +207,16 @@ const AdminPanel = () => {
         <div className="container mx-auto px-4">
           <h1 className="text-4xl font-bold mb-8">Pannello Amministratore</h1>
 
-          {/* Stats */}
-          <div className="grid md:grid-cols-3 gap-6 mb-8">
+          <Tabs defaultValue="applications" className="space-y-6">
+            <TabsList className="grid w-full max-w-2xl grid-cols-3">
+              <TabsTrigger value="applications">Richieste</TabsTrigger>
+              <TabsTrigger value="stats">Statistiche</TabsTrigger>
+              <TabsTrigger value="users">Utenti</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="applications" className="space-y-8">
+              {/* Stats */}
+              <div className="grid md:grid-cols-3 gap-6">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -375,6 +386,16 @@ const AdminPanel = () => {
               </div>
             </div>
           )}
+            </TabsContent>
+
+            <TabsContent value="stats">
+              <GlobalStats />
+            </TabsContent>
+
+            <TabsContent value="users">
+              <PromoteUserPanel />
+            </TabsContent>
+          </Tabs>
         </div>
       </main>
 

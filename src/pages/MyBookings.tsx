@@ -108,7 +108,7 @@ const MyBookings = () => {
     }
   };
 
-  const cancelBooking = async (bookingId: string) => {
+  const cancelBooking = async (bookingId: string, status: string) => {
     try {
       if (!user) throw new Error('Not authenticated');
       
@@ -116,28 +116,39 @@ const MyBookings = () => {
       const booking = bookings.find(b => b.id === bookingId);
       if (!booking) throw new Error('Booking not found');
 
+      // Calculate hours until booking
+      const bookingDateTime = new Date(`${booking.booking_date}T${booking.booking_time}`);
+      const now = new Date();
+      const hoursUntilBooking = (bookingDateTime.getTime() - now.getTime()) / (1000 * 60 * 60);
+
       const { error } = await supabase
         .from("bookings")
         .update({ status: "cancelled" })
         .eq("id", bookingId)
         .eq("user_id", user.id)
-        .eq("status", "pending");
+        .in("status", ["pending", "confirmed"]);
 
       if (error) throw error;
 
-      // Send cancellation email
+      // Send cancellation email with point deduction info
       await supabase.functions.invoke('send-cancellation-email', {
         body: {
           bookingId,
-          userEmail: booking.restaurants.name,
+          userEmail: user.email || '',
           userName: user.email || '',
           restaurantName: booking.restaurants.name,
           bookingDate: booking.booking_date,
           bookingTime: booking.booking_time,
+          userId: user.id,
         }
       });
 
-      toast.success("Prenotazione annullata. Controlla la tua email.");
+      if (hoursUntilBooking < 48 && status === 'confirmed') {
+        toast.success("Prenotazione annullata. Sono stati detratti dei punti.");
+      } else {
+        toast.success("Prenotazione annullata.");
+      }
+      
       fetchBookings();
     } catch (error) {
       console.error("Error canceling booking:", error);
@@ -315,7 +326,7 @@ const MyBookings = () => {
                             Vedi Ristorante
                           </Button>
                           
-                          {booking.status === "pending" && (
+                          {(booking.status === "pending" || booking.status === "confirmed") && (
                             <AlertDialog>
                               <AlertDialogTrigger asChild>
                                 <Button variant="destructive" size="sm">
@@ -327,13 +338,21 @@ const MyBookings = () => {
                                 <AlertDialogHeader>
                                   <AlertDialogTitle>Annullare la prenotazione?</AlertDialogTitle>
                                   <AlertDialogDescription>
-                                    Sei sicuro di voler annullare questa prenotazione? Questa azione non può essere annullata.
+                                    {booking.status === "confirmed" ? (
+                                      <>
+                                        <p className="font-semibold text-yellow-600 mb-2">⚠️ Attenzione!</p>
+                                        <p>Annullando questa prenotazione confermata a meno di 48 ore dall'orario prenotato, perderai dei punti fedeltà.</p>
+                                        <p className="mt-2">Sei sicuro di voler procedere?</p>
+                                      </>
+                                    ) : (
+                                      "Sei sicuro di voler annullare questa prenotazione? Questa azione non può essere annullata."
+                                    )}
                                   </AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
                                   <AlertDialogCancel>Indietro</AlertDialogCancel>
                                   <AlertDialogAction
-                                    onClick={() => cancelBooking(booking.id)}
+                                    onClick={() => cancelBooking(booking.id, booking.status)}
                                     className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                                   >
                                     Annulla Prenotazione
