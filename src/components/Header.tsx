@@ -14,6 +14,7 @@ import { useBusinessRole } from "@/hooks/useBusinessRole";
 import { Shield } from "lucide-react";
 import { useAdminRole } from "@/hooks/useAdminRole";
 import { useState } from "react";
+import { MobileUserMenu } from "@/components/MobileUserMenu";
 
 const Header = () => {
   const { language, setLanguage, t } = useLanguage();
@@ -146,61 +147,40 @@ const Header = () => {
           )}
         </nav>
 
-        <button 
-          className="md:hidden"
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-        >
-          {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-        </button>
+        {/* Mobile menu - Show user menu icon when logged in, hamburger when not */}
+        {isLoggedIn ? (
+          <div className="md:hidden">
+            <MobileUserMenu />
+          </div>
+        ) : (
+          <button 
+            className="md:hidden"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          >
+            {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          </button>
+        )}
       </div>
 
-      {mobileMenuOpen && (
+      {/* Mobile menu - Only show when NOT logged in */}
+      {mobileMenuOpen && !isLoggedIn && (
         <div className="md:hidden border-t border-border bg-background">
           <nav className="container mx-auto px-4 py-4 flex flex-col gap-2">
-            {!isLoggedIn ? (
-              <>
-                <Link to={location.pathname === '/business' ? '/' : '/business'} className="py-2 text-foreground" onClick={() => setMobileMenuOpen(false)}>
-                  {location.pathname === '/business' ? 'Home' : t('nav.forBusiness')}
-                </Link>
-                <div className="flex flex-col gap-2 pt-2 border-t border-border mt-2">
-                  <Link to={location.pathname === '/business' || location.pathname === '/business-login' ? '/business-login' : '/auth'} onClick={() => setMobileMenuOpen(false)}>
-                    <Button variant="outline" className="w-full border-foreground/30 text-foreground hover:bg-foreground/5 hover:border-foreground/50">
-                      {t('nav.login')}
-                    </Button>
-                  </Link>
-                  <Link to={location.pathname === '/business' || location.pathname === '/business-login' ? '/business-registration' : '/auth#signup'} onClick={() => setMobileMenuOpen(false)}>
-                    <Button className="w-full bg-primary hover:bg-primary/90 text-background font-semibold">
-                      Registrati
-                    </Button>
-                  </Link>
-                </div>
-              </>
-            ) : (
-              <>
-                <Link to="/profile" className="py-2 text-foreground" onClick={() => setMobileMenuOpen(false)}>
-                  {t('nav.profile')}
-                </Link>
-                <Link to="/my-bookings" className="py-2 text-foreground" onClick={() => setMobileMenuOpen(false)}>
-                  Le Mie Prenotazioni
-                </Link>
-                <Link to="/favorites" className="py-2 text-foreground" onClick={() => setMobileMenuOpen(false)}>
-                  I Miei Preferiti
-                </Link>
-                {showDashboard && (
-                  <Link to="/dashboard" className="py-2 text-foreground" onClick={() => setMobileMenuOpen(false)}>
-                    Dashboard
-                  </Link>
-                )}
-                {showAdminPanel && (
-                  <Link to="/admin" className="py-2 text-foreground" onClick={() => setMobileMenuOpen(false)}>
-                    Admin Panel
-                  </Link>
-                )}
-                <Button onClick={() => { logout(); setMobileMenuOpen(false); }} variant="outline" className="w-full mt-2 border-foreground/30 text-foreground">
-                  {t('nav.logout')}
+            <Link to={location.pathname === '/business' ? '/' : '/business'} className="py-2 text-foreground" onClick={() => setMobileMenuOpen(false)}>
+              {location.pathname === '/business' ? 'Home' : t('nav.forBusiness')}
+            </Link>
+            <div className="flex flex-col gap-2 pt-2 border-t border-border mt-2">
+              <Link to={location.pathname === '/business' || location.pathname === '/business-login' ? '/business-login' : '/auth'} onClick={() => setMobileMenuOpen(false)}>
+                <Button variant="outline" className="w-full border-foreground/30 text-foreground hover:bg-foreground/5 hover:border-foreground/50">
+                  {t('nav.login')}
                 </Button>
-              </>
-            )}
+              </Link>
+              <Link to={location.pathname === '/business' || location.pathname === '/business-login' ? '/business-registration' : '/auth#signup'} onClick={() => setMobileMenuOpen(false)}>
+                <Button className="w-full bg-primary hover:bg-primary/90 text-background font-semibold">
+                  Registrati
+                </Button>
+              </Link>
+            </div>
           </nav>
         </div>
       )}
