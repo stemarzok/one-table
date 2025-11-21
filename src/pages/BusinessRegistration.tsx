@@ -19,13 +19,21 @@ const BusinessRegistration = () => {
   const { t } = useLanguage();
   const documentsInputRef = useRef<HTMLInputElement>(null);
 
+  // Dati del richiedente
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [applicantEmail, setApplicantEmail] = useState("");
+  const [applicantRole, setApplicantRole] = useState("");
+  
+  // Dati dell'attività
   const [businessName, setBusinessName] = useState("");
   const [vatNumber, setVatNumber] = useState("");
   const [legalRepresentative, setLegalRepresentative] = useState("");
   const [businessEmail, setBusinessEmail] = useState("");
   const [businessPhone, setBusinessPhone] = useState("");
-  const [address, setAddress] = useState("");
+  const [country, setCountry] = useState("");
   const [city, setCity] = useState("");
+  const [street, setStreet] = useState("");
   const [province, setProvince] = useState("");
   const [postalCode, setPostalCode] = useState("");
   const [documents, setDocuments] = useState<File[]>([]);
@@ -115,6 +123,8 @@ const BusinessRegistration = () => {
     try {
       const documentUrls = await uploadDocuments();
 
+      const fullAddress = `${street}, ${city}, ${country}${postalCode ? ', ' + postalCode : ''}${province ? ', ' + province : ''}`;
+      
       const { error } = await supabase
         .from('business_applications')
         .insert({
@@ -122,12 +132,12 @@ const BusinessRegistration = () => {
           business_name: businessName,
           business_registration_number: vatNumber,
           legal_representative: legalRepresentative,
-          business_email: businessEmail,
+          business_email: applicantEmail,
           business_phone: businessPhone,
-          business_address: address,
+          business_address: fullAddress,
           city,
-          province,
-          postal_code: postalCode,
+          province: province || null,
+          postal_code: postalCode || null,
           documents_url: documentUrls,
         });
 
@@ -185,13 +195,68 @@ const BusinessRegistration = () => {
           </p>
           
           <form onSubmit={handleSubmit} className="space-y-8">
-            {/* Company Information */}
+            {/* Dati del Richiedente */}
             <Card className="p-8">
-              <h2 className="text-2xl font-bold mb-6">{t('businessReg.companyInfo')}</h2>
+              <h2 className="text-2xl font-bold mb-6">Dati del Richiedente</h2>
+              
+              <div className="space-y-4">
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="firstName">Nome *</Label>
+                    <Input
+                      id="firstName"
+                      value={firstName}
+                      onChange={(e) => setFirstName(e.target.value)}
+                      required
+                      className="mt-2"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="lastName">Cognome *</Label>
+                    <Input
+                      id="lastName"
+                      value={lastName}
+                      onChange={(e) => setLastName(e.target.value)}
+                      required
+                      className="mt-2"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="applicantEmail">Indirizzo Email *</Label>
+                  <Input
+                    id="applicantEmail"
+                    type="email"
+                    value={applicantEmail}
+                    onChange={(e) => setApplicantEmail(e.target.value)}
+                    required
+                    className="mt-2"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="applicantRole">Il Tuo Ruolo nell'Azienda *</Label>
+                  <Input
+                    id="applicantRole"
+                    value={applicantRole}
+                    onChange={(e) => setApplicantRole(e.target.value)}
+                    placeholder="Es: Titolare, Manager, Responsabile"
+                    required
+                    className="mt-2"
+                  />
+                </div>
+              </div>
+            </Card>
+
+            {/* Dati dell'Attività */}
+            <Card className="p-8">
+              <h2 className="text-2xl font-bold mb-6">Dati dell'Attività</h2>
               
               <div className="space-y-4">
                 <div>
-                  <Label htmlFor="businessName">{t('businessReg.businessName')} *</Label>
+                  <Label htmlFor="businessName">Nome Ufficiale dell'Attività *</Label>
                   <Input
                     id="businessName"
                     value={businessName}
@@ -202,7 +267,7 @@ const BusinessRegistration = () => {
                 </div>
 
                 <div>
-                  <Label htmlFor="vatNumber">{t('businessReg.vatNumber')} *</Label>
+                  <Label htmlFor="vatNumber">Partita IVA *</Label>
                   <Input
                     id="vatNumber"
                     value={vatNumber}
@@ -214,90 +279,74 @@ const BusinessRegistration = () => {
                 </div>
 
                 <div>
-                  <Label htmlFor="legalRep">{t('businessReg.legalRep')} *</Label>
+                  <Label htmlFor="businessPhone">Telefono Attività *</Label>
                   <Input
-                    id="legalRep"
-                    value={legalRepresentative}
-                    onChange={(e) => setLegalRepresentative(e.target.value)}
+                    id="businessPhone"
+                    type="tel"
+                    value={businessPhone}
+                    onChange={(e) => setBusinessPhone(e.target.value)}
                     required
                     className="mt-2"
                   />
-                </div>
-              </div>
-            </Card>
-
-            {/* Contact Information */}
-            <Card className="p-8">
-              <h2 className="text-2xl font-bold mb-6">{t('businessReg.contactInfo')}</h2>
-              
-              <div className="space-y-4">
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="businessEmail">{t('businessReg.businessEmail')} *</Label>
-                    <Input
-                      id="businessEmail"
-                      type="email"
-                      value={businessEmail}
-                      onChange={(e) => setBusinessEmail(e.target.value)}
-                      required
-                      className="mt-2"
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="businessPhone">{t('businessReg.businessPhone')} *</Label>
-                    <Input
-                      id="businessPhone"
-                      type="tel"
-                      value={businessPhone}
-                      onChange={(e) => setBusinessPhone(e.target.value)}
-                      required
-                      className="mt-2"
-                    />
-                  </div>
                 </div>
 
                 <div>
-                  <Label htmlFor="address">{t('businessReg.address')} *</Label>
+                  <Label htmlFor="country">Paese *</Label>
                   <Input
-                    id="address"
-                    value={address}
-                    onChange={(e) => setAddress(e.target.value)}
+                    id="country"
+                    value={country}
+                    onChange={(e) => setCountry(e.target.value)}
+                    placeholder="Es: Italia"
                     required
                     className="mt-2"
                   />
                 </div>
 
-                <div className="grid md:grid-cols-3 gap-4">
-                  <div>
-                    <Label htmlFor="city">{t('businessReg.city')} *</Label>
-                    <Input
-                      id="city"
-                      value={city}
-                      onChange={(e) => setCity(e.target.value)}
-                      required
-                      className="mt-2"
-                    />
-                  </div>
+                <div>
+                  <Label htmlFor="city">Città *</Label>
+                  <Input
+                    id="city"
+                    value={city}
+                    onChange={(e) => setCity(e.target.value)}
+                    required
+                    className="mt-2"
+                  />
+                </div>
 
-                  <div>
-                    <Label htmlFor="province">{t('businessReg.province')}</Label>
-                    <Input
-                      id="province"
-                      value={province}
-                      onChange={(e) => setProvince(e.target.value)}
-                      placeholder="ES: MI"
-                      maxLength={2}
-                      className="mt-2"
-                    />
-                  </div>
+                <div>
+                  <Label htmlFor="street">Via *</Label>
+                  <Input
+                    id="street"
+                    value={street}
+                    onChange={(e) => setStreet(e.target.value)}
+                    placeholder="Es: Via Roma, 123"
+                    required
+                    className="mt-2"
+                  />
+                </div>
 
+                <div className="grid md:grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="postalCode">{t('businessReg.postalCode')}</Label>
+                    <Label htmlFor="postalCode">CAP *</Label>
                     <Input
                       id="postalCode"
                       value={postalCode}
                       onChange={(e) => setPostalCode(e.target.value)}
+                      placeholder="Es: 00100"
+                      required
+                      className="mt-2"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="province">Provincia *</Label>
+                    <Input
+                      id="province"
+                      value={province}
+                      onChange={(e) => setProvince(e.target.value.toUpperCase())}
+                      placeholder="Es: RM"
+                      maxLength={2}
+                      required
                       className="mt-2"
                     />
                   </div>

@@ -15,6 +15,7 @@ import { Shield } from "lucide-react";
 import { useAdminRole } from "@/hooks/useAdminRole";
 import { useState } from "react";
 import { MobileUserMenu } from "@/components/MobileUserMenu";
+import { DesktopUserMenu } from "@/components/DesktopUserMenu";
 
 const Header = () => {
   const { language, setLanguage, t } = useLanguage();
@@ -87,50 +88,9 @@ const Header = () => {
           </DropdownMenu>
 
           {isLoggedIn ? (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button className="focus:outline-none">
-                  <Avatar className="w-10 h-10 cursor-pointer border-2 border-primary hover:border-primary/80 transition-colors">
-                    {profile?.avatar_url && (
-                      <AvatarImage src={profile.avatar_url} alt={profile?.name || 'User'} />
-                    )}
-                    <AvatarFallback className="bg-primary/10 text-primary font-semibold">
-                      {profile?.name?.charAt(0).toUpperCase() ?? 'U'}
-                    </AvatarFallback>
-                  </Avatar>
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => navigate('/profile')}>
-                  <User className="mr-2 h-4 w-4" />
-                  <span>{t('nav.profile')}</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate('/my-bookings')}>
-                  <Calendar className="mr-2 h-4 w-4" />
-                  <span>Le Mie Prenotazioni</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate('/favorites')}>
-                  <Heart className="mr-2 h-4 w-4" />
-                  <span>I Miei Preferiti</span>
-                </DropdownMenuItem>
-                {showDashboard && (
-                  <DropdownMenuItem onClick={() => navigate('/dashboard')}>
-                    <LayoutDashboard className="mr-2 h-4 w-4" />
-                    <span>Dashboard</span>
-                  </DropdownMenuItem>
-                )}
-                {showAdminPanel && (
-                  <DropdownMenuItem onClick={() => navigate('/admin')}>
-                    <Shield className="mr-2 h-4 w-4" />
-                    <span>Admin Panel</span>
-                  </DropdownMenuItem>
-                )}
-                <DropdownMenuItem onClick={logout}>
-                  <LogOut className="mr-2 h-4 w-4" />
-                  <span>{t('nav.logout')}</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <div className="hidden md:block">
+              <DesktopUserMenu />
+            </div>
           ) : (
             <div className="flex items-center gap-3">
               <Link to={location.pathname === '/business' || location.pathname === '/business-login' ? '/business-login' : '/auth'}>
