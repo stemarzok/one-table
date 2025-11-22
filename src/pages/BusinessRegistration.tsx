@@ -41,15 +41,10 @@ const BusinessRegistration = () => {
   const [hasApplication, setHasApplication] = useState(false);
 
   useEffect(() => {
-    if (!isLoggedIn) {
-      navigate("/auth");
-      return;
-    }
+    // Se l'utente è autenticato controlliamo se ha già inviato una richiesta
+    if (!isLoggedIn || !profile?.id) return;
 
-    // Check if user already has an application
     const checkApplication = async () => {
-      if (!profile?.id) return;
-
       const { data } = await supabase
         .from('business_applications')
         .select('*')
@@ -66,7 +61,7 @@ const BusinessRegistration = () => {
     };
 
     checkApplication();
-  }, [isLoggedIn, profile, navigate, toast, t]);
+  }, [isLoggedIn, profile, toast, t]);
 
   const handleDocumentsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
