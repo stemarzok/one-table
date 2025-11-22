@@ -10,7 +10,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const BookingConfirmationSchema = z.object({
+const BookingPendingSchema = z.object({
   userEmail: z.string().email().max(255),
   userName: z.string().trim().min(1).max(100),
   restaurantName: z.string().trim().min(1).max(200),
@@ -60,7 +60,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Parse and validate input
     const body = await req.json();
-    const validated = BookingConfirmationSchema.parse(body);
+    const validated = BookingPendingSchema.parse(body);
     
     const {
       userEmail,
@@ -72,26 +72,25 @@ const handler = async (req: Request): Promise<Response> => {
       specialRequests,
     } = validated;
 
-    console.log("Sending booking confirmation to:", userEmail);
+    console.log("Sending booking pending email to:", userEmail);
 
     const emailResponse = await resend.emails.send({
       from: "OneTable <onboarding@resend.dev>",
       to: [userEmail],
-      subject: `Conferma Prenotazione - ${escapeHtml(restaurantName)}`,
+      subject: `Richiesta Prenotazione Inviata - ${escapeHtml(restaurantName)}`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h1 style="color: #2c3e50;">✅ Prenotazione Confermata!</h1>
+          <h1 style="color: #2c3e50;">Richiesta di Prenotazione Ricevuta</h1>
           <p>Ciao ${escapeHtml(userName)},</p>
-          <p>Ottime notizie! Il ristorante <strong>${escapeHtml(restaurantName)}</strong> ha confermato la tua prenotazione.</p>
+          <p>Abbiamo ricevuto la tua richiesta di prenotazione presso <strong>${escapeHtml(restaurantName)}</strong>.</p>
           
-          <div style="background-color: #d4edda; border-left: 4px solid #28a745; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <h3 style="color: #155724; margin-top: 0;">✓ Prenotazione Confermata</h3>
-            <p style="color: #155724; margin-bottom: 0;">La tua prenotazione è stata approvata dal ristorante. Ti aspettiamo!</p>
+          <div style="background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <h3 style="color: #856404; margin-top: 0;">⏳ In Attesa di Conferma</h3>
+            <p style="color: #856404; margin-bottom: 0;">La tua prenotazione è in attesa di conferma da parte del ristorante. Riceverai un'email di conferma non appena il ristorante approverà la tua richiesta.</p>
           </div>
           
           <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
             <h2 style="color: #2c3e50; margin-top: 0;">Dettagli Prenotazione</h2>
-            <p><strong>Ristorante:</strong> ${escapeHtml(restaurantName)}</p>
             <p><strong>Data:</strong> ${new Date(bookingDate).toLocaleDateString('it-IT', { 
               weekday: 'long', 
               year: 'numeric', 
@@ -103,7 +102,7 @@ const handler = async (req: Request): Promise<Response> => {
             ${specialRequests ? `<p><strong>Richieste speciali:</strong> ${escapeHtml(specialRequests)}</p>` : ''}
           </div>
           
-          <p>Ti aspettiamo! Se hai bisogno di modificare o cancellare la prenotazione, contatta direttamente il ristorante.</p>
+          <p>Ti invieremo un'email di conferma non appena il ristorante accetterà la tua prenotazione.</p>
           
           <p style="color: #7f8c8d; font-size: 12px; margin-top: 30px;">
             Questa è una email automatica generata da OneTable. Per qualsiasi domanda, contatta il ristorante direttamente.
@@ -112,7 +111,7 @@ const handler = async (req: Request): Promise<Response> => {
       `,
     });
 
-    console.log("Email sent successfully:", emailResponse);
+    console.log("Pending email sent successfully:", emailResponse);
 
     return new Response(JSON.stringify(emailResponse), {
       status: 200,
@@ -122,7 +121,7 @@ const handler = async (req: Request): Promise<Response> => {
       },
     });
   } catch (error: any) {
-    console.error("Error sending booking confirmation:", error);
+    console.error("Error sending booking pending email:", error);
     
     if (error instanceof z.ZodError) {
       return new Response(

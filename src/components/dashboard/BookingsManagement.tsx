@@ -96,12 +96,43 @@ export const BookingsManagement = ({ restaurantId }: BookingsManagementProps) =>
 
   const updateBookingStatus = async (bookingId: string, status: string) => {
     try {
+      // Get booking details before updating
+      const booking = bookings.find(b => b.id === bookingId);
+      
       const { error } = await supabase
         .from("bookings")
         .update({ status })
         .eq("id", bookingId);
 
       if (error) throw error;
+      
+      // Send confirmation email when status is changed to confirmed
+      if (status === "confirmed" && booking) {
+        try {
+          // Get restaurant name
+          const { data: restaurant } = await supabase
+            .from("restaurants")
+            .select("name")
+            .eq("id", restaurantId)
+            .single();
+
+          await supabase.functions.invoke("send-booking-confirmation", {
+            body: {
+              userEmail: booking.user_email,
+              userName: booking.user_name,
+              restaurantName: restaurant?.name || "il ristorante",
+              bookingDate: booking.booking_date,
+              bookingTime: booking.booking_time,
+              guestsCount: booking.guests_count,
+              specialRequests: booking.special_requests,
+            },
+          });
+          console.log("Confirmation email sent successfully");
+        } catch (emailError) {
+          console.error("Error sending confirmation email:", emailError);
+          // Don't fail the status update if email fails
+        }
+      }
       
       toast.success(`Prenotazione ${status === "confirmed" ? "confermata" : status === "cancelled" ? "annullata" : "completata"}`);
       fetchBookings();

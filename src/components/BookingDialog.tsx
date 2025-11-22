@@ -114,9 +114,9 @@ export const BookingDialog = ({ restaurantId, restaurantName }: BookingDialogPro
 
       if (bookingError) throw bookingError;
 
-      // Send confirmation email
+      // Send pending email
       try {
-        await supabase.functions.invoke("send-booking-confirmation", {
+        await supabase.functions.invoke("send-booking-pending", {
           body: {
             userEmail: profile.email,
             userName: profile.name,
@@ -128,11 +128,11 @@ export const BookingDialog = ({ restaurantId, restaurantName }: BookingDialogPro
           },
         });
       } catch (emailError) {
-        console.error("Error sending confirmation email:", emailError);
+        console.error("Error sending pending email:", emailError);
         // Don't fail the booking if email fails
       }
 
-      toast.success(t("booking.bookingConfirmed"));
+      toast.success("Richiesta di prenotazione inviata! Riceverai un'email di conferma.");
       setOpen(false);
       setFormData({ date: "", time: "", guests: 2, specialRequests: "" });
     } catch (error: any) {
