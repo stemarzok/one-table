@@ -54,7 +54,10 @@ export const DesktopUserMenu = () => {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-80">
         <DropdownMenuLabel>
-          <div className="flex items-center gap-3">
+          <div 
+            className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity" 
+            onClick={() => navigate("/profile")}
+          >
             <Avatar className="w-10 h-10">
               <AvatarImage src={profile?.avatar_url || undefined} />
               <AvatarFallback>
@@ -71,11 +74,6 @@ export const DesktopUserMenu = () => {
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        
-        <DropdownMenuItem onClick={() => navigate("/profile")}>
-          <User className="w-4 h-4 mr-2" />
-          Profilo
-        </DropdownMenuItem>
         <DropdownMenuItem onClick={() => navigate("/my-bookings")}>
           <Calendar className="w-4 h-4 mr-2" />
           Le Mie Prenotazioni

@@ -37,7 +37,6 @@ export const MobileUserMenu = () => {
   };
 
   const menuItems = [
-    { icon: User, label: "Profilo", path: "/profile" },
     { icon: Calendar, label: "Le Mie Prenotazioni", path: "/my-bookings" },
     { icon: Heart, label: "Preferiti", path: "/favorites" },
     ...(isAdmin ? [{ icon: Shield, label: "Pannello Admin", path: "/admin" }] : []),
@@ -62,7 +61,13 @@ export const MobileUserMenu = () => {
 
         <div className="mt-6 space-y-6">
           {/* User Profile Section */}
-          <div className="flex items-center gap-4 p-4 bg-muted rounded-lg">
+          <div 
+            className="flex items-center gap-4 p-4 bg-muted rounded-lg cursor-pointer hover:bg-muted/80 transition-colors" 
+            onClick={() => {
+              navigate("/profile");
+              setOpen(false);
+            }}
+          >
             <Avatar className="w-12 h-12">
               <AvatarImage src={profile?.avatar_url || undefined} />
               <AvatarFallback>
