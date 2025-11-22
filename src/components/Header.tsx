@@ -93,12 +93,12 @@ const Header = () => {
             </div>
           ) : (
             <div className="flex items-center gap-3">
-              <Link to={location.pathname === '/business' || location.pathname === '/business-login' ? '/business-login' : '/auth'}>
+              <Link to={location.pathname === '/business' || location.pathname === '/business-login' || location.pathname === '/business-registration' ? '/business-login' : '/auth'}>
                 <Button variant="outline" className="border-foreground/30 text-foreground hover:bg-foreground/5 hover:border-foreground/50 rounded-full">
                   {t('nav.login')}
                 </Button>
               </Link>
-              <Link to={location.pathname === '/business' || location.pathname === '/business-login' ? '/business-registration' : '/auth#signup'}>
+              <Link to={location.pathname === '/business' || location.pathname === '/business-login' || location.pathname === '/business-registration' ? '/business-registration' : '/auth#signup'}>
                 <Button className="bg-primary hover:bg-primary/90 text-background font-semibold rounded-full">
                   Registrati
                 </Button>
@@ -130,16 +130,16 @@ const Header = () => {
               {location.pathname === '/business' ? 'Home' : t('nav.forBusiness')}
             </Link>
             <div className="flex flex-col gap-2 pt-2 border-t border-border mt-2">
-              <Link to={location.pathname === '/business' || location.pathname === '/business-login' ? '/business-login' : '/auth'} onClick={() => setMobileMenuOpen(false)}>
-                <Button variant="outline" className="w-full border-foreground/30 text-foreground hover:bg-foreground/5 hover:border-foreground/50">
-                  {t('nav.login')}
-                </Button>
-              </Link>
-              <Link to={location.pathname === '/business' || location.pathname === '/business-login' ? '/business-registration' : '/auth#signup'} onClick={() => setMobileMenuOpen(false)}>
-                <Button className="w-full bg-primary hover:bg-primary/90 text-background font-semibold">
-                  Registrati
-                </Button>
-              </Link>
+            <Link to={location.pathname === '/business' || location.pathname === '/business-login' || location.pathname === '/business-registration' ? '/business-login' : '/auth'} onClick={() => setMobileMenuOpen(false)}>
+              <Button variant="outline" className="w-full border-foreground/30 text-foreground hover:bg-foreground/5 hover:border-foreground/50">
+                {t('nav.login')}
+              </Button>
+            </Link>
+            <Link to={location.pathname === '/business' || location.pathname === '/business-login' || location.pathname === '/business-registration' ? '/business-registration' : '/auth#signup'} onClick={() => setMobileMenuOpen(false)}>
+              <Button className="w-full bg-primary hover:bg-primary/90 text-background font-semibold">
+                Registrati
+              </Button>
+            </Link>
             </div>
           </nav>
         </div>
