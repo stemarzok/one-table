@@ -285,6 +285,50 @@ export type Database = {
           },
         ]
       }
+      notifications: {
+        Row: {
+          created_at: string
+          id: string
+          is_read: boolean
+          link: string | null
+          message: string
+          restaurant_id: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          link?: string | null
+          message: string
+          restaurant_id?: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          link?: string | null
+          message?: string
+          restaurant_id?: string | null
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_restaurant_id_fkey"
+            columns: ["restaurant_id"]
+            isOneToOne: false
+            referencedRelation: "restaurants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -448,6 +492,51 @@ export type Database = {
           },
         ]
       }
+      review_responses: {
+        Row: {
+          created_at: string
+          id: string
+          response: string
+          restaurant_id: string
+          review_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          response: string
+          restaurant_id: string
+          review_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          response?: string
+          restaurant_id?: string
+          review_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "review_responses_restaurant_id_fkey"
+            columns: ["restaurant_id"]
+            isOneToOne: false
+            referencedRelation: "restaurants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "review_responses_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "reviews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       reviews: {
         Row: {
           ambiance_rating: number | null
@@ -456,6 +545,7 @@ export type Database = {
           created_at: string
           food_rating: number | null
           id: string
+          photos: string[] | null
           rating: number
           restaurant_id: string
           service_rating: number | null
@@ -469,6 +559,7 @@ export type Database = {
           created_at?: string
           food_rating?: number | null
           id?: string
+          photos?: string[] | null
           rating: number
           restaurant_id: string
           service_rating?: number | null
@@ -482,6 +573,7 @@ export type Database = {
           created_at?: string
           food_rating?: number | null
           id?: string
+          photos?: string[] | null
           rating?: number
           restaurant_id?: string
           service_rating?: number | null

@@ -10,12 +10,14 @@ import { useBusinessRole } from "@/hooks/useBusinessRole";
 import { useAdminRole } from "@/hooks/useAdminRole";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
-import { LayoutDashboard, Store, Table2, UtensilsCrossed, Calendar, AlertCircle, Info, CheckCircle, Clock, XCircle, BarChart3 } from "lucide-react";
+import { LayoutDashboard, Store, Table2, UtensilsCrossed, Calendar, AlertCircle, Info, CheckCircle, Clock, XCircle, BarChart3, Bell, MessageSquare } from "lucide-react";
 import { TablesManagement } from "@/components/dashboard/TablesManagement";
 import { MenuManagement } from "@/components/dashboard/MenuManagement";
 import { BookingsManagement } from "@/components/dashboard/BookingsManagement";
 import { RestaurantInfo } from "@/components/dashboard/RestaurantInfo";
 import { RestaurantAnalytics } from "@/components/dashboard/RestaurantAnalytics";
+import { NotificationsCenter } from "@/components/dashboard/NotificationsCenter";
+import { ReviewsManagement } from "@/components/dashboard/ReviewsManagement";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const Dashboard = () => {
@@ -132,9 +134,11 @@ const Dashboard = () => {
             </div>
           </div>
           <Tabs defaultValue="overview" className="space-y-8">
-            <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6">
+            <TabsList className="grid w-full grid-cols-4 lg:grid-cols-8">
               <TabsTrigger value="overview"><LayoutDashboard className="w-4 h-4 mr-2" /><span className="hidden sm:inline">{t('dashboard.overview')}</span></TabsTrigger>
               <TabsTrigger value="analytics"><BarChart3 className="w-4 h-4 mr-2" /><span className="hidden sm:inline">Analytics</span></TabsTrigger>
+              <TabsTrigger value="notifications"><Bell className="w-4 h-4 mr-2" /><span className="hidden sm:inline">Notifiche</span></TabsTrigger>
+              <TabsTrigger value="reviews"><MessageSquare className="w-4 h-4 mr-2" /><span className="hidden sm:inline">Recensioni</span></TabsTrigger>
               <TabsTrigger value="info"><Info className="w-4 h-4 mr-2" /><span className="hidden sm:inline">Info & Foto</span></TabsTrigger>
               <TabsTrigger value="bookings"><Calendar className="w-4 h-4 mr-2" /><span className="hidden sm:inline">Prenotazioni</span></TabsTrigger>
               <TabsTrigger value="tables"><Table2 className="w-4 h-4 mr-2" /><span className="hidden sm:inline">{t('dashboard.tables')}</span></TabsTrigger>
@@ -199,6 +203,8 @@ const Dashboard = () => {
               </div>
             </TabsContent>
             <TabsContent value="analytics">{selectedRestaurantId && <RestaurantAnalytics restaurantId={selectedRestaurantId} />}</TabsContent>
+            <TabsContent value="notifications">{selectedRestaurantId && <NotificationsCenter restaurantId={selectedRestaurantId} />}</TabsContent>
+            <TabsContent value="reviews">{selectedRestaurantId && <ReviewsManagement restaurantId={selectedRestaurantId} />}</TabsContent>
             <TabsContent value="info">{restaurant && <RestaurantInfo restaurant={restaurant} onUpdate={() => setSelectedRestaurantId(selectedRestaurantId)} />}</TabsContent>
             <TabsContent value="bookings">{selectedRestaurantId && <BookingsManagement restaurantId={selectedRestaurantId} />}</TabsContent>
             <TabsContent value="tables">{selectedRestaurantId && <TablesManagement restaurantId={selectedRestaurantId} />}</TabsContent>
