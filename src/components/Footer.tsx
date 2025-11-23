@@ -1,8 +1,21 @@
 import { Mail, Phone, MapPin, Facebook, Instagram, Linkedin, Twitter } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useLocation } from "react-router-dom";
 
 const BUILD_VERSION = `v${new Date().toISOString().slice(0, 16).replace('T', '-')}`;
 
 const Footer = () => {
+  const { isLoggedIn } = useAuth();
+  const location = useLocation();
+  
+  // Hide footer on mobile when logged in
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+  const shouldHideFooter = isMobile && isLoggedIn;
+
+  if (shouldHideFooter) {
+    return null;
+  }
+
   return (
     <footer className="bg-foreground border-t border-border">
       <div className="container mx-auto px-4 py-12">

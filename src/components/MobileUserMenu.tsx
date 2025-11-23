@@ -39,6 +39,7 @@ export const MobileUserMenu = () => {
   const menuItems = [
     { icon: Calendar, label: "Le Mie Prenotazioni", path: "/my-bookings" },
     { icon: Heart, label: "Preferiti", path: "/favorites" },
+    { icon: Settings, label: "Impostazioni", path: "/settings" },
     ...(isAdmin ? [{ icon: Shield, label: "Pannello Admin", path: "/admin" }] : []),
   ];
 
@@ -105,19 +106,16 @@ export const MobileUserMenu = () => {
 
           <Separator />
 
-          {/* Settings Section */}
+          {/* Quick Settings */}
           <div className="space-y-4">
             <div className="flex items-center gap-2">
-              <Settings className="w-5 h-5" />
-              <h3 className="font-semibold">Impostazioni</h3>
+              <Globe className="w-5 h-5" />
+              <h3 className="font-semibold">Preferenze Rapide</h3>
             </div>
 
             {/* Language Selector */}
             <div className="space-y-2">
-              <Label className="flex items-center gap-2">
-                <Globe className="w-4 h-4" />
-                Lingua
-              </Label>
+              <Label>Lingua</Label>
               <Select value={language} onValueChange={setLanguage}>
                 <SelectTrigger>
                   <SelectValue />
@@ -139,12 +137,6 @@ export const MobileUserMenu = () => {
                 checked={theme === "dark"}
                 onCheckedChange={handleThemeToggle}
               />
-            </div>
-
-            {/* Notifications (future feature) */}
-            <div className="flex items-center justify-between opacity-50">
-              <Label>Notifiche</Label>
-              <Switch disabled />
             </div>
           </div>
 
