@@ -127,7 +127,7 @@ const BusinessRegistration = () => {
           business_name: businessName,
           business_registration_number: vatNumber,
           legal_representative: legalRepresentative,
-          business_email: applicantEmail,
+          business_email: businessEmail,
           business_phone: businessPhone,
           business_address: fullAddress,
           city,
@@ -268,6 +268,30 @@ const BusinessRegistration = () => {
                     value={vatNumber}
                     onChange={(e) => setVatNumber(e.target.value)}
                     placeholder="IT12345678901"
+                    required
+                    className="mt-2"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="legalRepresentative">Rappresentante Legale *</Label>
+                  <Input
+                    id="legalRepresentative"
+                    value={legalRepresentative}
+                    onChange={(e) => setLegalRepresentative(e.target.value)}
+                    placeholder="Nome Cognome"
+                    required
+                    className="mt-2"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="businessEmail">Email Attività *</Label>
+                  <Input
+                    id="businessEmail"
+                    type="email"
+                    value={businessEmail}
+                    onChange={(e) => setBusinessEmail(e.target.value)}
                     required
                     className="mt-2"
                   />
