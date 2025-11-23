@@ -3,11 +3,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Star } from "lucide-react";
+import { Star, Upload, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { Input } from "@/components/ui/input";
 
 interface ReviewDialogProps {
   restaurantId: string;
@@ -27,6 +28,8 @@ export const ReviewDialog = ({ restaurantId, bookingId, onReviewSubmitted }: Rev
     ambianceRating: 0,
     comment: "",
   });
+  const [photos, setPhotos] = useState<File[]>([]);
+  const [photoUrls, setPhotoUrls] = useState<string[]>([]);
 
   const StarRating = ({ value, onChange, label }: { value: number; onChange: (value: number) => void; label: string }) => (
     <div className="space-y-2">
@@ -50,6 +53,25 @@ export const ReviewDialog = ({ restaurantId, bookingId, onReviewSubmitted }: Rev
     </div>
   );
 
+  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (photos.length + files.length > 5) {
+      toast.error("Puoi caricare massimo 5 foto");
+      return;
+    }
+    setPhotos([...photos, ...files]);
+    files.forEach(file => {
+      const url = URL.createObjectURL(file);
+      setPhotoUrls(prev => [...prev, url]);
+    });
+  };
+
+  const removePhoto = (index: number) => {
+    URL.revokeObjectURL(photoUrls[index]);
+    setPhotos(photos.filter((_, i) => i !== index));
+    setPhotoUrls(photoUrls.filter((_, i) => i !== index));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -66,6 +88,28 @@ export const ReviewDialog = ({ restaurantId, bookingId, onReviewSubmitted }: Rev
     setLoading(true);
 
     try {
+      // Upload photos if any
+      const uploadedPhotoUrls: string[] = [];
+      
+      if (photos.length > 0) {
+        for (const photo of photos) {
+          const fileExt = photo.name.split('.').pop();
+          const fileName = `${user.id}/${Math.random()}.${fileExt}`;
+          
+          const { error: uploadError, data } = await supabase.storage
+            .from('restaurant-images')
+            .upload(fileName, photo);
+
+          if (uploadError) throw uploadError;
+          
+          const { data: { publicUrl } } = supabase.storage
+            .from('restaurant-images')
+            .getPublicUrl(fileName);
+            
+          uploadedPhotoUrls.push(publicUrl);
+        }
+      }
+
       const { error } = await supabase.from("reviews").insert({
         restaurant_id: restaurantId,
         user_id: user.id,
@@ -75,6 +119,7 @@ export const ReviewDialog = ({ restaurantId, bookingId, onReviewSubmitted }: Rev
         service_rating: formData.serviceRating || null,
         ambiance_rating: formData.ambianceRating || null,
         comment: formData.comment || null,
+        photos: uploadedPhotoUrls.length > 0 ? uploadedPhotoUrls : null,
       });
 
       if (error) throw error;
@@ -88,6 +133,8 @@ export const ReviewDialog = ({ restaurantId, bookingId, onReviewSubmitted }: Rev
         ambianceRating: 0,
         comment: "",
       });
+      setPhotos([]);
+      setPhotoUrls([]);
       onReviewSubmitted?.();
     } catch (error: any) {
       console.error("Review error:", error);
@@ -137,6 +184,53 @@ export const ReviewDialog = ({ restaurantId, bookingId, onReviewSubmitted }: Rev
               rows={4}
             />
           </div>
+          
+          <div>
+            <Label>Foto (max 5)</Label>
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <Input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={handlePhotoChange}
+                  className="hidden"
+                  id="photo-upload"
+                />
+                <Label htmlFor="photo-upload" className="cursor-pointer">
+                  <div className="flex items-center gap-2 px-4 py-2 border border-input rounded-md hover:bg-accent">
+                    <Upload className="w-4 h-4" />
+                    <span>Carica foto</span>
+                  </div>
+                </Label>
+                <span className="text-sm text-muted-foreground">
+                  {photos.length}/5 foto
+                </span>
+              </div>
+              
+              {photoUrls.length > 0 && (
+                <div className="grid grid-cols-3 gap-2">
+                  {photoUrls.map((url, index) => (
+                    <div key={index} className="relative aspect-square">
+                      <img
+                        src={url}
+                        alt={`Preview ${index + 1}`}
+                        className="w-full h-full object-cover rounded-lg"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removePhoto(index)}
+                        className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+          
           <Button type="submit" className="w-full" disabled={loading}>
             {loading ? t("review.submitting") : t("review.submitReview")}
           </Button>

@@ -308,6 +308,17 @@ export const BookingsManagement = ({ restaurantId }: BookingsManagementProps) =>
                     </Button>
                   </div>
                 )}
+                
+                {booking.status === "pending" && new Date(booking.booking_date) < new Date() && (
+                  <Button
+                    variant="outline"
+                    onClick={() => updateBookingStatus(booking.id, "cancelled")}
+                    className="w-full"
+                  >
+                    <XCircle className="w-4 h-4 mr-2" />
+                    Annulla (scaduta)
+                  </Button>
+                )}
 
                 {booking.status === "confirmed" && (
                   <div className="flex md:flex-col gap-2">
