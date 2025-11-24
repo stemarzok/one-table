@@ -597,6 +597,54 @@ export type Database = {
           },
         ]
       }
+      subscriptions: {
+        Row: {
+          billing_period: string
+          cancel_at_period_end: boolean | null
+          created_at: string
+          current_period_end: string
+          current_period_start: string
+          id: string
+          plan_type: string
+          status: string
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
+          trial_end: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          billing_period: string
+          cancel_at_period_end?: boolean | null
+          created_at?: string
+          current_period_end: string
+          current_period_start?: string
+          id?: string
+          plan_type: string
+          status?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          trial_end?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          billing_period?: string
+          cancel_at_period_end?: boolean | null
+          created_at?: string
+          current_period_end?: string
+          current_period_start?: string
+          id?: string
+          plan_type?: string
+          status?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          trial_end?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -625,6 +673,8 @@ export type Database = {
           total_reviews: number
         }[]
       }
+      get_trial_days_remaining: { Args: { _user_id: string }; Returns: number }
+      has_active_subscription: { Args: { _user_id: string }; Returns: boolean }
       has_any_business_role: {
         Args: { _restaurant_id: string; _user_id: string }
         Returns: boolean
