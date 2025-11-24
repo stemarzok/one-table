@@ -26,6 +26,8 @@ import Cookies from "./pages/Cookies";
 import GDPR from "./pages/GDPR";
 import Status from "./pages/Status";
 import Settings from "./pages/Settings";
+import Pricing from "./pages/Pricing";
+import Billing from "./pages/Billing";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -60,6 +62,8 @@ const App = () => (
               <Route path="/gdpr" element={<GDPR />} />
               <Route path="/status" element={<Status />} />
               <Route path="/settings" element={<Settings />} />
+              <Route path="/pricing" element={<Pricing />} />
+              <Route path="/billing" element={<Billing />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>

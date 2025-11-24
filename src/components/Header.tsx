@@ -64,9 +64,14 @@ const Header = () => {
         
         <nav className="hidden md:flex items-center gap-8">
           {!isLoggedIn && (
-            <Link to={location.pathname === '/business' ? '/' : '/business'} className="text-sm font-medium text-foreground hover:text-primary transition-colors mr-2">
-              {location.pathname === '/business' ? 'Home' : t('nav.forBusiness')}
-            </Link>
+            <>
+              <Link to="/pricing" className="text-sm font-medium text-foreground hover:text-primary transition-colors">
+                Prezzi
+              </Link>
+              <Link to={location.pathname === '/business' ? '/' : '/business'} className="text-sm font-medium text-foreground hover:text-primary transition-colors mr-2">
+                {location.pathname === '/business' ? 'Home' : t('nav.forBusiness')}
+              </Link>
+            </>
           )}
           
           <DropdownMenu>

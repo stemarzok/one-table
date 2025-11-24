@@ -6,7 +6,7 @@ import { Separator } from "@/components/ui/separator";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { User, Calendar, Heart, Settings, LogOut, Globe, Moon, Sun, Shield } from "lucide-react";
+import { User, Calendar, Heart, Settings, LogOut, Globe, Moon, Sun, Shield, CreditCard } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useNavigate } from "react-router-dom";
@@ -39,6 +39,7 @@ export const MobileUserMenu = () => {
   const menuItems = [
     { icon: Calendar, label: "Le Mie Prenotazioni", path: "/my-bookings" },
     { icon: Heart, label: "Preferiti", path: "/favorites" },
+    { icon: CreditCard, label: "Gestione Abbonamento", path: "/billing" },
     { icon: Settings, label: "Impostazioni", path: "/settings" },
     ...(isAdmin ? [{ icon: Shield, label: "Pannello Admin", path: "/admin" }] : []),
   ];

@@ -12,7 +12,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { User, Calendar, Heart, Settings, LogOut, Globe, Moon, Sun, Shield } from "lucide-react";
+import { User, Calendar, Heart, Settings, LogOut, Globe, Moon, Sun, Shield, CreditCard } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useNavigate } from "react-router-dom";
@@ -81,6 +81,10 @@ export const DesktopUserMenu = () => {
         <DropdownMenuItem onClick={() => navigate("/favorites")}>
           <Heart className="w-4 h-4 mr-2" />
           Preferiti
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => navigate("/billing")}>
+          <CreditCard className="w-4 h-4 mr-2" />
+          Gestione Abbonamento
         </DropdownMenuItem>
         
         {isAdmin && (
