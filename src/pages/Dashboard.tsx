@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useBusinessRole } from "@/hooks/useBusinessRole";
 import { useAdminRole } from "@/hooks/useAdminRole";
+import { useSubscription } from "@/hooks/useSubscription";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
 import { LayoutDashboard, Store, Table2, UtensilsCrossed, Calendar, AlertCircle, Info, CheckCircle, Clock, XCircle, BarChart3, Bell, MessageSquare } from "lucide-react";
@@ -18,16 +19,19 @@ import { RestaurantInfo } from "@/components/dashboard/RestaurantInfo";
 import { RestaurantAnalytics } from "@/components/dashboard/RestaurantAnalytics";
 import { NotificationsCenter } from "@/components/dashboard/NotificationsCenter";
 import { ReviewsManagement } from "@/components/dashboard/ReviewsManagement";
+import { PaywallModal } from "@/components/PaywallModal";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const Dashboard = () => {
   const { isLoggedIn } = useAuth();
   const { hasRole, loading: businessLoading, businessRoles } = useBusinessRole();
   const { isAdmin, loading: adminLoading } = useAdminRole();
+  const subscription = useSubscription();
   const { t } = useLanguage();
   const navigate = useNavigate();
   const [restaurant, setRestaurant] = useState<any>(null);
-  const [stats, setStats] = useState({ 
+  const [showPaywall, setShowPaywall] = useState(false);
+  const [stats, setStats] = useState({
     tables: 0, 
     menuItems: 0,
     totalBookings: 0,
@@ -114,6 +118,12 @@ const Dashboard = () => {
               <div>
                 <h1 className="text-4xl font-bold mb-2">{t('dashboard.title')}</h1>
                 {restaurant && <p className="text-xl text-muted-foreground">{restaurant.name}</p>}
+                {/* Trial Badge */}
+                {subscription.inTrial && subscription.trialDaysRemaining && (
+                  <div className="mt-2 inline-flex items-center gap-2 px-3 py-1 bg-primary/10 text-primary rounded-full text-sm font-medium">
+                    💡 Trial attivo – {subscription.trialDaysRemaining} giorni rimasti
+                  </div>
+                )}
               </div>
               {allRestaurants.length > 1 && (
                 <div className="w-full md:w-64">
@@ -135,14 +145,80 @@ const Dashboard = () => {
           </div>
           <Tabs defaultValue="overview" className="space-y-8">
             <TabsList className="grid w-full grid-cols-4 lg:grid-cols-8">
-              <TabsTrigger value="overview"><LayoutDashboard className="w-4 h-4 mr-2" /><span className="hidden sm:inline">{t('dashboard.overview')}</span></TabsTrigger>
-              <TabsTrigger value="analytics"><BarChart3 className="w-4 h-4 mr-2" /><span className="hidden sm:inline">Analytics</span></TabsTrigger>
-              <TabsTrigger value="notifications"><Bell className="w-4 h-4 mr-2" /><span className="hidden sm:inline">Notifiche</span></TabsTrigger>
-              <TabsTrigger value="reviews"><MessageSquare className="w-4 h-4 mr-2" /><span className="hidden sm:inline">Recensioni</span></TabsTrigger>
-              <TabsTrigger value="info"><Info className="w-4 h-4 mr-2" /><span className="hidden sm:inline">Info & Foto</span></TabsTrigger>
-              <TabsTrigger value="bookings"><Calendar className="w-4 h-4 mr-2" /><span className="hidden sm:inline">Prenotazioni</span></TabsTrigger>
-              <TabsTrigger value="tables"><Table2 className="w-4 h-4 mr-2" /><span className="hidden sm:inline">{t('dashboard.tables')}</span></TabsTrigger>
-              <TabsTrigger value="menu"><UtensilsCrossed className="w-4 h-4 mr-2" /><span className="hidden sm:inline">{t('dashboard.menu')}</span></TabsTrigger>
+            <TabsTrigger value="overview"><LayoutDashboard className="w-4 h-4 mr-2" /><span className="hidden sm:inline">{t('dashboard.overview')}</span></TabsTrigger>
+            <TabsTrigger 
+              value="analytics" 
+              onClick={(e) => {
+                if (!isAdmin && !subscription.hasAccess) {
+                  e.preventDefault();
+                  setShowPaywall(true);
+                }
+              }}
+            >
+              <BarChart3 className="w-4 h-4 mr-2" />
+              <span className="hidden sm:inline">Analytics</span>
+            </TabsTrigger>
+            <TabsTrigger 
+              value="notifications"
+              onClick={(e) => {
+                if (!isAdmin && !subscription.hasAccess) {
+                  e.preventDefault();
+                  setShowPaywall(true);
+                }
+              }}
+            >
+              <Bell className="w-4 h-4 mr-2" />
+              <span className="hidden sm:inline">Notifiche</span>
+            </TabsTrigger>
+            <TabsTrigger 
+              value="reviews"
+              onClick={(e) => {
+                if (!isAdmin && !subscription.hasAccess) {
+                  e.preventDefault();
+                  setShowPaywall(true);
+                }
+              }}
+            >
+              <MessageSquare className="w-4 h-4 mr-2" />
+              <span className="hidden sm:inline">Recensioni</span>
+            </TabsTrigger>
+            <TabsTrigger value="info"><Info className="w-4 h-4 mr-2" /><span className="hidden sm:inline">Info & Foto</span></TabsTrigger>
+            <TabsTrigger 
+              value="bookings"
+              onClick={(e) => {
+                if (!isAdmin && !subscription.hasAccess) {
+                  e.preventDefault();
+                  setShowPaywall(true);
+                }
+              }}
+            >
+              <Calendar className="w-4 h-4 mr-2" />
+              <span className="hidden sm:inline">Prenotazioni</span>
+            </TabsTrigger>
+            <TabsTrigger 
+              value="tables"
+              onClick={(e) => {
+                if (!isAdmin && !subscription.hasAccess) {
+                  e.preventDefault();
+                  setShowPaywall(true);
+                }
+              }}
+            >
+              <Table2 className="w-4 h-4 mr-2" />
+              <span className="hidden sm:inline">{t('dashboard.tables')}</span>
+            </TabsTrigger>
+            <TabsTrigger 
+              value="menu"
+              onClick={(e) => {
+                if (!isAdmin && !subscription.hasAccess) {
+                  e.preventDefault();
+                  setShowPaywall(true);
+                }
+              }}
+            >
+              <UtensilsCrossed className="w-4 h-4 mr-2" />
+              <span className="hidden sm:inline">{t('dashboard.menu')}</span>
+            </TabsTrigger>
             </TabsList>
             <TabsContent value="overview">
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -213,6 +289,7 @@ const Dashboard = () => {
         </div>
       </main>
       <Footer />
+      <PaywallModal open={showPaywall} onOpenChange={setShowPaywall} />
     </div>
   );
 };
