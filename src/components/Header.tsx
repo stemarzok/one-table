@@ -65,11 +65,13 @@ const Header = () => {
         <nav className="hidden md:flex items-center gap-8">
           {!isLoggedIn && (
             <>
-              <Link to="/pricing" className="text-sm font-medium text-foreground hover:text-primary transition-colors">
-                Prezzi
-              </Link>
-              <Link to={location.pathname === '/business' ? '/' : '/business'} className="text-sm font-medium text-foreground hover:text-primary transition-colors mr-2">
-                {location.pathname === '/business' ? 'Home' : t('nav.forBusiness')}
+              {isInBusinessSection && (
+                <Link to="/pricing" className="text-sm font-medium text-foreground hover:text-primary transition-colors">
+                  Prezzi
+                </Link>
+              )}
+              <Link to={isInBusinessSection ? '/' : '/business'} className="text-sm font-medium text-foreground hover:text-primary transition-colors mr-2">
+                {isInBusinessSection ? 'Home' : t('nav.forBusiness')}
               </Link>
             </>
           )}
@@ -131,8 +133,13 @@ const Header = () => {
       {mobileMenuOpen && !isLoggedIn && (
         <div className="md:hidden border-t border-border bg-background">
           <nav className="container mx-auto px-4 py-4 flex flex-col gap-2">
-            <Link to={location.pathname === '/business' ? '/' : '/business'} className="py-2 text-foreground" onClick={() => setMobileMenuOpen(false)}>
-              {location.pathname === '/business' ? 'Home' : t('nav.forBusiness')}
+            {isInBusinessSection && (
+              <Link to="/pricing" className="py-2 text-foreground" onClick={() => setMobileMenuOpen(false)}>
+                Prezzi
+              </Link>
+            )}
+            <Link to={isInBusinessSection ? '/' : '/business'} className="py-2 text-foreground" onClick={() => setMobileMenuOpen(false)}>
+              {isInBusinessSection ? 'Home' : t('nav.forBusiness')}
             </Link>
             <div className="flex flex-col gap-2 pt-2 border-t border-border mt-2">
             <Link to={location.pathname === '/business' || location.pathname === '/business-login' || location.pathname === '/business-registration' ? '/business-login' : '/auth'} onClick={() => setMobileMenuOpen(false)}>

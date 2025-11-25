@@ -39,6 +39,15 @@ serve(async (req) => {
     if (!priceId) throw new Error("Price ID is required");
     logStep("Price ID received", { priceId });
 
+    // Fetch user business data for EU invoicing
+    const { data: restaurant } = await supabaseClient
+      .from('restaurants')
+      .select('business_name, legal_representative, business_registration_number, address, city')
+      .eq('owner_id', user.id)
+      .maybeSingle();
+
+    logStep("Restaurant data fetched", { hasRestaurant: !!restaurant });
+
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", { 
       apiVersion: "2025-08-27.basil" 
     });
@@ -46,14 +55,47 @@ serve(async (req) => {
     // Check for existing customer
     const customers = await stripe.customers.list({ email: user.email, limit: 1 });
     let customerId;
+    
     if (customers.data.length > 0) {
       customerId = customers.data[0].id;
       logStep("Existing customer found", { customerId });
+      
+      // Update customer with business data if available
+      if (restaurant) {
+        await stripe.customers.update(customerId, {
+          name: restaurant.legal_representative || restaurant.business_name,
+          metadata: {
+            business_name: restaurant.business_name || '',
+            vat_number: restaurant.business_registration_number || '',
+            legal_representative: restaurant.legal_representative || '',
+          },
+          address: {
+            line1: restaurant.address || '',
+            city: restaurant.city || '',
+            country: 'IT',
+          }
+        });
+        logStep("Customer updated with business data");
+      }
     } else {
-      logStep("Creating new customer");
+      logStep("Creating new customer with business data");
     }
 
-    // Create checkout session with trial
+    // Prepare customer details for checkout
+    const customerDetails: any = {
+      email: user.email,
+    };
+
+    if (restaurant) {
+      customerDetails.name = restaurant.legal_representative || restaurant.business_name;
+      customerDetails.address = {
+        line1: restaurant.address || '',
+        city: restaurant.city || '',
+        country: 'IT',
+      };
+    }
+
+    // Create checkout session with trial and EU invoicing data
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       customer_email: customerId ? undefined : user.email,
@@ -63,7 +105,17 @@ serve(async (req) => {
         trial_period_days: 14,
         metadata: {
           user_id: user.id,
+          business_name: restaurant?.business_name || '',
+          vat_number: restaurant?.business_registration_number || '',
+          legal_representative: restaurant?.legal_representative || '',
         }
+      },
+      customer_update: customerId ? {
+        address: 'auto',
+        name: 'auto',
+      } : undefined,
+      tax_id_collection: {
+        enabled: true,
       },
       success_url: `${req.headers.get("origin")}/billing?success=true`,
       cancel_url: `${req.headers.get("origin")}/pricing`,

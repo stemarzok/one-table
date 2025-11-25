@@ -10,15 +10,10 @@ import { useAuth } from "@/contexts/AuthContext";
 
 const Business = () => {
   const navigate = useNavigate();
-  const { isLoggedIn } = useAuth();
   
   useEffect(() => {
-    if (!isLoggedIn) {
-      navigate('/auth');
-      return;
-    }
     window.scrollTo(0, 0);
-  }, [isLoggedIn, navigate]);
+  }, []);
 
   return (
     <div className="min-h-screen">
