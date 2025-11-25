@@ -26,8 +26,9 @@ const Billing = () => {
     }
 
     if (searchParams.get('success') === 'true') {
+      const sessionId = searchParams.get('session_id') || undefined;
       toast.success("Abbonamento attivato con successo!");
-      subscription.refresh();
+      subscription.refresh(sessionId);
     }
   }, [isLoggedIn, navigate, searchParams]);
 

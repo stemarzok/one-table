@@ -20,7 +20,7 @@ export const useSubscription = () => {
   });
   const [loading, setLoading] = useState(true);
 
-  const checkSubscription = async () => {
+  const checkSubscription = async (sessionId?: string) => {
     if (!isLoggedIn || !user) {
       setSubscription({ subscribed: false, inTrial: false });
       setLoading(false);
@@ -28,12 +28,16 @@ export const useSubscription = () => {
     }
 
     try {
-      const { data, error } = await supabase.functions.invoke('check-subscription');
+      const invokeOptions = sessionId
+        ? { body: { sessionId } }
+        : undefined;
+
+      const { data, error } = await supabase.functions.invoke('check-subscription', invokeOptions as any);
       
       if (error) throw error;
       
       if (data) {
-        setSubscription(data);
+        setSubscription(data as SubscriptionData);
       }
     } catch (error) {
       console.error('Error checking subscription:', error);
@@ -58,6 +62,6 @@ export const useSubscription = () => {
     ...subscription,
     hasAccess,
     loading,
-    refresh: checkSubscription,
+    refresh: (sessionId?: string) => checkSubscription(sessionId),
   };
 };
