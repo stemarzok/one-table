@@ -41,32 +41,70 @@ serve(async (req) => {
       apiVersion: "2025-08-27.basil" 
     });
 
-    const customers = await stripe.customers.list({ email: user.email, limit: 1 });
-    
-    if (customers.data.length === 0) {
-      logStep("No customer found");
-      return new Response(JSON.stringify({ 
-        subscribed: false,
-        inTrial: false 
-      }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 200,
-      });
+    // Optionally accept a Checkout Session ID from the frontend to ensure
+    // we read the latest subscription just created after checkout
+    let sessionId: string | null = null;
+    if (req.method === "POST") {
+      try {
+        const body = await req.json();
+        sessionId = body?.sessionId ?? null;
+        logStep("Session ID from body", { sessionId });
+      } catch {
+        // Ignore JSON parse errors and fallback to email-based lookup
+        logStep("No JSON body or invalid JSON");
+      }
     }
 
-    const customerId = customers.data[0].id;
-    logStep("Customer found", { customerId });
+    let customerId: string | null = null;
+    let activeSub: any = null;
 
-    // Check for active or trialing subscriptions
-    const subscriptions = await stripe.subscriptions.list({
-      customer: customerId,
-      status: "all",
-      limit: 10,
-    });
+    if (sessionId) {
+      const session = await stripe.checkout.sessions.retrieve(sessionId, {
+        expand: ["subscription"],
+      });
 
-    const activeSub = subscriptions.data.find(
-      (sub: any) => sub.status === "active" || sub.status === "trialing"
-    );
+      if (session.subscription) {
+        activeSub = session.subscription as any;
+        customerId = (activeSub.customer as string) || null;
+        logStep("Active subscription from session", {
+          subscriptionId: activeSub.id,
+          status: activeSub.status,
+        });
+      } else {
+        logStep("No subscription found on session, will fallback to email lookup");
+      }
+    }
+
+    if (!customerId) {
+      const customers = await stripe.customers.list({ email: user.email, limit: 1 });
+      
+      if (customers.data.length === 0) {
+        logStep("No customer found");
+        return new Response(JSON.stringify({ 
+          subscribed: false,
+          inTrial: false 
+        }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 200,
+        });
+      }
+
+      customerId = customers.data[0].id;
+      logStep("Customer found", { customerId });
+    }
+
+    if (!activeSub) {
+      // Check for active or trialing subscriptions
+      const subscriptions = await stripe.subscriptions.list({
+        customer: customerId,
+        status: "all",
+        limit: 10,
+      });
+
+      activeSub = subscriptions.data.find(
+        (sub: any) => sub.status === "active" || sub.status === "trialing"
+      );
+    }
 
     if (!activeSub) {
       logStep("No active subscription");
