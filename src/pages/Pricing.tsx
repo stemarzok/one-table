@@ -53,9 +53,12 @@ const Pricing = () => {
   const handleCheckout = async (priceId: string, planName: string) => {
     if (!isLoggedIn) {
       toast.error("Devi effettuare l'accesso per procedere");
-      navigate('/auth');
+      navigate('/business-login');
       return;
     }
+
+    // Apriamo subito una nuova scheda per evitare blocchi popup
+    const checkoutWindow = window.open('', '_blank');
 
     setLoading(priceId);
     try {
@@ -66,12 +69,18 @@ const Pricing = () => {
       if (error) throw error;
       
       if (data?.url) {
-        // Usiamo un redirect diretto per evitare blocchi del browser sui popup
-        window.location.href = data.url;
+        if (checkoutWindow) {
+          checkoutWindow.location.href = data.url;
+        } else {
+          window.open(data.url, '_blank', 'noopener');
+        }
+      } else if (checkoutWindow) {
+        checkoutWindow.close();
       }
     } catch (error) {
       console.error('Checkout error:', error);
       toast.error("Errore durante la creazione della sessione di pagamento");
+      if (checkoutWindow) checkoutWindow.close();
     } finally {
       setLoading(null);
     }
