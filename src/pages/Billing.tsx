@@ -5,7 +5,6 @@ import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { useAuth } from "@/contexts/AuthContext";
 import { useSubscription } from "@/hooks/useSubscription";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -15,22 +14,16 @@ import { it } from "date-fns/locale";
 
 const Billing = () => {
   const navigate = useNavigate();
-  const { isLoggedIn } = useAuth();
   const [searchParams] = useSearchParams();
   const subscription = useSubscription();
 
   useEffect(() => {
-    if (!isLoggedIn) {
-      navigate('/auth');
-      return;
-    }
-
     if (searchParams.get('success') === 'true') {
       const sessionId = searchParams.get('session_id') || undefined;
       toast.success("Abbonamento attivato con successo!");
       subscription.refresh(sessionId);
     }
-  }, [isLoggedIn, navigate, searchParams]);
+  }, [searchParams, subscription]);
 
   const handleManageSubscription = async () => {
     try {
