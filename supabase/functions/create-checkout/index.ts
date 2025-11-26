@@ -96,7 +96,7 @@ serve(async (req) => {
     }
 
     // Create checkout session with trial and EU invoicing data
-    const origin = req.headers.get("origin") || "https://kwqevxerxywplccgtybz.lovableproject.com";
+    const origin = req.headers.get("origin") || "http://localhost:5173";
 
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
