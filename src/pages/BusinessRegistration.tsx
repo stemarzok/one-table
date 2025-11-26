@@ -70,14 +70,14 @@ const BusinessRegistration = () => {
     }
   };
 
-  const uploadDocuments = async (): Promise<string[]> => {
-    if (!profile?.id || documents.length === 0) return [];
+  const uploadDocuments = async (userId: string): Promise<string[]> => {
+    if (documents.length === 0) return [];
 
     const fileNames: string[] = [];
 
     for (const file of documents) {
       const fileExt = file.name.split('.').pop();
-      const fileName = `${profile.id}/${Date.now()}-${Math.random()}.${fileExt}`;
+      const fileName = `${userId}/${Date.now()}-${Math.random()}.${fileExt}`;
 
       const { error: uploadError } = await supabase.storage
         .from('business-documents')
@@ -95,15 +95,6 @@ const BusinessRegistration = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!profile?.id) {
-      toast({
-        title: t('businessReg.error'),
-        description: "Devi essere autenticato",
-        variant: "destructive",
-      });
-      return;
-    }
-
     if (documents.length === 0) {
       toast({
         title: t('businessReg.error'),
@@ -116,14 +107,15 @@ const BusinessRegistration = () => {
     setSubmitting(true);
 
     try {
-      const documentUrls = await uploadDocuments();
+      const userId = profile?.id || applicantEmail;
+      const documentUrls = await uploadDocuments(userId);
 
       const fullAddress = `${street}, ${city}, ${country}${postalCode ? ', ' + postalCode : ''}${province ? ', ' + province : ''}`;
       
       const { error } = await supabase
         .from('business_applications')
         .insert({
-          user_id: profile.id,
+          user_id: userId,
           business_name: businessName,
           business_registration_number: vatNumber,
           legal_representative: legalRepresentative,

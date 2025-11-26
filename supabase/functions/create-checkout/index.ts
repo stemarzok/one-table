@@ -96,6 +96,8 @@ serve(async (req) => {
     }
 
     // Create checkout session with trial and EU invoicing data
+    const origin = req.headers.get("origin") || "https://kwqevxerxywplccgtybz.lovableproject.com";
+
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       customer_email: customerId ? undefined : user.email,
@@ -117,8 +119,8 @@ serve(async (req) => {
       tax_id_collection: {
         enabled: true,
       },
-      success_url: `${req.headers.get("origin")}/billing?success=true`,
-      cancel_url: `${req.headers.get("origin")}/pricing`,
+      success_url: `${origin}/billing?success=true&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${origin}/pricing`,
     });
 
     logStep("Checkout session created", { sessionId: session.id });
