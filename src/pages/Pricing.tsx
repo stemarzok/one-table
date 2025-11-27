@@ -50,6 +50,15 @@ const Pricing = () => {
   const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'yearly'>('monthly');
   const [loading, setLoading] = useState<string | null>(null);
 
+  // Redirect non-business users to home
+  const isBusinessRoute = window.location.pathname.startsWith('/business') || 
+                          window.location.pathname === '/pricing';
+  
+  if (!isBusinessRoute && !isLoggedIn) {
+    navigate('/business');
+    return null;
+  }
+
   const handleCheckout = async (priceId: string, planName: string) => {
     if (!isLoggedIn) {
       toast.error("Devi effettuare l'accesso per procedere");

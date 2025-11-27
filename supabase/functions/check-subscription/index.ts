@@ -125,7 +125,13 @@ serve(async (req) => {
     }
 
     const isTrialing = activeSub.status === "trialing";
-    const trialEnd = activeSub.trial_end ? new Date(activeSub.trial_end * 1000) : null;
+    
+    // Safely parse trial_end - Stripe returns null if no trial
+    let trialEnd: Date | null = null;
+    if (activeSub.trial_end && typeof activeSub.trial_end === 'number') {
+      trialEnd = new Date(activeSub.trial_end * 1000);
+    }
+    
     const currentPeriodEnd = new Date(activeSub.current_period_end * 1000);
     const priceId = activeSub.items.data[0].price.id;
     
