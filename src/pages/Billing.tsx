@@ -15,17 +15,68 @@ import { it } from "date-fns/locale";
 const Billing = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const subscription = useSubscription();
+  const { user, isLoggedIn } = useAuth();
+  const [subscription, setSubscription] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch subscription from database
+  const fetchSubscription = async () => {
+    if (!isLoggedIn || !user) {
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('subscriptions')
+        .select('*')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (error) {
+        console.error('Error fetching subscription:', error);
+        setSubscription(null);
+      } else {
+        setSubscription(data);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      setSubscription(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchSubscription();
+  }, [user, isLoggedIn]);
 
   useEffect(() => {
     const success = searchParams.get("success");
 
     if (success === "true") {
-      const sessionId = searchParams.get("session_id") || undefined;
       toast.success("Abbonamento attivato con successo!");
-      subscription.refresh(sessionId);
+      
+      // Refresh subscription from Stripe and DB
+      const refreshSub = async () => {
+        const sessionId = searchParams.get("session_id") || undefined;
+        try {
+          await supabase.functions.invoke('check-subscription', {
+            body: { sessionId }
+          });
+          
+          // Wait a moment for DB to update, then fetch
+          setTimeout(() => {
+            fetchSubscription();
+          }, 1000);
+        } catch (error) {
+          console.error('Error refreshing subscription:', error);
+        }
+      };
+      
+      refreshSub();
 
-      // Rimuovi i parametri dalla URL per evitare loop di notifiche
+      // Remove params from URL
       const newParams = new URLSearchParams(searchParams);
       newParams.delete("success");
       newParams.delete("session_id");
@@ -33,7 +84,7 @@ const Billing = () => {
       const query = newParams.toString();
       navigate(query ? `/billing?${query}` : "/billing", { replace: true });
     }
-  }, [searchParams, navigate, subscription.refresh]);
+  }, [searchParams, navigate]);
 
   const handleManageSubscription = async () => {
     try {
@@ -50,7 +101,7 @@ const Billing = () => {
     }
   };
 
-  if (subscription.loading) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-background">
         <Header />
@@ -64,8 +115,14 @@ const Billing = () => {
     );
   }
 
-  const planName = subscription.planType === 'pro' ? 'Pro' : 'Base';
-  const billingName = subscription.billingPeriod === 'yearly' ? 'Annuale' : 'Mensile';
+  const hasActiveSubscription = subscription && (subscription.status === 'active' || subscription.status === 'trialing');
+  const isTrialing = subscription?.status === 'trialing';
+  const planName = subscription?.plan_type === 'pro' ? 'Pro' : 'Base';
+  const billingName = subscription?.billing_period === 'yearly' ? 'Annuale' : 'Mensile';
+  
+  const trialDaysRemaining = isTrialing && subscription?.trial_end 
+    ? Math.ceil((new Date(subscription.trial_end).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+    : 0;
 
   return (
     <div className="min-h-screen bg-background">
@@ -74,16 +131,16 @@ const Billing = () => {
         <div className="container mx-auto px-4 max-w-4xl">
           <h1 className="text-4xl font-bold mb-8">Gestione Abbonamento</h1>
 
-          {subscription.hasAccess ? (
+          {hasActiveSubscription ? (
             <div className="space-y-6">
               {/* Trial Badge */}
-              {subscription.inTrial && (
+              {isTrialing && (
                 <Card className="p-6 bg-primary/5 border-primary/20">
                   <div className="flex items-start gap-4">
                     <Sparkles className="h-8 w-8 text-primary" />
                     <div className="flex-1">
                       <h3 className="text-xl font-semibold mb-2">
-                        💡 Trial attivo – {subscription.trialDaysRemaining} giorni rimasti
+                        💡 Trial attivo – {trialDaysRemaining} giorni rimasti
                       </h3>
                       <p className="text-muted-foreground">
                         Stai testando tutte le funzionalità gratuitamente. 
@@ -104,8 +161,8 @@ const Billing = () => {
                       <Badge variant="secondary">{billingName}</Badge>
                     </div>
                   </div>
-                  <Badge variant={subscription.inTrial ? "secondary" : "default"}>
-                    {subscription.inTrial ? 'In Prova' : 'Attivo'}
+                  <Badge variant={isTrialing ? "secondary" : "default"}>
+                    {isTrialing ? 'In Prova' : 'Attivo'}
                   </Badge>
                 </div>
 
@@ -114,17 +171,17 @@ const Billing = () => {
                     <Calendar className="h-5 w-5" />
                     <div>
                       <p className="text-sm">
-                        {subscription.cancelAtPeriodEnd ? 'Scade il' : 'Prossimo rinnovo'}
+                        {subscription?.cancel_at_period_end ? 'Scade il' : 'Prossimo rinnovo'}
                       </p>
                       <p className="font-medium text-foreground">
-                        {subscription.currentPeriodEnd && 
-                          format(new Date(subscription.currentPeriodEnd), "d MMMM yyyy", { locale: it })
+                        {subscription?.current_period_end && 
+                          format(new Date(subscription.current_period_end), "d MMMM yyyy", { locale: it })
                         }
                       </p>
                     </div>
                   </div>
 
-                  {subscription.cancelAtPeriodEnd && (
+                  {subscription?.cancel_at_period_end && (
                     <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
                       <p className="text-sm text-destructive">
                         Il tuo abbonamento è stato cancellato e terminerà alla fine del periodo corrente.
@@ -170,7 +227,7 @@ const Billing = () => {
                     <div className="h-1.5 w-1.5 rounded-full bg-primary" />
                     <span>Gestione tavoli</span>
                   </li>
-                  {subscription.planType === 'pro' && (
+                  {subscription?.plan_type === 'pro' && (
                     <>
                       <li className="flex items-center gap-2">
                         <div className="h-1.5 w-1.5 rounded-full bg-primary" />
