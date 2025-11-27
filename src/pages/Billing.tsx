@@ -18,12 +18,22 @@ const Billing = () => {
   const subscription = useSubscription();
 
   useEffect(() => {
-    if (searchParams.get('success') === 'true') {
-      const sessionId = searchParams.get('session_id') || undefined;
+    const success = searchParams.get("success");
+
+    if (success === "true") {
+      const sessionId = searchParams.get("session_id") || undefined;
       toast.success("Abbonamento attivato con successo!");
       subscription.refresh(sessionId);
+
+      // Rimuovi i parametri dalla URL per evitare loop di notifiche
+      const newParams = new URLSearchParams(searchParams);
+      newParams.delete("success");
+      newParams.delete("session_id");
+
+      const query = newParams.toString();
+      navigate(query ? `/billing?${query}` : "/billing", { replace: true });
     }
-  }, [searchParams, subscription]);
+  }, [searchParams, navigate, subscription.refresh]);
 
   const handleManageSubscription = async () => {
     try {

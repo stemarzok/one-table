@@ -31,7 +31,8 @@ const Header = () => {
 
   // Determine if user is in business section based on current route
   const isInBusinessSection = location.pathname.startsWith('/dashboard') || 
-                               location.pathname.startsWith('/business');
+                               location.pathname.startsWith('/business') ||
+                               location.pathname.startsWith('/billing');
 
   const getLogoLink = () => {
     // If not logged in and in business section, return to business page
