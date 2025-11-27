@@ -13,12 +13,14 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useAdminRole } from "@/hooks/useAdminRole";
+import { useBusinessRole } from "@/hooks/useBusinessRole";
 
 export const MobileUserMenu = () => {
   const { profile, logout } = useAuth();
   const { language, setLanguage } = useLanguage();
   const navigate = useNavigate();
   const { isAdmin } = useAdminRole();
+  const { hasRole: hasBusinessRole } = useBusinessRole();
   const [theme, setTheme] = useState<"light" | "dark">("light");
   const [open, setOpen] = useState(false);
 
@@ -39,7 +41,7 @@ export const MobileUserMenu = () => {
   const menuItems = [
     { icon: Calendar, label: "Le Mie Prenotazioni", path: "/my-bookings" },
     { icon: Heart, label: "Preferiti", path: "/favorites" },
-    { icon: CreditCard, label: "Gestione Abbonamento", path: "/billing" },
+    ...(hasBusinessRole() ? [{ icon: CreditCard, label: "Gestione Abbonamento", path: "/billing" }] : []),
     { icon: Settings, label: "Impostazioni", path: "/settings" },
     ...(isAdmin ? [{ icon: Shield, label: "Pannello Admin", path: "/admin" }] : []),
   ];

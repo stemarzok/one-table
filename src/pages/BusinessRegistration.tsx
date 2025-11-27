@@ -4,12 +4,12 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Upload, FileText, CheckCircle } from "lucide-react";
+import { CheckCircle } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 const BusinessRegistration = () => {
@@ -17,7 +17,6 @@ const BusinessRegistration = () => {
   const { isLoggedIn, profile } = useAuth();
   const navigate = useNavigate();
   const { t } = useLanguage();
-  const documentsInputRef = useRef<HTMLInputElement>(null);
 
   // Dati del richiedente
   const [firstName, setFirstName] = useState("");
@@ -36,7 +35,6 @@ const BusinessRegistration = () => {
   const [street, setStreet] = useState("");
   const [province, setProvince] = useState("");
   const [postalCode, setPostalCode] = useState("");
-  const [documents, setDocuments] = useState<File[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [hasApplication, setHasApplication] = useState(false);
 
@@ -63,42 +61,13 @@ const BusinessRegistration = () => {
     checkApplication();
   }, [isLoggedIn, profile, toast, t]);
 
-  const handleDocumentsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (files) {
-      setDocuments(Array.from(files));
-    }
-  };
-
-  const uploadDocuments = async (userId: string): Promise<string[]> => {
-    if (documents.length === 0) return [];
-
-    const fileNames: string[] = [];
-
-    for (const file of documents) {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${userId}/${Date.now()}-${Math.random()}.${fileExt}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from('business-documents')
-        .upload(fileName, file, { upsert: true });
-
-      if (uploadError) throw uploadError;
-
-      // Store file names instead of URLs - admins will generate signed URLs when needed
-      fileNames.push(fileName);
-    }
-
-    return fileNames;
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (documents.length === 0) {
+    if (!profile?.id) {
       toast({
-        title: t('businessReg.error'),
-        description: "Devi caricare almeno un documento",
+        title: t("businessReg.error"),
+        description: "Per inviare la richiesta devi prima creare un account ed effettuare l'accesso.",
         variant: "destructive",
       });
       return;
@@ -107,8 +76,7 @@ const BusinessRegistration = () => {
     setSubmitting(true);
 
     try {
-      const userId = profile?.id || applicantEmail;
-      const documentUrls = await uploadDocuments(userId);
+      const userId = profile.id;
 
       const fullAddress = `${street}, ${city}, ${country}${postalCode ? ', ' + postalCode : ''}${province ? ', ' + province : ''}`;
       
@@ -125,7 +93,6 @@ const BusinessRegistration = () => {
           city,
           province: province || null,
           postal_code: postalCode || null,
-          documents_url: documentUrls,
         });
 
       if (error) throw error;
@@ -361,47 +328,6 @@ const BusinessRegistration = () => {
                       className="mt-2"
                     />
                   </div>
-                </div>
-              </div>
-            </Card>
-
-            {/* Documents */}
-            <Card className="p-8">
-              <h2 className="text-2xl font-bold mb-6">{t('businessReg.documents')}</h2>
-              
-              <div className="space-y-4">
-                <p className="text-sm text-muted-foreground">
-                  {t('businessReg.docsRequired')}
-                </p>
-
-                <div>
-                  {documents.length > 0 && (
-                    <div className="mb-4 space-y-2">
-                      {documents.map((doc, index) => (
-                        <div key={index} className="flex items-center gap-2 text-sm">
-                          <FileText className="w-4 h-4" />
-                          <span>{doc.name}</span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => documentsInputRef.current?.click()}
-                    className="w-full"
-                  >
-                    <Upload className="w-4 h-4 mr-2" />
-                    {t('businessReg.uploadDocs')}
-                  </Button>
-                  <input
-                    ref={documentsInputRef}
-                    type="file"
-                    accept=".pdf,.jpg,.jpeg,.png"
-                    multiple
-                    className="hidden"
-                    onChange={handleDocumentsChange}
-                  />
                 </div>
               </div>
             </Card>

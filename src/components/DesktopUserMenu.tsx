@@ -18,12 +18,14 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useAdminRole } from "@/hooks/useAdminRole";
+import { useBusinessRole } from "@/hooks/useBusinessRole";
 
 export const DesktopUserMenu = () => {
   const { profile, logout } = useAuth();
   const { language, setLanguage } = useLanguage();
   const navigate = useNavigate();
   const { isAdmin } = useAdminRole();
+  const { hasRole: hasBusinessRole } = useBusinessRole();
   const [theme, setTheme] = useState<"light" | "dark">("light");
   const [showSettings, setShowSettings] = useState(false);
 
@@ -82,6 +84,12 @@ export const DesktopUserMenu = () => {
           <Heart className="w-4 h-4 mr-2" />
           Preferiti
         </DropdownMenuItem>
+        {!hasBusinessRole() ? null : (
+          <DropdownMenuItem onClick={() => navigate("/billing")}>
+            <CreditCard className="w-4 h-4 mr-2" />
+            Gestione Abbonamento
+          </DropdownMenuItem>
+        )}
 
         {isAdmin && (
           <>
