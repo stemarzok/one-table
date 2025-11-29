@@ -42,29 +42,16 @@ serve(async (req) => {
         const session = event.data.object as Stripe.Checkout.Session;
         logStep("Checkout completed", { sessionId: session.id, customerId: session.customer });
         
-        // Get customer email
-        const customer = await stripe.customers.retrieve(session.customer as string);
-        const customerEmail = (customer as any).email;
+        // Get user_id from metadata
+        const userId = (session.metadata as any)?.user_id;
+        const priceIdFromMetadata = (session.metadata as any)?.price_id;
         
-        if (!customerEmail) {
-          logStep("ERROR: No customer email found");
+        if (!userId) {
+          logStep("ERROR: No user_id in session metadata");
           break;
         }
 
-        // Find user by email
-        const { data: userData, error: userError } = await supabaseClient
-          .from('profiles')
-          .select('id')
-          .eq('email', customerEmail)
-          .single();
-
-        if (userError || !userData) {
-          logStep("ERROR: User not found", { email: customerEmail, error: userError });
-          break;
-        }
-
-        const userId = userData.id;
-        logStep("User found", { userId, email: customerEmail });
+        logStep("User ID from metadata", { userId, priceId: priceIdFromMetadata });
 
         // If session has subscription, store it
         if (session.subscription) {
@@ -120,24 +107,15 @@ serve(async (req) => {
         const subscription = event.data.object as Stripe.Subscription;
         logStep("Subscription event", { type: event.type, subscriptionId: subscription.id });
 
-        const customer = await stripe.customers.retrieve(subscription.customer as string);
-        const customerEmail = (customer as any).email;
+        // Get user_id from subscription metadata
+        const userId = (subscription.metadata as any)?.user_id;
 
-        if (!customerEmail) {
-          logStep("ERROR: No customer email found");
+        if (!userId) {
+          logStep("ERROR: No user_id in subscription metadata");
           break;
         }
 
-        const { data: userData, error: userError } = await supabaseClient
-          .from('profiles')
-          .select('id')
-          .eq('email', customerEmail)
-          .single();
-
-        if (userError || !userData) {
-          logStep("ERROR: User not found", { email: customerEmail });
-          break;
-        }
+        logStep("User ID from metadata", { userId });
 
         const priceId = subscription.items.data[0].price.id;
         let planType = "base";
@@ -160,7 +138,7 @@ serve(async (req) => {
         const { error: upsertError } = await supabaseClient
           .from('subscriptions')
           .upsert({
-            user_id: userData.id,
+            user_id: userId,
             stripe_customer_id: subscription.customer as string,
             stripe_subscription_id: subscription.id,
             plan_type: planType,
@@ -178,7 +156,7 @@ serve(async (req) => {
         if (upsertError) {
           logStep("ERROR: Failed to update subscription", { error: upsertError });
         } else {
-          logStep("Subscription updated in DB", { userId: userData.id, status: subscription.status });
+          logStep("Subscription updated in DB", { userId, status: subscription.status });
         }
         break;
       }
@@ -187,34 +165,52 @@ serve(async (req) => {
         const subscription = event.data.object as Stripe.Subscription;
         logStep("Subscription deleted", { subscriptionId: subscription.id });
 
-        const customer = await stripe.customers.retrieve(subscription.customer as string);
-        const customerEmail = (customer as any).email;
+        // Get user_id from subscription metadata
+        const userId = (subscription.metadata as any)?.user_id;
 
-        if (!customerEmail) {
-          logStep("ERROR: No customer email found");
+        if (!userId) {
+          logStep("ERROR: No user_id in subscription metadata");
           break;
         }
 
-        const { data: userData, error: userError } = await supabaseClient
-          .from('profiles')
-          .select('id')
-          .eq('email', customerEmail)
-          .single();
-
-        if (userError || !userData) {
-          logStep("ERROR: User not found", { email: customerEmail });
-          break;
-        }
+        logStep("User ID from metadata", { userId });
 
         const { error: deleteError } = await supabaseClient
           .from('subscriptions')
           .delete()
-          .eq('user_id', userData.id);
+          .eq('user_id', userId);
 
         if (deleteError) {
           logStep("ERROR: Failed to delete subscription", { error: deleteError });
         } else {
-          logStep("Subscription deleted from DB", { userId: userData.id });
+          logStep("Subscription deleted from DB", { userId });
+        }
+        break;
+      }
+
+      case "invoice.payment_failed": {
+        const invoice = event.data.object as Stripe.Invoice;
+        logStep("Invoice payment failed", { invoiceId: invoice.id });
+
+        // Get user_id from invoice metadata
+        const userId = (invoice.metadata as any)?.user_id;
+
+        if (!userId) {
+          logStep("ERROR: No user_id in invoice metadata");
+          break;
+        }
+
+        logStep("User ID from metadata", { userId });
+
+        const { error: updateError } = await supabaseClient
+          .from('subscriptions')
+          .update({ status: "past_due" })
+          .eq('user_id', userId);
+
+        if (updateError) {
+          logStep("ERROR: Failed to update subscription status", { error: updateError });
+        } else {
+          logStep("Subscription status updated to past_due", { userId });
         }
         break;
       }
