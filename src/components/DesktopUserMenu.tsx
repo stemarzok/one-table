@@ -84,7 +84,7 @@ export const DesktopUserMenu = () => {
           <Heart className="w-4 h-4 mr-2" />
           Preferiti
         </DropdownMenuItem>
-        {!hasBusinessRole() ? null : (
+        {(hasBusinessRole() || isAdmin) && (
           <DropdownMenuItem onClick={() => navigate("/billing")}>
             <CreditCard className="w-4 h-4 mr-2" />
             Gestione Abbonamento
