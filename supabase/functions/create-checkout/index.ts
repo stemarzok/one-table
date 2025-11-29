@@ -105,10 +105,15 @@ serve(async (req) => {
       client_reference_id: user.id,
       line_items: [{ price: priceId, quantity: 1 }],
       mode: "subscription",
+      metadata: {
+        user_id: user.id,
+        price_id: priceId,
+      },
       subscription_data: {
         trial_period_days: 14,
         metadata: {
           user_id: user.id,
+          price_id: priceId,
           business_name: restaurant?.business_name || '',
           vat_number: restaurant?.business_registration_number || '',
           legal_representative: restaurant?.legal_representative || '',
