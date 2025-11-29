@@ -41,7 +41,7 @@ export const MobileUserMenu = () => {
   const menuItems = [
     { icon: Calendar, label: "Le Mie Prenotazioni", path: "/my-bookings" },
     { icon: Heart, label: "Preferiti", path: "/favorites" },
-    ...(hasBusinessRole() ? [{ icon: CreditCard, label: "Gestione Abbonamento", path: "/billing" }] : []),
+    ...(hasBusinessRole() || isAdmin ? [{ icon: CreditCard, label: "Gestione Abbonamento", path: "/billing" }] : []),
     { icon: Settings, label: "Impostazioni", path: "/settings" },
     ...(isAdmin ? [{ icon: Shield, label: "Pannello Admin", path: "/admin" }] : []),
   ];
