@@ -10,6 +10,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { Mail } from "lucide-react";
 
 const BusinessRegistration = () => {
   const { toast } = useToast();
@@ -37,6 +38,7 @@ const BusinessRegistration = () => {
   const [province, setProvince] = useState("");
   const [postalCode, setPostalCode] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [showEmailVerification, setShowEmailVerification] = useState(false);
 
   useEffect(() => {
     // Redirect if already logged in with business role
@@ -82,11 +84,12 @@ const BusinessRegistration = () => {
     setSubmitting(true);
 
     try {
-      // 1. Create user account
+      // 1. Create user account with email confirmation required
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: applicantEmail,
         password: password,
         options: {
+          emailRedirectTo: `${window.location.origin}/business-login`,
           data: {
             name: `${firstName} ${lastName}`,
             role: applicantRole
@@ -133,15 +136,15 @@ const BusinessRegistration = () => {
 
       if (roleError) throw roleError;
 
+      // 4. Logout immediately to force email verification
+      await supabase.auth.signOut();
+
       toast({
-        title: "Registrazione completata!",
-        description: "Reindirizzamento alla dashboard...",
+        title: "Registrazione completata! 🎉",
+        description: "Controlla la tua email per verificare l'account. Clicca sul link di verifica per attivare il tuo account.",
       });
 
-      // 4. Auto-login is already done by signUp, just navigate
-      setTimeout(() => {
-        navigate('/dashboard');
-      }, 1500);
+      setShowEmailVerification(true);
 
     } catch (error: any) {
       console.error('Registration error:', error);
@@ -154,6 +157,34 @@ const BusinessRegistration = () => {
       setSubmitting(false);
     }
   };
+
+  if (showEmailVerification) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <main className="pt-24 pb-16">
+          <div className="container mx-auto px-4 max-w-2xl">
+            <Card className="p-12 text-center">
+              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Mail className="w-8 h-8 text-primary" />
+              </div>
+              <h1 className="text-3xl font-bold mb-4">Verifica la tua email</h1>
+              <p className="text-muted-foreground mb-6">
+                Ti abbiamo inviato un'email con un link di verifica. Clicca sul link per attivare il tuo account e poter accedere.
+              </p>
+              <p className="text-sm text-muted-foreground mb-6">
+                Non hai ricevuto l'email? Controlla nella cartella spam.
+              </p>
+              <Button onClick={() => navigate('/business-login')} className="mt-6">
+                Vai al Login
+              </Button>
+            </Card>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
