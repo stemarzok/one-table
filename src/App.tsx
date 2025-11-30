@@ -18,6 +18,7 @@ import Favorites from "./pages/Favorites";
 import RestaurantRegistration from "./pages/RestaurantRegistration";
 import BusinessRegistration from "./pages/BusinessRegistration";
 import Dashboard from "./pages/Dashboard";
+import Onboarding from "./pages/Onboarding";
 import AdminPanel from "./pages/AdminPanel";
 import AdminSetup from "./pages/AdminSetup";
 import Privacy from "./pages/Privacy";
@@ -54,6 +55,7 @@ const App = () => (
               <Route path="/restaurant-registration" element={<RestaurantRegistration />} />
               <Route path="/business-registration" element={<BusinessRegistration />} />
               <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/onboarding" element={<Onboarding />} />
               <Route path="/admin" element={<AdminPanel />} />
               <Route path="/admin-setup" element={<AdminSetup />} />
               <Route path="/privacy" element={<Privacy />} />

@@ -100,9 +100,10 @@ const BusinessLogin = () => {
 
     // Check if user is admin or has business role
     if (authData.user) {
-      const [businessRoleResult, adminRoleResult] = await Promise.all([
+      const [businessRoleResult, adminRoleResult, profileResult] = await Promise.all([
         supabase.from('business_roles').select('*').eq('user_id', authData.user.id).maybeSingle(),
-        supabase.from('admin_roles').select('*').eq('user_id', authData.user.id).maybeSingle()
+        supabase.from('admin_roles').select('*').eq('user_id', authData.user.id).maybeSingle(),
+        supabase.from('profiles').select('avatar_url').eq('id', authData.user.id).maybeSingle()
       ]);
       
       if (!businessRoleResult.data && !adminRoleResult.data) {
@@ -112,8 +113,17 @@ const BusinessLogin = () => {
         return;
       }
       
-      toast.success("Accesso effettuato! Reindirizzamento alla dashboard...");
-      setTimeout(() => navigate('/dashboard'), 1000);
+      // Check if onboarding has been completed
+      const hasCompletedOnboarding = profileResult.data?.avatar_url === 'onboarding_completed';
+      
+      toast.success("Accesso effettuato! Reindirizzamento...");
+      setTimeout(() => {
+        if (!hasCompletedOnboarding && businessRoleResult.data) {
+          navigate('/onboarding');
+        } else {
+          navigate('/dashboard');
+        }
+      }, 1000);
     }
     
     setIsLoading(false);
