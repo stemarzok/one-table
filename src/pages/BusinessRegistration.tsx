@@ -9,7 +9,6 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { CheckCircle } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 const BusinessRegistration = () => {
@@ -22,6 +21,8 @@ const BusinessRegistration = () => {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [applicantEmail, setApplicantEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [applicantRole, setApplicantRole] = useState("");
   
   // Dati dell'attività
@@ -36,38 +37,43 @@ const BusinessRegistration = () => {
   const [province, setProvince] = useState("");
   const [postalCode, setPostalCode] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [hasApplication, setHasApplication] = useState(false);
 
   useEffect(() => {
-    // Se l'utente è autenticato controlliamo se ha già inviato una richiesta
-    if (!isLoggedIn || !profile?.id) return;
+    // Redirect if already logged in with business role
+    const checkExistingRole = async () => {
+      if (isLoggedIn && profile?.id) {
+        const { data } = await supabase
+          .from('business_roles')
+          .select('*')
+          .eq('user_id', profile.id)
+          .maybeSingle();
 
-    const checkApplication = async () => {
-      const { data } = await supabase
-        .from('business_applications')
-        .select('*')
-        .eq('user_id', profile.id)
-        .maybeSingle();
-
-      if (data) {
-        setHasApplication(true);
-        toast({
-          title: t('businessReg.pending'),
-          description: t('businessReg.pendingMsg'),
-        });
+        if (data) {
+          navigate('/dashboard');
+        }
       }
     };
 
-    checkApplication();
-  }, [isLoggedIn, profile, toast, t]);
+    checkExistingRole();
+  }, [isLoggedIn, profile, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!profile?.id) {
+    // Validate password match
+    if (password !== confirmPassword) {
       toast({
-        title: t("businessReg.error"),
-        description: "Per inviare la richiesta devi prima creare un account ed effettuare l'accesso.",
+        title: "Errore",
+        description: "Le password non corrispondono",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (password.length < 6) {
+      toast({
+        title: "Errore",
+        description: "La password deve contenere almeno 6 caratteri",
         variant: "destructive",
       });
       return;
@@ -76,64 +82,78 @@ const BusinessRegistration = () => {
     setSubmitting(true);
 
     try {
-      const userId = profile.id;
+      // 1. Create user account
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: applicantEmail,
+        password: password,
+        options: {
+          data: {
+            name: `${firstName} ${lastName}`,
+            role: applicantRole
+          }
+        }
+      });
 
+      if (authError) throw authError;
+      if (!authData.user) throw new Error("Errore nella creazione dell'account");
+
+      const userId = authData.user.id;
       const fullAddress = `${street}, ${city}, ${country}${postalCode ? ', ' + postalCode : ''}${province ? ', ' + province : ''}`;
-      
-      const { error } = await supabase
-        .from('business_applications')
+
+      // 2. Create restaurant
+      const { data: restaurantData, error: restaurantError } = await supabase
+        .from('restaurants')
         .insert({
-          user_id: userId,
+          owner_id: userId,
+          name: businessName,
           business_name: businessName,
           business_registration_number: vatNumber,
           legal_representative: legalRepresentative,
-          business_email: businessEmail,
-          business_phone: businessPhone,
-          business_address: fullAddress,
-          city,
-          province: province || null,
-          postal_code: postalCode || null,
+          email: businessEmail,
+          phone: businessPhone,
+          address: fullAddress,
+          city: city,
+          is_verified: true,
+          verification_status: 'approved'
+        })
+        .select()
+        .single();
+
+      if (restaurantError) throw restaurantError;
+      if (!restaurantData) throw new Error("Errore nella creazione del ristorante");
+
+      // 3. Create business role
+      const { error: roleError } = await supabase
+        .from('business_roles')
+        .insert({
+          user_id: userId,
+          restaurant_id: restaurantData.id,
+          role: 'owner'
         });
 
-      if (error) throw error;
+      if (roleError) throw roleError;
 
       toast({
-        title: t('businessReg.success'),
-        description: t('businessReg.successMsg'),
+        title: "Registrazione completata!",
+        description: "Reindirizzamento alla dashboard...",
       });
 
-      setHasApplication(true);
+      // 4. Auto-login is already done by signUp, just navigate
+      setTimeout(() => {
+        navigate('/dashboard');
+      }, 1500);
+
     } catch (error: any) {
+      console.error('Registration error:', error);
       toast({
         title: t('businessReg.error'),
-        description: error.message,
+        description: error.message || "Si è verificato un errore durante la registrazione",
         variant: "destructive",
       });
     } finally {
       setSubmitting(false);
     }
   };
-
-  if (hasApplication) {
-    return (
-      <div className="min-h-screen bg-background">
-        <Header />
-        <main className="pt-24 pb-16">
-          <div className="container mx-auto px-4 max-w-2xl">
-            <Card className="p-12 text-center">
-              <CheckCircle className="w-16 h-16 text-primary mx-auto mb-4" />
-              <h1 className="text-3xl font-bold mb-4">{t('businessReg.pending')}</h1>
-              <p className="text-muted-foreground">{t('businessReg.pendingMsg')}</p>
-              <Button onClick={() => navigate('/')} className="mt-6">
-                Torna alla Home
-              </Button>
-            </Card>
-          </div>
-        </main>
-        <Footer />
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -185,6 +205,32 @@ const BusinessRegistration = () => {
                     type="email"
                     value={applicantEmail}
                     onChange={(e) => setApplicantEmail(e.target.value)}
+                    required
+                    className="mt-2"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="password">Password *</Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Almeno 6 caratteri"
+                    required
+                    className="mt-2"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="confirmPassword">Conferma Password *</Label>
+                  <Input
+                    id="confirmPassword"
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="Ripeti la password"
                     required
                     className="mt-2"
                   />
