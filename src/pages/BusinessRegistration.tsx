@@ -84,60 +84,31 @@ const BusinessRegistration = () => {
     setSubmitting(true);
 
     try {
-      // 1. Create user account with email confirmation required
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: applicantEmail,
-        password: password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/business-login`,
-          data: {
-            name: `${firstName} ${lastName}`,
-            role: applicantRole
-          }
+      const fullAddress = `${street}, ${city}, ${country}${postalCode ? ', ' + postalCode : ''}${province ? ', ' + province : ''}`;
+
+      // Call edge function to create user, restaurant and business role
+      const { data, error } = await supabase.functions.invoke('register-business', {
+        body: {
+          firstName,
+          lastName,
+          applicantEmail,
+          password,
+          applicantRole,
+          businessName,
+          vatNumber,
+          legalRepresentative,
+          businessEmail,
+          businessPhone,
+          country,
+          city,
+          street,
+          province,
+          postalCode
         }
       });
 
-      if (authError) throw authError;
-      if (!authData.user) throw new Error("Errore nella creazione dell'account");
-
-      const userId = authData.user.id;
-      const fullAddress = `${street}, ${city}, ${country}${postalCode ? ', ' + postalCode : ''}${province ? ', ' + province : ''}`;
-
-      // 2. Create restaurant
-      const { data: restaurantData, error: restaurantError } = await supabase
-        .from('restaurants')
-        .insert({
-          owner_id: userId,
-          name: businessName,
-          business_name: businessName,
-          business_registration_number: vatNumber,
-          legal_representative: legalRepresentative,
-          email: businessEmail,
-          phone: businessPhone,
-          address: fullAddress,
-          city: city,
-          is_verified: true,
-          verification_status: 'approved'
-        })
-        .select()
-        .single();
-
-      if (restaurantError) throw restaurantError;
-      if (!restaurantData) throw new Error("Errore nella creazione del ristorante");
-
-      // 3. Create business role
-      const { error: roleError } = await supabase
-        .from('business_roles')
-        .insert({
-          user_id: userId,
-          restaurant_id: restaurantData.id,
-          role: 'owner'
-        });
-
-      if (roleError) throw roleError;
-
-      // 4. Logout immediately to force email verification
-      await supabase.auth.signOut();
+      if (error) throw error;
+      if (!data?.success) throw new Error(data?.error || "Errore durante la registrazione");
 
       toast({
         title: "Registrazione completata! 🎉",
