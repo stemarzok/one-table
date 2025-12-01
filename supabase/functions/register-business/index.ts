@@ -69,6 +69,7 @@ serve(async (req) => {
         phone: businessPhone,
         address: fullAddress,
         city: city,
+        is_active: true,
         is_verified: true,
         verification_status: 'approved'
       })

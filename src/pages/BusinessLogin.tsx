@@ -18,6 +18,7 @@ const BusinessLogin = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [showPasswordReset, setShowPasswordReset] = useState(false);
+  const [showResendConfirmation, setShowResendConfirmation] = useState(false);
   const { isLoggedIn, user } = useAuth();
   const navigate = useNavigate();
 
@@ -90,7 +91,8 @@ const BusinessLogin = () => {
       if (error.message.includes("Invalid login credentials")) {
         toast.error("Email o password non corretti");
       } else if (error.message.includes("Email not confirmed")) {
-        toast.error("Conferma la tua email prima di accedere");
+        toast.error("Devi confermare la tua email. Clicca su 'Rinvia email di conferma' per riceverla nuovamente.");
+        setShowResendConfirmation(true);
       } else {
         toast.error(error.message);
       }
@@ -149,6 +151,32 @@ const BusinessLogin = () => {
     } else {
       toast.success("Email di recupero inviata! Controlla la tua casella di posta.");
       setShowPasswordReset(false);
+    }
+    
+    setIsLoading(false);
+  };
+
+  const handleResendConfirmation = async (email: string) => {
+    setIsLoading(true);
+
+    try {
+      emailSchema.parse(email);
+    } catch (error: any) {
+      toast.error(error.message || "Email non valida");
+      setIsLoading(false);
+      return;
+    }
+    
+    const { error } = await supabase.auth.resend({
+      type: 'signup',
+      email: email,
+    });
+
+    if (error) {
+      toast.error(error.message);
+    } else {
+      toast.success("Email di conferma inviata! Controlla la tua casella di posta e clicca sul link per confermare il tuo account.");
+      setShowResendConfirmation(false);
     }
     
     setIsLoading(false);
@@ -234,8 +262,15 @@ const BusinessLogin = () => {
               <div className="text-center space-y-2">
                 <button
                   type="button"
+                  onClick={() => setShowResendConfirmation(true)}
+                  className="text-sm text-muted-foreground hover:text-primary transition-colors block w-full"
+                >
+                  Non hai ricevuto l'email di conferma? Rinvia
+                </button>
+                <button
+                  type="button"
                   onClick={() => navigate('/business-registration')}
-                  className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                  className="text-sm text-muted-foreground hover:text-primary transition-colors block w-full"
                 >
                   Non hai un account? Registra il tuo ristorante
                 </button>
@@ -276,6 +311,43 @@ const BusinessLogin = () => {
                 disabled={isLoading}
               >
                 {isLoading ? "Invio in corso..." : "Invia Link di Recupero"}
+              </Button>
+            </form>
+          </DialogContent>
+        </Dialog>
+
+        {/* Resend Confirmation Dialog */}
+        <Dialog open={showResendConfirmation} onOpenChange={setShowResendConfirmation}>
+          <DialogContent onOpenAutoFocus={(e) => { e.preventDefault(); window.scrollTo(0, 0); }}>
+            <DialogHeader>
+              <DialogTitle>Rinvia Email di Conferma</DialogTitle>
+              <DialogDescription>
+                Inserisci la tua email e ti invieremo nuovamente il link di conferma
+              </DialogDescription>
+            </DialogHeader>
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              const formData = new FormData(e.currentTarget);
+              const email = formData.get('resend-email') as string;
+              handleResendConfirmation(email);
+            }} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="resend-email">Email <span className="text-destructive">*</span></Label>
+                <Input
+                  id="resend-email"
+                  name="resend-email"
+                  type="email"
+                  required
+                  placeholder="ristorante@email.com"
+                />
+              </div>
+              
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={isLoading}
+              >
+                {isLoading ? "Invio in corso..." : "Rinvia Email di Conferma"}
               </Button>
             </form>
           </DialogContent>
