@@ -6,14 +6,14 @@ import { Separator } from "@/components/ui/separator";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { User, Calendar, Heart, Settings, LogOut, Globe, Moon, Sun, Shield } from "lucide-react";
+import { Settings, LogOut, Globe, Moon, Sun, Shield, CreditCard, LayoutDashboard, Store } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useAdminRole } from "@/hooks/useAdminRole";
 
-export const MobileUserMenu = () => {
+export const MobileBusinessMenu = () => {
   const { profile, logout } = useAuth();
   const { language, setLanguage } = useLanguage();
   const navigate = useNavigate();
@@ -31,13 +31,13 @@ export const MobileUserMenu = () => {
   const handleLogout = async () => {
     await logout();
     setOpen(false);
-    navigate("/");
+    navigate("/business");
     toast.success("Disconnesso con successo");
   };
 
   const menuItems = [
-    { icon: Calendar, label: "Le Mie Prenotazioni", path: "/my-bookings" },
-    { icon: Heart, label: "Preferiti", path: "/favorites" },
+    { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },
+    { icon: CreditCard, label: "Gestione Abbonamento", path: "/billing" },
     { icon: Settings, label: "Impostazioni", path: "/settings" },
     ...(isAdmin ? [{ icon: Shield, label: "Pannello Admin", path: "/admin" }] : []),
   ];
@@ -49,36 +49,30 @@ export const MobileUserMenu = () => {
           <Avatar className="w-8 h-8">
             <AvatarImage src={profile?.avatar_url || undefined} />
             <AvatarFallback>
-              <User className="w-5 h-5" />
+              <Store className="w-5 h-5" />
             </AvatarFallback>
           </Avatar>
         </Button>
       </SheetTrigger>
       <SheetContent side="right" className="w-[300px] sm:w-[400px]">
         <SheetHeader>
-          <SheetTitle>Menu Utente</SheetTitle>
+          <SheetTitle>Menu Business</SheetTitle>
         </SheetHeader>
 
         <div className="mt-6 space-y-6">
-          {/* User Profile Section */}
-          <div 
-            className="flex items-center gap-4 p-4 bg-muted rounded-lg cursor-pointer hover:bg-muted/80 transition-colors" 
-            onClick={() => {
-              navigate("/profile");
-              setOpen(false);
-            }}
-          >
+          {/* Business Profile Section */}
+          <div className="flex items-center gap-4 p-4 bg-muted rounded-lg">
             <Avatar className="w-12 h-12">
               <AvatarImage src={profile?.avatar_url || undefined} />
               <AvatarFallback>
-                <User className="w-6 h-6" />
+                <Store className="w-6 h-6" />
               </AvatarFallback>
             </Avatar>
             <div className="flex-1 min-w-0">
-              <p className="font-semibold truncate">{profile?.name || "Utente"}</p>
+              <p className="font-semibold truncate">{profile?.name || "Ristoratore"}</p>
               <p className="text-sm text-muted-foreground truncate">{profile?.email}</p>
               <p className="text-xs text-primary font-medium mt-1">
-                {profile?.level || "Bronze"} • {profile?.points || 0} punti
+                Account Business
               </p>
             </div>
           </div>

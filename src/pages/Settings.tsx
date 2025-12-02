@@ -1,15 +1,11 @@
-import { ArrowLeft, Mail, Phone, MapPin, Facebook, Instagram, Linkedin, Twitter, CreditCard } from "lucide-react";
+import { ArrowLeft, Mail, Phone, MapPin, Facebook, Instagram, Linkedin, Twitter } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { useBusinessRole } from "@/hooks/useBusinessRole";
-import { useAdminRole } from "@/hooks/useAdminRole";
 
 const Settings = () => {
   const navigate = useNavigate();
-  const { hasRole: hasBusinessRole } = useBusinessRole();
-  const { isAdmin } = useAdminRole();
 
   return (
     <div className="min-h-screen bg-background">
@@ -29,21 +25,6 @@ const Settings = () => {
 
       {/* Content */}
       <div className="container mx-auto px-4 py-6 space-y-6 pb-20">
-        {/* Gestione Abbonamento - Solo per Business e Admin */}
-        {(hasBusinessRole() || isAdmin) && (
-          <Card className="p-6">
-            <h2 className="text-xl font-bold mb-4">Abbonamento</h2>
-            <Button 
-              onClick={() => navigate('/billing')}
-              className="w-full"
-              variant="outline"
-            >
-              <CreditCard className="w-5 h-5 mr-2" />
-              Gestisci Abbonamento
-            </Button>
-          </Card>
-        )}
-
         {/* Contatti */}
         <Card className="p-6">
           <h2 className="text-xl font-bold mb-4">Contatti</h2>

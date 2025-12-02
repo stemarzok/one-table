@@ -1,48 +1,40 @@
 import { Button } from "@/components/ui/button";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Menu, X, User, LogOut, LayoutDashboard, Calendar, Heart } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
-import { useBusinessRole } from "@/hooks/useBusinessRole";
-import { Shield } from "lucide-react";
-import { useAdminRole } from "@/hooks/useAdminRole";
 import { useState } from "react";
 import { MobileUserMenu } from "@/components/MobileUserMenu";
 import { DesktopUserMenu } from "@/components/DesktopUserMenu";
+import { BusinessUserMenu } from "@/components/BusinessUserMenu";
+import { MobileBusinessMenu } from "@/components/MobileBusinessMenu";
 
 const Header = () => {
   const { language, setLanguage, t } = useLanguage();
-  const { isLoggedIn, profile, logout } = useAuth();
-  const { hasRole: hasBusinessRole, loading: businessRoleLoading } = useBusinessRole();
-  const { isAdmin, loading: adminRoleLoading } = useAdminRole();
+  const { isLoggedIn, isBusinessMode } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  
-  const showDashboard = hasBusinessRole() && !businessRoleLoading;
-  const showAdminPanel = isAdmin && !adminRoleLoading;
 
   // Determine if user is in business section based on current route
   const isInBusinessSection = location.pathname.startsWith('/dashboard') || 
                                location.pathname.startsWith('/business') ||
-                               location.pathname.startsWith('/billing');
+                               location.pathname.startsWith('/billing') ||
+                               location.pathname.startsWith('/onboarding');
 
   const getLogoLink = () => {
     // If not logged in and in business section, return to business page
     if (!isLoggedIn && isInBusinessSection) return "/business";
     // If not logged in and not in business section, return to home
     if (!isLoggedIn) return "/";
-    // If in business section and has business/admin role, go to dashboard
-    if (isInBusinessSection && (showDashboard || showAdminPanel)) return "/dashboard";
-    // If has business/admin role but not in business section, stay in user section
-    if (showDashboard || showAdminPanel) return "/restaurants";
+    // If logged in as business user, go to dashboard
+    if (isBusinessMode) return "/dashboard";
     // Regular users always go to restaurants
     return "/restaurants";
   };
@@ -97,16 +89,16 @@ const Header = () => {
 
           {isLoggedIn ? (
             <div className="hidden md:block">
-              <DesktopUserMenu />
+              {isBusinessMode ? <BusinessUserMenu /> : <DesktopUserMenu />}
             </div>
           ) : (
             <div className="flex items-center gap-3">
-              <Link to={location.pathname === '/business' || location.pathname === '/business-login' || location.pathname === '/business-registration' ? '/business-login' : '/auth'}>
+              <Link to={isInBusinessSection ? '/business-login' : '/auth'}>
                 <Button variant="outline" className="border-foreground/30 text-foreground hover:bg-foreground/5 hover:border-foreground/50 rounded-full">
                   {t('nav.login')}
                 </Button>
               </Link>
-              <Link to={location.pathname === '/business' || location.pathname === '/business-login' || location.pathname === '/business-registration' ? '/business-registration' : '/auth#signup'}>
+              <Link to={isInBusinessSection ? '/business-registration' : '/auth#signup'}>
                 <Button className="bg-primary hover:bg-primary/90 text-background font-semibold rounded-full">
                   Registrati
                 </Button>
@@ -118,7 +110,7 @@ const Header = () => {
         {/* Mobile menu - Show user menu icon when logged in, hamburger when not */}
         {isLoggedIn ? (
           <div className="md:hidden">
-            <MobileUserMenu />
+            {isBusinessMode ? <MobileBusinessMenu /> : <MobileUserMenu />}
           </div>
         ) : (
           <button 
@@ -143,12 +135,12 @@ const Header = () => {
               {isInBusinessSection ? 'Home' : t('nav.forBusiness')}
             </Link>
             <div className="flex flex-col gap-2 pt-2 border-t border-border mt-2">
-            <Link to={location.pathname === '/business' || location.pathname === '/business-login' || location.pathname === '/business-registration' ? '/business-login' : '/auth'} onClick={() => setMobileMenuOpen(false)}>
+            <Link to={isInBusinessSection ? '/business-login' : '/auth'} onClick={() => setMobileMenuOpen(false)}>
               <Button variant="outline" className="w-full border-foreground/30 text-foreground hover:bg-foreground/5 hover:border-foreground/50">
                 {t('nav.login')}
               </Button>
             </Link>
-            <Link to={location.pathname === '/business' || location.pathname === '/business-login' || location.pathname === '/business-registration' ? '/business-registration' : '/auth#signup'} onClick={() => setMobileMenuOpen(false)}>
+            <Link to={isInBusinessSection ? '/business-registration' : '/auth#signup'} onClick={() => setMobileMenuOpen(false)}>
               <Button className="w-full bg-primary hover:bg-primary/90 text-background font-semibold">
                 Registrati
               </Button>

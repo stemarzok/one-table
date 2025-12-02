@@ -19,7 +19,7 @@ const BusinessLogin = () => {
   const [rememberMe, setRememberMe] = useState(false);
   const [showPasswordReset, setShowPasswordReset] = useState(false);
   const [showResendConfirmation, setShowResendConfirmation] = useState(false);
-  const { isLoggedIn, user } = useAuth();
+  const { isLoggedIn, user, setBusinessMode } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
