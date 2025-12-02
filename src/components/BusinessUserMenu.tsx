@@ -12,20 +12,25 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { User, Calendar, Heart, Settings, LogOut, Globe, Moon, Sun, Shield } from "lucide-react";
+import { User, Settings, LogOut, Globe, Moon, Sun, Shield, CreditCard, LayoutDashboard, Store } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useAdminRole } from "@/hooks/useAdminRole";
+import { useBusinessRole } from "@/hooks/useBusinessRole";
 
-export const DesktopUserMenu = () => {
+export const BusinessUserMenu = () => {
   const { profile, logout } = useAuth();
   const { language, setLanguage } = useLanguage();
   const navigate = useNavigate();
   const { isAdmin } = useAdminRole();
+  const { businessRoles } = useBusinessRole();
   const [theme, setTheme] = useState<"light" | "dark">("light");
   const [showSettings, setShowSettings] = useState(false);
+
+  // Get first restaurant name if available
+  const restaurantName = businessRoles.length > 0 ? "Il Tuo Ristorante" : null;
 
   const handleThemeToggle = () => {
     const newTheme = theme === "light" ? "dark" : "light";
@@ -36,7 +41,7 @@ export const DesktopUserMenu = () => {
 
   const handleLogout = async () => {
     await logout();
-    navigate("/");
+    navigate("/business");
     toast.success("Disconnesso con successo");
   };
 
@@ -47,40 +52,39 @@ export const DesktopUserMenu = () => {
           <Avatar className="w-8 h-8">
             <AvatarImage src={profile?.avatar_url || undefined} />
             <AvatarFallback>
-              <User className="w-5 h-5" />
+              <Store className="w-5 h-5" />
             </AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-80">
         <DropdownMenuLabel>
-          <div 
-            className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity" 
-            onClick={() => navigate("/profile")}
-          >
+          <div className="flex items-center gap-3">
             <Avatar className="w-10 h-10">
               <AvatarImage src={profile?.avatar_url || undefined} />
               <AvatarFallback>
-                <User className="w-5 h-5" />
+                <Store className="w-5 h-5" />
               </AvatarFallback>
             </Avatar>
             <div className="flex-1 min-w-0">
-              <p className="font-semibold truncate">{profile?.name || "Utente"}</p>
+              <p className="font-semibold truncate">{profile?.name || "Ristoratore"}</p>
               <p className="text-xs text-muted-foreground truncate">{profile?.email}</p>
               <p className="text-xs text-primary font-medium mt-0.5">
-                {profile?.level || "Bronze"} • {profile?.points || 0} punti
+                Account Business
               </p>
             </div>
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => navigate("/my-bookings")}>
-          <Calendar className="w-4 h-4 mr-2" />
-          Le Mie Prenotazioni
+        
+        <DropdownMenuItem onClick={() => navigate("/dashboard")}>
+          <LayoutDashboard className="w-4 h-4 mr-2" />
+          Dashboard
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => navigate("/favorites")}>
-          <Heart className="w-4 h-4 mr-2" />
-          Preferiti
+        
+        <DropdownMenuItem onClick={() => navigate("/billing")}>
+          <CreditCard className="w-4 h-4 mr-2" />
+          Gestione Abbonamento
         </DropdownMenuItem>
 
         {isAdmin && (
@@ -130,11 +134,6 @@ export const DesktopUserMenu = () => {
                 checked={theme === "dark"}
                 onCheckedChange={handleThemeToggle}
               />
-            </div>
-
-            <div className="flex items-center justify-between opacity-50">
-              <Label className="text-xs">Notifiche</Label>
-              <Switch disabled />
             </div>
           </div>
         )}

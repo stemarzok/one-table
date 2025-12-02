@@ -8,16 +8,30 @@ import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Loader2, Crown, Calendar, CreditCard, Sparkles } from "lucide-react";
+import { Loader2, Crown, Calendar, CreditCard, Sparkles, AlertTriangle } from "lucide-react";
 import { format } from "date-fns";
 import { it } from "date-fns/locale";
 
 const Billing = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { user, isLoggedIn } = useAuth();
+  const { user, isLoggedIn, isBusinessMode } = useAuth();
   const [subscription, setSubscription] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+
+  // Redirect non-business users
+  useEffect(() => {
+    if (!isLoggedIn) {
+      navigate('/business-login');
+      return;
+    }
+    
+    if (!isBusinessMode) {
+      toast.error("Questa pagina è riservata agli account business");
+      navigate('/restaurants');
+      return;
+    }
+  }, [isLoggedIn, isBusinessMode, navigate]);
 
   // Fetch subscription from database
   const fetchSubscription = async () => {
@@ -48,8 +62,10 @@ const Billing = () => {
   };
 
   useEffect(() => {
-    fetchSubscription();
-  }, [user, isLoggedIn]);
+    if (isBusinessMode) {
+      fetchSubscription();
+    }
+  }, [user, isLoggedIn, isBusinessMode]);
 
   useEffect(() => {
     const success = searchParams.get("success");
@@ -100,6 +116,11 @@ const Billing = () => {
       toast.error("Errore durante l'apertura del portale clienti");
     }
   };
+
+  // Don't render for non-business users
+  if (!isBusinessMode) {
+    return null;
+  }
 
   if (loading) {
     return (

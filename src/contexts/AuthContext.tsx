@@ -17,16 +17,32 @@ interface AuthContextType {
   user: User | null;
   profile: Profile | null;
   session: Session | null;
+  isBusinessMode: boolean;
+  setBusinessMode: (value: boolean) => void;
   logout: () => Promise<void>;
   updateProfile: (updates: Partial<Profile>) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+const BUSINESS_MODE_KEY = 'onetable_business_mode';
+
 export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [isBusinessMode, setIsBusinessMode] = useState<boolean>(() => {
+    return sessionStorage.getItem(BUSINESS_MODE_KEY) === 'true';
+  });
+
+  const setBusinessMode = (value: boolean) => {
+    setIsBusinessMode(value);
+    if (value) {
+      sessionStorage.setItem(BUSINESS_MODE_KEY, 'true');
+    } else {
+      sessionStorage.removeItem(BUSINESS_MODE_KEY);
+    }
+  };
 
   useEffect(() => {
     // Set up auth state listener FIRST
@@ -42,6 +58,8 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
           }, 0);
         } else {
           setProfile(null);
+          // Clear business mode on sign out
+          setBusinessMode(false);
         }
       }
     );
@@ -71,10 +89,14 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
   };
 
   const logout = async () => {
-    await supabase.auth.signOut();
+    // Clear state immediately for faster UI response
     setUser(null);
     setSession(null);
     setProfile(null);
+    setBusinessMode(false);
+    
+    // Then perform the actual sign out
+    await supabase.auth.signOut();
   };
 
   const updateProfile = async (updates: Partial<Profile>) => {
@@ -90,8 +112,10 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
       throw error;
     }
 
-    // Refetch the complete profile to ensure all data is current
-    await fetchProfile(user.id);
+    // Update local state immediately for faster UI response
+    if (profile) {
+      setProfile({ ...profile, ...updates });
+    }
   };
 
   const value = useMemo(
@@ -100,10 +124,12 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
       user, 
       profile,
       session,
+      isBusinessMode,
+      setBusinessMode,
       logout, 
       updateProfile 
     }),
-    [user, profile, session]
+    [user, profile, session, isBusinessMode]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

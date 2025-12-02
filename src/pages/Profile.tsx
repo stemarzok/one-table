@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Trophy, TrendingUp, Mail, User, Upload, Lock, Star, Calendar, Heart } from "lucide-react";
+import { Trophy, Mail, User, Upload, Lock, Star, Calendar, Heart } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
@@ -18,7 +18,7 @@ import { supabase } from "@/integrations/supabase/client";
 const Profile = () => {
   const { t } = useLanguage();
   const { toast } = useToast();
-  const { isLoggedIn, profile, updateProfile, user } = useAuth();
+  const { isLoggedIn, profile, updateProfile, user, isBusinessMode } = useAuth();
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
   
@@ -38,12 +38,18 @@ const Profile = () => {
       return;
     }
     
+    // Business users should not access this profile page
+    if (isBusinessMode) {
+      navigate("/dashboard");
+      return;
+    }
+    
     if (profile) {
       setName(profile.name || "");
       setEmail(profile.email || "");
       setPhone(profile.phone || "");
     }
-  }, [isLoggedIn, profile, navigate]);
+  }, [isLoggedIn, profile, navigate, isBusinessMode]);
 
   const userPoints = profile?.points ?? 0;
   const currentLevel = profile?.level ?? "Bronze";
@@ -137,6 +143,11 @@ const Profile = () => {
       setUploading(false);
     }
   };
+
+  // Don't render for business users
+  if (isBusinessMode) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-background">
