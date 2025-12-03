@@ -365,6 +365,60 @@ export type Database = {
         }
         Relationships: []
       }
+      promo_codes: {
+        Row: {
+          code: string
+          created_at: string
+          id: string
+          used_at: string | null
+          user_id: string
+          valid: boolean
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          id?: string
+          used_at?: string | null
+          user_id: string
+          valid?: boolean
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          id?: string
+          used_at?: string | null
+          user_id?: string
+          valid?: boolean
+        }
+        Relationships: []
+      }
+      promo_requests: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       restaurant_tables: {
         Row: {
           created_at: string

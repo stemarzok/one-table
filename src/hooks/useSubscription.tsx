@@ -6,8 +6,8 @@ interface SubscriptionData {
   subscribed: boolean;
   inTrial: boolean;
   trialDaysRemaining?: number;
-  planType?: 'base' | 'pro';
-  billingPeriod?: 'monthly' | 'yearly';
+  planType?: 'base' | 'pro' | 'promo_speciale';
+  billingPeriod?: 'monthly' | 'yearly' | 'lifetime';
   currentPeriodEnd?: string;
   cancelAtPeriodEnd?: boolean;
 }
