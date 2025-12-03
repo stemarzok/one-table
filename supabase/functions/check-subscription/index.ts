@@ -37,6 +37,32 @@ serve(async (req) => {
     if (!user?.email) throw new Error("User not authenticated");
     logStep("User authenticated", { userId: user.id, email: user.email });
 
+    // First, check if user has a Promo Speciale subscription in the database
+    // (these are not managed by Stripe)
+    const { data: promoSub } = await supabaseClient
+      .from('subscriptions')
+      .select('*')
+      .eq('user_id', user.id)
+      .eq('plan_type', 'promo_speciale')
+      .eq('status', 'active')
+      .maybeSingle();
+
+    if (promoSub) {
+      logStep("Promo Speciale subscription found", { userId: user.id });
+      return new Response(JSON.stringify({
+        subscribed: true,
+        inTrial: false,
+        trialDaysRemaining: 0,
+        planType: 'promo_speciale',
+        billingPeriod: 'lifetime',
+        currentPeriodEnd: promoSub.current_period_end,
+        cancelAtPeriodEnd: false
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      });
+    }
+
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", { 
       apiVersion: "2025-08-27.basil" 
     });

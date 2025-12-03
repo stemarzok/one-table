@@ -15,6 +15,7 @@ import { AlertCircle, CheckCircle, XCircle, FileText, Clock } from "lucide-react
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PromoteUserPanel } from "@/components/admin/PromoteUserPanel";
 import { GlobalStats } from "@/components/admin/GlobalStats";
+import { PromoRequestsPanel } from "@/components/admin/PromoRequestsPanel";
 
 interface Application {
   id: string;
@@ -208,8 +209,9 @@ const AdminPanel = () => {
           <h1 className="text-4xl font-bold mb-8">Pannello Amministratore</h1>
 
           <Tabs defaultValue="applications" className="space-y-6">
-            <TabsList className="grid w-full max-w-2xl grid-cols-3">
+            <TabsList className="grid w-full max-w-3xl grid-cols-4">
               <TabsTrigger value="applications">Richieste</TabsTrigger>
+              <TabsTrigger value="promo">Codici Promo</TabsTrigger>
               <TabsTrigger value="stats">Statistiche</TabsTrigger>
               <TabsTrigger value="users">Utenti</TabsTrigger>
             </TabsList>
@@ -386,6 +388,10 @@ const AdminPanel = () => {
               </div>
             </div>
           )}
+            </TabsContent>
+
+            <TabsContent value="promo">
+              <PromoRequestsPanel />
             </TabsContent>
 
             <TabsContent value="stats">

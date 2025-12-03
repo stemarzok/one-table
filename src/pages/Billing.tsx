@@ -138,8 +138,9 @@ const Billing = () => {
 
   const hasActiveSubscription = subscription && (subscription.status === 'active' || subscription.status === 'trialing');
   const isTrialing = subscription?.status === 'trialing';
-  const planName = subscription?.plan_type === 'pro' ? 'Pro' : 'Base';
-  const billingName = subscription?.billing_period === 'yearly' ? 'Annuale' : 'Mensile';
+  const isPromoSpeciale = subscription?.plan_type === 'promo_speciale';
+  const planName = isPromoSpeciale ? 'Promo Speciale' : (subscription?.plan_type === 'pro' ? 'Pro' : 'Base');
+  const billingName = isPromoSpeciale ? 'Nessun rinnovo' : (subscription?.billing_period === 'yearly' ? 'Annuale' : 'Mensile');
   
   const trialDaysRemaining = isTrialing && subscription?.trial_end 
     ? Math.ceil((new Date(subscription.trial_end).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
@@ -188,21 +189,31 @@ const Billing = () => {
                 </div>
 
                 <div className="space-y-4">
-                  <div className="flex items-center gap-3 text-muted-foreground">
-                    <Calendar className="h-5 w-5" />
-                    <div>
-                      <p className="text-sm">
-                        {subscription?.cancel_at_period_end ? 'Scade il' : 'Prossimo rinnovo'}
-                      </p>
-                      <p className="font-medium text-foreground">
-                        {subscription?.current_period_end && 
-                          format(new Date(subscription.current_period_end), "d MMMM yyyy", { locale: it })
-                        }
+                  {!isPromoSpeciale && (
+                    <div className="flex items-center gap-3 text-muted-foreground">
+                      <Calendar className="h-5 w-5" />
+                      <div>
+                        <p className="text-sm">
+                          {subscription?.cancel_at_period_end ? 'Scade il' : 'Prossimo rinnovo'}
+                        </p>
+                        <p className="font-medium text-foreground">
+                          {subscription?.current_period_end && 
+                            format(new Date(subscription.current_period_end), "d MMMM yyyy", { locale: it })
+                          }
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {isPromoSpeciale && (
+                    <div className="p-4 bg-primary/10 border border-primary/20 rounded-lg">
+                      <p className="text-sm text-primary">
+                        🎁 Piano speciale attivato tramite codice promozionale. Nessun rinnovo automatico previsto.
                       </p>
                     </div>
-                  </div>
+                  )}
 
-                  {subscription?.cancel_at_period_end && (
+                  {subscription?.cancel_at_period_end && !isPromoSpeciale && (
                     <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
                       <p className="text-sm text-destructive">
                         Il tuo abbonamento è stato cancellato e terminerà alla fine del periodo corrente.
@@ -212,23 +223,25 @@ const Billing = () => {
                 </div>
               </Card>
 
-              {/* Manage Subscription */}
-              <Card className="p-6">
-                <div className="flex items-start gap-4">
-                  <CreditCard className="h-6 w-6 text-primary mt-1" />
-                  <div className="flex-1">
-                    <h3 className="text-lg font-semibold mb-2">
-                      Gestisci il tuo abbonamento
-                    </h3>
-                    <p className="text-muted-foreground mb-4">
-                      Aggiorna il metodo di pagamento, cambia piano o cancella l'abbonamento.
-                    </p>
-                    <Button onClick={handleManageSubscription}>
-                      Apri Portale Clienti
-                    </Button>
+              {/* Manage Subscription - only show for non-promo plans */}
+              {!isPromoSpeciale && (
+                <Card className="p-6">
+                  <div className="flex items-start gap-4">
+                    <CreditCard className="h-6 w-6 text-primary mt-1" />
+                    <div className="flex-1">
+                      <h3 className="text-lg font-semibold mb-2">
+                        Gestisci il tuo abbonamento
+                      </h3>
+                      <p className="text-muted-foreground mb-4">
+                        Aggiorna il metodo di pagamento, cambia piano o cancella l'abbonamento.
+                      </p>
+                      <Button onClick={handleManageSubscription}>
+                        Apri Portale Clienti
+                      </Button>
+                    </div>
                   </div>
-                </div>
-              </Card>
+                </Card>
+              )}
 
               {/* Features */}
               <Card className="p-6">
@@ -248,7 +261,7 @@ const Billing = () => {
                     <div className="h-1.5 w-1.5 rounded-full bg-primary" />
                     <span>Gestione tavoli</span>
                   </li>
-                  {subscription?.plan_type === 'pro' && (
+                  {(subscription?.plan_type === 'pro' || isPromoSpeciale) && (
                     <>
                       <li className="flex items-center gap-2">
                         <div className="h-1.5 w-1.5 rounded-full bg-primary" />
