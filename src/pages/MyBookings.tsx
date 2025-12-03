@@ -42,12 +42,17 @@ interface Booking {
 }
 
 const MyBookings = () => {
-  const { user, isLoggedIn } = useAuth();
+  const { user, isLoggedIn, isBusinessMode } = useAuth();
   const navigate = useNavigate();
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Business users cannot access client pages
+    if (isBusinessMode) {
+      navigate("/dashboard");
+      return;
+    }
     if (!isLoggedIn) {
       navigate("/auth");
       return;
@@ -74,7 +79,7 @@ const MyBookings = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [isLoggedIn, user, navigate]);
+  }, [isLoggedIn, isBusinessMode, user, navigate]);
 
   const fetchBookings = async () => {
     if (!user) return;

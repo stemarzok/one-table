@@ -6,16 +6,21 @@ import RestaurantList from "@/components/RestaurantList";
 import Footer from "@/components/Footer";
 
 const RestaurantsApp = () => {
-  const { isLoggedIn } = useAuth();
+  const { isLoggedIn, isBusinessMode } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
+    // Business users cannot access client pages
+    if (isBusinessMode) {
+      navigate("/dashboard");
+      return;
+    }
     if (!isLoggedIn) {
       navigate("/auth");
     }
-  }, [isLoggedIn, navigate]);
+  }, [isLoggedIn, isBusinessMode, navigate]);
 
-  if (!isLoggedIn) {
+  if (!isLoggedIn || isBusinessMode) {
     return null;
   }
 

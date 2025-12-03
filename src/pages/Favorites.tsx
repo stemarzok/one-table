@@ -23,7 +23,7 @@ interface Restaurant {
 }
 
 const Favorites = () => {
-  const { isLoggedIn } = useAuth();
+  const { isLoggedIn, isBusinessMode } = useAuth();
   const { favorites, toggleFavorite, loading: favoritesLoading } = useFavorites();
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [loading, setLoading] = useState(true);
@@ -31,6 +31,11 @@ const Favorites = () => {
   const { toast } = useToast();
 
   useEffect(() => {
+    // Business users cannot access client pages
+    if (isBusinessMode) {
+      navigate('/dashboard');
+      return;
+    }
     if (!isLoggedIn) {
       navigate('/auth');
       return;
@@ -41,7 +46,7 @@ const Favorites = () => {
     } else if (!favoritesLoading) {
       setLoading(false);
     }
-  }, [isLoggedIn, favorites, favoritesLoading, navigate]);
+  }, [isLoggedIn, isBusinessMode, favorites, favoritesLoading, navigate]);
 
   const fetchFavoriteRestaurants = async () => {
     try {
