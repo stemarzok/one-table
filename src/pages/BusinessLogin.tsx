@@ -46,13 +46,15 @@ const BusinessLogin = () => {
         ]);
         
         if (businessRoleResult.data || adminRoleResult.data) {
+          // Set business mode and redirect
+          setBusinessMode(true);
           navigate('/dashboard');
         }
       }
     };
     
     checkBusinessRole();
-  }, [isLoggedIn, user, navigate]);
+  }, [isLoggedIn, user, navigate, setBusinessMode]);
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -117,6 +119,9 @@ const BusinessLogin = () => {
       
       // Check if onboarding has been completed
       const hasCompletedOnboarding = profileResult.data?.avatar_url === 'onboarding_completed';
+      
+      // Set business mode to isolate this session from client section
+      setBusinessMode(true);
       
       toast.success("Accesso effettuato! Reindirizzamento...");
       setTimeout(() => {

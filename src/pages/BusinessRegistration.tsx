@@ -13,7 +13,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 
 const BusinessRegistration = () => {
   const { toast } = useToast();
-  const { isLoggedIn, profile } = useAuth();
+  const { isLoggedIn, profile, setBusinessMode } = useAuth();
   const navigate = useNavigate();
   const { t } = useLanguage();
 
@@ -115,6 +115,9 @@ const BusinessRegistration = () => {
       });
 
       if (loginError) throw loginError;
+
+      // Set business mode after successful registration and login
+      setBusinessMode(true);
 
       toast({
         title: "Registrazione completata! 🎉",

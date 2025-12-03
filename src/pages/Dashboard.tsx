@@ -23,7 +23,7 @@ import { PaywallModal } from "@/components/PaywallModal";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const Dashboard = () => {
-  const { isLoggedIn } = useAuth();
+  const { isLoggedIn, isBusinessMode } = useAuth();
   const { hasRole, loading: businessLoading, businessRoles } = useBusinessRole();
   const { isAdmin, loading: adminLoading } = useAdminRole();
   const subscription = useSubscription();
@@ -45,8 +45,15 @@ const Dashboard = () => {
   const loading = businessLoading || adminLoading;
 
   useEffect(() => {
-    if (!isLoggedIn) navigate("/auth");
-  }, [isLoggedIn, navigate]);
+    if (!isLoggedIn) {
+      navigate("/auth");
+      return;
+    }
+    // Client users (not in business mode) cannot access business dashboard
+    if (!loading && !isBusinessMode && !isAdmin && !hasRole()) {
+      navigate("/restaurants");
+    }
+  }, [isLoggedIn, isBusinessMode, isAdmin, hasRole, loading, navigate]);
 
   useEffect(() => {
     const fetchRestaurants = async () => {
