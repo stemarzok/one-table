@@ -1,11 +1,26 @@
-import { ArrowLeft, Mail, Phone, MapPin, Facebook, Instagram, Linkedin, Twitter } from "lucide-react";
+import { ArrowLeft, Mail, Phone, MapPin, Facebook, Instagram, Linkedin, Twitter, Globe, Moon, Sun } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { useState } from "react";
+import { toast } from "sonner";
 
 const Settings = () => {
   const navigate = useNavigate();
+  const { language, setLanguage } = useLanguage();
+  const [theme, setTheme] = useState<"light" | "dark">("light");
+
+  const handleThemeToggle = () => {
+    const newTheme = theme === "light" ? "dark" : "light";
+    setTheme(newTheme);
+    document.documentElement.classList.toggle("dark", newTheme === "dark");
+    toast.success(`Tema ${newTheme === "dark" ? "scuro" : "chiaro"} attivato`);
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -25,6 +40,40 @@ const Settings = () => {
 
       {/* Content */}
       <div className="container mx-auto px-4 py-6 space-y-6 pb-20">
+        {/* Preferenze */}
+        <Card className="p-6">
+          <h2 className="text-xl font-bold mb-4">Preferenze</h2>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <Label className="flex items-center gap-2">
+                <Globe className="w-5 h-5" />
+                Lingua
+              </Label>
+              <Select value={language} onValueChange={setLanguage}>
+                <SelectTrigger className="w-[140px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="it">🇮🇹 Italiano</SelectItem>
+                  <SelectItem value="en">🇬🇧 English</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <Separator />
+            
+            <div className="flex items-center justify-between">
+              <Label className="flex items-center gap-2">
+                {theme === "light" ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+                Tema Scuro
+              </Label>
+              <Switch
+                checked={theme === "dark"}
+                onCheckedChange={handleThemeToggle}
+              />
+            </div>
+          </div>
+        </Card>
         {/* Contatti */}
         <Card className="p-6">
           <h2 className="text-xl font-bold mb-4">Contatti</h2>

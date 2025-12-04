@@ -82,10 +82,20 @@ export const PaywallModal = ({ open, onOpenChange, onClose }: PaywallModalProps)
         .eq('valid', true)
         .maybeSingle();
 
-      if (codeError) throw codeError;
+      if (codeError) {
+        console.error('Error checking code:', codeError);
+        toast.error("Errore durante la verifica del codice");
+        return;
+      }
 
       if (!codeData) {
-        toast.error("Codice non valido o già utilizzato");
+        toast.error("Codice non valido, già utilizzato o non assegnato a te");
+        return;
+      }
+
+      // Check if code has expired
+      if (codeData.expires_at && new Date(codeData.expires_at) < new Date()) {
+        toast.error("Questo codice è scaduto");
         return;
       }
 
@@ -97,21 +107,50 @@ export const PaywallModal = ({ open, onOpenChange, onClose }: PaywallModalProps)
 
       if (updateCodeError) throw updateCodeError;
 
-      // Create or update subscription with Promo Speciale
-      const { error: subError } = await supabase
+      // Calculate expiration date based on code duration
+      const currentPeriodEnd = codeData.expires_at 
+        ? new Date(codeData.expires_at).toISOString()
+        : new Date(2099, 11, 31).toISOString();
+
+      // Check if user already has a subscription
+      const { data: existingSub } = await supabase
         .from('subscriptions')
-        .upsert({
-          user_id: user.id,
-          plan_type: 'promo_speciale',
-          billing_period: 'lifetime',
-          status: 'active',
-          current_period_start: new Date().toISOString(),
-          current_period_end: new Date(2099, 11, 31).toISOString(),
-          cancel_at_period_end: false,
-          trial_end: null
-        }, {
-          onConflict: 'user_id'
-        });
+        .select('id')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      let subError;
+      if (existingSub) {
+        // Update existing subscription
+        const { error } = await supabase
+          .from('subscriptions')
+          .update({
+            plan_type: 'promo_speciale',
+            billing_period: codeData.duration_days ? 'limited' : 'lifetime',
+            status: 'active',
+            current_period_start: new Date().toISOString(),
+            current_period_end: currentPeriodEnd,
+            cancel_at_period_end: false,
+            trial_end: null
+          })
+          .eq('user_id', user.id);
+        subError = error;
+      } else {
+        // Insert new subscription
+        const { error } = await supabase
+          .from('subscriptions')
+          .insert({
+            user_id: user.id,
+            plan_type: 'promo_speciale',
+            billing_period: codeData.duration_days ? 'limited' : 'lifetime',
+            status: 'active',
+            current_period_start: new Date().toISOString(),
+            current_period_end: currentPeriodEnd,
+            cancel_at_period_end: false,
+            trial_end: null
+          });
+        subError = error;
+      }
 
       if (subError) throw subError;
 
