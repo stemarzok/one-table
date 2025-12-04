@@ -1,11 +1,5 @@
 import { Button } from "@/components/ui/button";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Menu, X } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -14,6 +8,7 @@ import { MobileUserMenu } from "@/components/MobileUserMenu";
 import { DesktopUserMenu } from "@/components/DesktopUserMenu";
 import { BusinessUserMenu } from "@/components/BusinessUserMenu";
 import { MobileBusinessMenu } from "@/components/MobileBusinessMenu";
+import { NotificationBell } from "@/components/NotificationBell";
 
 const Header = () => {
   const { language, setLanguage, t } = useLanguage();
@@ -68,27 +63,10 @@ const Header = () => {
               </Link>
             </>
           )}
-          
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button className="flex items-center gap-2 text-foreground hover:text-primary transition-colors">
-                <span className="text-sm font-medium">
-                  {language === 'it' ? 'Italiano' : 'English'}
-                </span>
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => setLanguage('it')}>
-                Italiano
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setLanguage('en')}>
-                English
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
 
           {isLoggedIn ? (
-            <div className="hidden md:block">
+            <div className="hidden md:flex items-center gap-2">
+              {isBusinessMode && <NotificationBell />}
               {isBusinessMode ? <BusinessUserMenu /> : <DesktopUserMenu />}
             </div>
           ) : (
@@ -109,7 +87,8 @@ const Header = () => {
 
         {/* Mobile menu - Show user menu icon when logged in, hamburger when not */}
         {isLoggedIn ? (
-          <div className="md:hidden">
+          <div className="md:hidden flex items-center gap-2">
+            {isBusinessMode && <NotificationBell />}
             {isBusinessMode ? <MobileBusinessMenu /> : <MobileUserMenu />}
           </div>
         ) : (

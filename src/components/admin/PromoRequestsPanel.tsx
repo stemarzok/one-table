@@ -2,10 +2,11 @@ import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Gift, Clock, CheckCircle, Loader2, Copy } from "lucide-react";
-import { format } from "date-fns";
+import { Gift, Clock, CheckCircle, Loader2, Copy, Trash2, Edit, User } from "lucide-react";
+import { format, addDays } from "date-fns";
 import { it } from "date-fns/locale";
 
 interface PromoRequest {
@@ -23,14 +24,27 @@ interface PromoCode {
   valid: boolean;
   created_at: string;
   used_at: string | null;
+  expires_at: string | null;
+  duration_days: number | null;
+}
+
+interface Subscription {
+  id: string;
+  user_id: string;
+  plan_type: string;
+  status: string;
+  current_period_end: string;
 }
 
 export const PromoRequestsPanel = () => {
   const { toast } = useToast();
   const [requests, setRequests] = useState<PromoRequest[]>([]);
   const [codes, setCodes] = useState<PromoCode[]>([]);
+  const [activePromos, setActivePromos] = useState<Subscription[]>([]);
   const [loading, setLoading] = useState(true);
   const [generatingFor, setGeneratingFor] = useState<string | null>(null);
+  const [selectedDuration, setSelectedDuration] = useState<{ [key: string]: string }>({});
+  const [deletingCode, setDeletingCode] = useState<string | null>(null);
 
   const fetchData = async () => {
     try {
@@ -51,6 +65,16 @@ export const PromoRequestsPanel = () => {
 
       if (codesError) throw codesError;
       setCodes(codesData || []);
+
+      // Fetch active promo subscriptions
+      const { data: subData, error: subError } = await supabase
+        .from('subscriptions')
+        .select('*')
+        .eq('plan_type', 'promo_speciale')
+        .eq('status', 'active');
+
+      if (subError) throw subError;
+      setActivePromos(subData || []);
     } catch (error) {
       console.error('Error fetching promo data:', error);
       toast({
@@ -114,13 +138,20 @@ export const PromoRequestsPanel = () => {
         attempts++;
       }
 
+      // Get duration
+      const durationStr = selectedDuration[request.id] || 'unlimited';
+      const durationDays = durationStr === 'unlimited' ? null : parseInt(durationStr);
+      const expiresAt = durationDays ? addDays(new Date(), durationDays).toISOString() : null;
+
       // Insert code
       const { error: codeError } = await supabase
         .from('promo_codes')
         .insert({
           code,
           user_id: request.user_id,
-          valid: true
+          valid: true,
+          duration_days: durationDays,
+          expires_at: expiresAt
         });
 
       if (codeError) throw codeError;
@@ -135,7 +166,7 @@ export const PromoRequestsPanel = () => {
 
       toast({
         title: "Codice Generato",
-        description: `Codice ${code} creato per ${request.email}`,
+        description: `Codice ${code} creato per ${request.email}${durationDays ? ` (valido ${durationDays} giorni)` : ' (illimitato)'}`,
       });
 
       fetchData();
@@ -148,6 +179,34 @@ export const PromoRequestsPanel = () => {
       });
     } finally {
       setGeneratingFor(null);
+    }
+  };
+
+  const handleDeleteCode = async (codeId: string) => {
+    setDeletingCode(codeId);
+    try {
+      const { error } = await supabase
+        .from('promo_codes')
+        .delete()
+        .eq('id', codeId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Codice Eliminato",
+        description: "Il codice è stato eliminato",
+      });
+
+      fetchData();
+    } catch (error) {
+      console.error('Error deleting code:', error);
+      toast({
+        title: "Errore",
+        description: "Impossibile eliminare il codice",
+        variant: "destructive",
+      });
+    } finally {
+      setDeletingCode(null);
     }
   };
 
@@ -173,10 +232,10 @@ export const PromoRequestsPanel = () => {
   return (
     <div className="space-y-8">
       {/* Stats */}
-      <div className="grid md:grid-cols-3 gap-6">
+      <div className="grid md:grid-cols-4 gap-6">
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+          <CardHeader className="pb-2">
+            <CardTitle className="flex items-center gap-2 text-base">
               <Clock className="w-5 h-5 text-yellow-500" />
               In Attesa
             </CardTitle>
@@ -187,8 +246,8 @@ export const PromoRequestsPanel = () => {
         </Card>
 
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+          <CardHeader className="pb-2">
+            <CardTitle className="flex items-center gap-2 text-base">
               <CheckCircle className="w-5 h-5 text-green-500" />
               Approvate
             </CardTitle>
@@ -199,8 +258,8 @@ export const PromoRequestsPanel = () => {
         </Card>
 
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+          <CardHeader className="pb-2">
+            <CardTitle className="flex items-center gap-2 text-base">
               <Gift className="w-5 h-5 text-primary" />
               Codici Attivi
             </CardTitle>
@@ -209,7 +268,51 @@ export const PromoRequestsPanel = () => {
             <p className="text-3xl font-bold">{codes.filter(c => c.valid).length}</p>
           </CardContent>
         </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <User className="w-5 h-5 text-blue-500" />
+              Promo Attive
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-3xl font-bold">{activePromos.length}</p>
+          </CardContent>
+        </Card>
       </div>
+
+      {/* Active Promo Users */}
+      {activePromos.length > 0 && (
+        <div>
+          <h2 className="text-2xl font-bold mb-4">Utenti con Promo Attiva</h2>
+          <div className="space-y-4">
+            {activePromos.map((sub) => {
+              const relatedRequest = requests.find(r => r.user_id === sub.user_id);
+              const isExpired = new Date(sub.current_period_end) < new Date();
+              return (
+                <Card key={sub.id} className={isExpired ? 'opacity-60' : ''}>
+                  <CardContent className="pt-4">
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <p className="font-medium">{relatedRequest?.email || 'Email non disponibile'}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {new Date(sub.current_period_end).getFullYear() >= 2099 
+                            ? 'Nessuna scadenza'
+                            : `Scade il ${format(new Date(sub.current_period_end), "d MMMM yyyy", { locale: it })}`}
+                        </p>
+                      </div>
+                      <Badge variant={isExpired ? "secondary" : "default"}>
+                        {isExpired ? 'Scaduto' : 'Attivo'}
+                      </Badge>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Pending Requests */}
       <div>
@@ -234,10 +337,26 @@ export const PromoRequestsPanel = () => {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="flex items-center gap-4">
-                    <p className="text-sm text-muted-foreground">
-                      User ID: <code className="text-xs">{request.user_id.slice(0, 8)}...</code>
-                    </p>
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-muted-foreground">Durata:</span>
+                      <Select
+                        value={selectedDuration[request.id] || 'unlimited'}
+                        onValueChange={(value) => setSelectedDuration(prev => ({ ...prev, [request.id]: value }))}
+                      >
+                        <SelectTrigger className="w-[140px]">
+                          <SelectValue placeholder="Seleziona" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="7">7 giorni</SelectItem>
+                          <SelectItem value="14">14 giorni</SelectItem>
+                          <SelectItem value="30">30 giorni</SelectItem>
+                          <SelectItem value="60">60 giorni</SelectItem>
+                          <SelectItem value="90">90 giorni</SelectItem>
+                          <SelectItem value="unlimited">Illimitato</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
                     <Button
                       onClick={() => handleGenerateCode(request)}
                       disabled={generatingFor === request.id}
@@ -268,8 +387,9 @@ export const PromoRequestsPanel = () => {
           <div className="space-y-4">
             {codes.map((code) => {
               const relatedRequest = requests.find(r => r.user_id === code.user_id);
+              const isExpired = code.expires_at && new Date(code.expires_at) < new Date();
               return (
-                <Card key={code.id}>
+                <Card key={code.id} className={isExpired && code.valid ? 'border-yellow-500/50' : ''}>
                   <CardHeader>
                     <div className="flex justify-between items-start">
                       <div className="flex items-center gap-4">
@@ -284,16 +404,46 @@ export const PromoRequestsPanel = () => {
                           <Copy className="h-4 w-4" />
                         </Button>
                       </div>
-                      <Badge variant={code.valid ? "default" : "secondary"}>
-                        {code.valid ? 'Valido' : 'Utilizzato'}
-                      </Badge>
+                      <div className="flex items-center gap-2">
+                        <Badge variant={code.valid ? (isExpired ? "secondary" : "default") : "secondary"}>
+                          {!code.valid ? 'Utilizzato' : (isExpired ? 'Scaduto' : 'Valido')}
+                        </Badge>
+                        {code.valid && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleDeleteCode(code.id)}
+                            disabled={deletingCode === code.id}
+                          >
+                            {deletingCode === code.id ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <Trash2 className="h-4 w-4 text-destructive" />
+                            )}
+                          </Button>
+                        )}
+                      </div>
                     </div>
                   </CardHeader>
                   <CardContent>
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                    <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
                       <span>Email: {relatedRequest?.email || 'N/A'}</span>
                       <span>•</span>
                       <span>Creato il {format(new Date(code.created_at), "d MMM yyyy", { locale: it })}</span>
+                      {code.expires_at && (
+                        <>
+                          <span>•</span>
+                          <span className={isExpired ? 'text-yellow-600' : ''}>
+                            {isExpired ? 'Scaduto il' : 'Scade il'} {format(new Date(code.expires_at), "d MMM yyyy", { locale: it })}
+                          </span>
+                        </>
+                      )}
+                      {!code.expires_at && (
+                        <>
+                          <span>•</span>
+                          <span>Nessuna scadenza</span>
+                        </>
+                      )}
                       {code.used_at && (
                         <>
                           <span>•</span>

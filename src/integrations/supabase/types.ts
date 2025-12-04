@@ -369,6 +369,8 @@ export type Database = {
         Row: {
           code: string
           created_at: string
+          duration_days: number | null
+          expires_at: string | null
           id: string
           used_at: string | null
           user_id: string
@@ -377,6 +379,8 @@ export type Database = {
         Insert: {
           code: string
           created_at?: string
+          duration_days?: number | null
+          expires_at?: string | null
           id?: string
           used_at?: string | null
           user_id: string
@@ -385,6 +389,8 @@ export type Database = {
         Update: {
           code?: string
           created_at?: string
+          duration_days?: number | null
+          expires_at?: string | null
           id?: string
           used_at?: string | null
           user_id?: string

@@ -206,6 +206,21 @@ const Billing = () => {
                   )}
                   
                   {isPromoSpeciale && (
+                    <div className="flex items-center gap-3 text-muted-foreground">
+                      <Calendar className="h-5 w-5" />
+                      <div>
+                        <p className="text-sm">Scadenza</p>
+                        <p className="font-medium text-foreground">
+                          {subscription?.current_period_end && new Date(subscription.current_period_end).getFullYear() >= 2099
+                            ? 'Nessuna scadenza'
+                            : subscription?.current_period_end && format(new Date(subscription.current_period_end), "d MMMM yyyy", { locale: it })
+                          }
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {isPromoSpeciale && (
                     <div className="p-4 bg-primary/10 border border-primary/20 rounded-lg">
                       <p className="text-sm text-primary">
                         🎁 Piano speciale attivato tramite codice promozionale. Nessun rinnovo automatico previsto.
