@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
-import { Crown, Sparkles, Gift, Loader2 } from "lucide-react";
+import { Crown, Sparkles, Gift, Loader2, X } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -11,9 +11,10 @@ import { toast } from "sonner";
 interface PaywallModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onClose?: () => void; // Callback when user chooses to leave
 }
 
-export const PaywallModal = ({ open, onOpenChange }: PaywallModalProps) => {
+export const PaywallModal = ({ open, onOpenChange, onClose }: PaywallModalProps) => {
   const navigate = useNavigate();
   const { user, profile } = useAuth();
   const [showCodeInput, setShowCodeInput] = useState(false);
@@ -21,6 +22,7 @@ export const PaywallModal = ({ open, onOpenChange }: PaywallModalProps) => {
   const [promoCode, setPromoCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [requestSent, setRequestSent] = useState(false);
+  const [hasExistingRequest, setHasExistingRequest] = useState(false);
 
   const handleRequestCode = async () => {
     if (!user || !profile) {
@@ -41,7 +43,7 @@ export const PaywallModal = ({ open, onOpenChange }: PaywallModalProps) => {
       if (existingRequest) {
         toast.info("Hai già una richiesta in attesa");
         setRequestSent(true);
-        setShowConfirmRequest(false);
+        setHasExistingRequest(true);
         return;
       }
 
@@ -58,7 +60,6 @@ export const PaywallModal = ({ open, onOpenChange }: PaywallModalProps) => {
 
       toast.success("Richiesta inviata con successo!");
       setRequestSent(true);
-      setShowConfirmRequest(false);
     } catch (error: any) {
       console.error('Error creating promo request:', error);
       toast.error("Errore nell'invio della richiesta");
@@ -105,7 +106,7 @@ export const PaywallModal = ({ open, onOpenChange }: PaywallModalProps) => {
           billing_period: 'lifetime',
           status: 'active',
           current_period_start: new Date().toISOString(),
-          current_period_end: new Date(2099, 11, 31).toISOString(), // Far future
+          current_period_end: new Date(2099, 11, 31).toISOString(),
           cancel_at_period_end: false,
           trial_end: null
         }, {
@@ -127,13 +128,56 @@ export const PaywallModal = ({ open, onOpenChange }: PaywallModalProps) => {
     }
   };
 
-  const handleClose = () => {
-    // Reset states and close - user doesn't get access
+  // Close and redirect to dashboard overview - user doesn't get access
+  const handleCloseAndRedirect = () => {
     setShowCodeInput(false);
     setShowConfirmRequest(false);
     setPromoCode("");
     setRequestSent(false);
+    setHasExistingRequest(false);
     onOpenChange(false);
+    onClose?.();
+    navigate('/dashboard');
+  };
+
+  const handleCheckExistingCode = async () => {
+    if (!user) return;
+    
+    setLoading(true);
+    try {
+      // Check if user has an existing pending request
+      const { data: existingRequest } = await supabase
+        .from('promo_requests')
+        .select('id, status')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      // Check if user has an unused code
+      const { data: existingCode } = await supabase
+        .from('promo_codes')
+        .select('code')
+        .eq('user_id', user.id)
+        .eq('valid', true)
+        .maybeSingle();
+
+      if (existingCode) {
+        // User has a code, show input
+        setShowCodeInput(true);
+      } else if (existingRequest?.status === 'pending') {
+        // User already requested
+        setRequestSent(true);
+        setHasExistingRequest(true);
+        setShowConfirmRequest(true);
+      } else {
+        // Show request form
+        setShowConfirmRequest(true);
+      }
+    } catch (error) {
+      console.error('Error checking existing code:', error);
+      setShowConfirmRequest(true);
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Show code input screen
@@ -141,10 +185,18 @@ export const PaywallModal = ({ open, onOpenChange }: PaywallModalProps) => {
     return (
       <Dialog open={open} onOpenChange={() => {}} modal>
         <DialogContent 
-          className="sm:max-w-md"
+          className="sm:max-w-md [&>button]:hidden"
           onPointerDownOutside={(e) => e.preventDefault()}
           onEscapeKeyDown={(e) => e.preventDefault()}
         >
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute right-4 top-4"
+            onClick={handleCloseAndRedirect}
+          >
+            <X className="h-4 w-4" />
+          </Button>
           <DialogHeader>
             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
               <Gift className="h-8 w-8 text-primary" />
@@ -200,30 +252,51 @@ export const PaywallModal = ({ open, onOpenChange }: PaywallModalProps) => {
     return (
       <Dialog open={open} onOpenChange={() => {}} modal>
         <DialogContent 
-          className="sm:max-w-md"
+          className="sm:max-w-md [&>button]:hidden"
           onPointerDownOutside={(e) => e.preventDefault()}
           onEscapeKeyDown={(e) => e.preventDefault()}
         >
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute right-4 top-4"
+            onClick={handleCloseAndRedirect}
+          >
+            <X className="h-4 w-4" />
+          </Button>
           <DialogHeader>
             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
               <Gift className="h-8 w-8 text-primary" />
             </div>
             <DialogTitle className="text-center text-2xl">
-              {requestSent ? "Richiesta Inviata" : "Richiedi Codice Speciale"}
+              {requestSent || hasExistingRequest ? "Richiesta Inviata" : "Richiedi Codice Speciale"}
             </DialogTitle>
             <DialogDescription className="text-center text-base">
-              {requestSent 
-                ? "La tua richiesta è stata inviata. Verrai contattato dall'amministratore."
+              {requestSent || hasExistingRequest
+                ? "La tua richiesta è stata inviata. Attendi che l'amministrazione ti fornisca un codice."
                 : "Vuoi richiedere un codice speciale? L'amministratore riceverà la tua richiesta."
               }
             </DialogDescription>
           </DialogHeader>
 
           <div className="flex flex-col gap-2 pt-4">
-            {requestSent ? (
-              <Button size="lg" className="w-full" onClick={handleClose}>
-                Ho capito
-              </Button>
+            {requestSent || hasExistingRequest ? (
+              <>
+                <Button
+                  size="lg"
+                  className="w-full"
+                  onClick={() => setShowCodeInput(true)}
+                >
+                  Ho già un codice
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="lg" 
+                  onClick={handleCloseAndRedirect}
+                >
+                  Torna alla Dashboard
+                </Button>
+              </>
             ) : (
               <>
                 <Button
@@ -256,10 +329,18 @@ export const PaywallModal = ({ open, onOpenChange }: PaywallModalProps) => {
   return (
     <Dialog open={open} onOpenChange={() => {}} modal>
       <DialogContent 
-        className="sm:max-w-md"
+        className="sm:max-w-md [&>button]:hidden"
         onPointerDownOutside={(e) => e.preventDefault()}
         onEscapeKeyDown={(e) => e.preventDefault()}
       >
+        <Button
+          variant="ghost"
+          size="icon"
+          className="absolute right-4 top-4"
+          onClick={handleCloseAndRedirect}
+        >
+          <X className="h-4 w-4" />
+        </Button>
         <DialogHeader>
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
             <Crown className="h-8 w-8 text-primary" />
@@ -313,15 +394,20 @@ export const PaywallModal = ({ open, onOpenChange }: PaywallModalProps) => {
             variant="outline" 
             size="lg"
             className="w-full"
-            onClick={() => setShowCodeInput(true)}
+            onClick={handleCheckExistingCode}
+            disabled={loading}
           >
-            <Gift className="h-4 w-4 mr-2" />
+            {loading ? (
+              <Loader2 className="h-4 w-4 animate-spin mr-2" />
+            ) : (
+              <Gift className="h-4 w-4 mr-2" />
+            )}
             Ho un codice speciale
           </Button>
           <Button 
             variant="ghost" 
             size="lg"
-            onClick={handleClose}
+            onClick={handleCloseAndRedirect}
           >
             Forse più tardi
           </Button>

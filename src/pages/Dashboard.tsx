@@ -11,7 +11,7 @@ import { useAdminRole } from "@/hooks/useAdminRole";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
-import { LayoutDashboard, Store, Table2, UtensilsCrossed, Calendar, AlertCircle, Info, CheckCircle, Clock, XCircle, BarChart3, Bell, MessageSquare } from "lucide-react";
+import { LayoutDashboard, Store, Table2, UtensilsCrossed, Calendar, AlertCircle, Info, CheckCircle, Clock, XCircle, BarChart3, Bell, MessageSquare, Lock } from "lucide-react";
 import { TablesManagement } from "@/components/dashboard/TablesManagement";
 import { MenuManagement } from "@/components/dashboard/MenuManagement";
 import { BookingsManagement } from "@/components/dashboard/BookingsManagement";
@@ -31,6 +31,7 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const [restaurant, setRestaurant] = useState<any>(null);
   const [showPaywall, setShowPaywall] = useState(false);
+  const [activeTab, setActiveTab] = useState("overview");
   const [stats, setStats] = useState({
     tables: 0, 
     menuItems: 0,
@@ -43,6 +44,10 @@ const Dashboard = () => {
   const [selectedRestaurantId, setSelectedRestaurantId] = useState<string>("");
   
   const loading = businessLoading || adminLoading;
+  
+  // Tabs that require Pro subscription
+  const proTabs = ['analytics', 'notifications', 'reviews', 'bookings', 'tables', 'menu'];
+  const hasProAccess = isAdmin || subscription.hasAccess;
 
   useEffect(() => {
     if (!isLoggedIn) {
@@ -58,7 +63,6 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchRestaurants = async () => {
       if (isAdmin) {
-        // Admin can see all restaurants
         const { data } = await supabase.from('restaurants').select('*').order('name');
         if (data) {
           setAllRestaurants(data);
@@ -67,7 +71,6 @@ const Dashboard = () => {
           }
         }
       } else if (businessRoles.length > 0) {
-        // Business user sees only their restaurants
         const restaurantIds = businessRoles.map(r => r.restaurant_id);
         const { data } = await supabase.from('restaurants').select('*').in('id', restaurantIds);
         if (data) {
@@ -112,6 +115,19 @@ const Dashboard = () => {
     fetchRestaurantDetails();
   }, [selectedRestaurantId]);
 
+  const handleTabChange = (value: string) => {
+    if (proTabs.includes(value) && !hasProAccess) {
+      setShowPaywall(true);
+      return;
+    }
+    setActiveTab(value);
+  };
+
+  const handlePaywallClose = () => {
+    // Reset to overview when paywall is closed
+    setActiveTab("overview");
+  };
+
   if (loading) return <div className="min-h-screen bg-background"><Header /><main className="pt-24 pb-16"><div className="container mx-auto px-4 text-center"><p className="text-lg text-muted-foreground">{t('dashboard.loading')}</p></div></main><Footer /></div>;
   if (!isAdmin && !hasRole()) return <div className="min-h-screen bg-background"><Header /><main className="pt-24 pb-16"><div className="container mx-auto px-4 max-w-2xl"><Card className="p-12 text-center"><AlertCircle className="w-16 h-16 text-destructive mx-auto mb-4" /><h1 className="text-3xl font-bold mb-4">{t('dashboard.noAccess')}</h1><p className="text-muted-foreground mb-6">{t('dashboard.noAccessMsg')}</p><Button onClick={() => navigate('/business-registration')}>Registra il Tuo Ristorante</Button></Card></div></main><Footer /></div>;
 
@@ -125,7 +141,6 @@ const Dashboard = () => {
               <div>
                 <h1 className="text-4xl font-bold mb-2">{t('dashboard.title')}</h1>
                 {restaurant && <p className="text-xl text-muted-foreground">{restaurant.name}</p>}
-                {/* Trial Badge */}
                 {subscription.inTrial && subscription.trialDaysRemaining && (
                   <div className="mt-2 inline-flex items-center gap-2 px-3 py-1 bg-primary/10 text-primary rounded-full text-sm font-medium">
                     💡 Trial attivo – {subscription.trialDaysRemaining} giorni rimasti
@@ -150,82 +165,46 @@ const Dashboard = () => {
               )}
             </div>
           </div>
-          <Tabs defaultValue="overview" className="space-y-8">
+          <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-8">
             <TabsList className="grid w-full grid-cols-4 lg:grid-cols-8">
-            <TabsTrigger value="overview"><LayoutDashboard className="w-4 h-4 mr-2" /><span className="hidden sm:inline">{t('dashboard.overview')}</span></TabsTrigger>
-            <TabsTrigger 
-              value="analytics" 
-              onClick={(e) => {
-                if (!isAdmin && !subscription.hasAccess) {
-                  e.preventDefault();
-                  setShowPaywall(true);
-                }
-              }}
-            >
-              <BarChart3 className="w-4 h-4 mr-2" />
-              <span className="hidden sm:inline">Analytics</span>
-            </TabsTrigger>
-            <TabsTrigger 
-              value="notifications"
-              onClick={(e) => {
-                if (!isAdmin && !subscription.hasAccess) {
-                  e.preventDefault();
-                  setShowPaywall(true);
-                }
-              }}
-            >
-              <Bell className="w-4 h-4 mr-2" />
-              <span className="hidden sm:inline">Notifiche</span>
-            </TabsTrigger>
-            <TabsTrigger 
-              value="reviews"
-              onClick={(e) => {
-                if (!isAdmin && !subscription.hasAccess) {
-                  e.preventDefault();
-                  setShowPaywall(true);
-                }
-              }}
-            >
-              <MessageSquare className="w-4 h-4 mr-2" />
-              <span className="hidden sm:inline">Recensioni</span>
-            </TabsTrigger>
-            <TabsTrigger value="info"><Info className="w-4 h-4 mr-2" /><span className="hidden sm:inline">Info & Foto</span></TabsTrigger>
-            <TabsTrigger 
-              value="bookings"
-              onClick={(e) => {
-                if (!isAdmin && !subscription.hasAccess) {
-                  e.preventDefault();
-                  setShowPaywall(true);
-                }
-              }}
-            >
-              <Calendar className="w-4 h-4 mr-2" />
-              <span className="hidden sm:inline">Prenotazioni</span>
-            </TabsTrigger>
-            <TabsTrigger 
-              value="tables"
-              onClick={(e) => {
-                if (!isAdmin && !subscription.hasAccess) {
-                  e.preventDefault();
-                  setShowPaywall(true);
-                }
-              }}
-            >
-              <Table2 className="w-4 h-4 mr-2" />
-              <span className="hidden sm:inline">{t('dashboard.tables')}</span>
-            </TabsTrigger>
-            <TabsTrigger 
-              value="menu"
-              onClick={(e) => {
-                if (!isAdmin && !subscription.hasAccess) {
-                  e.preventDefault();
-                  setShowPaywall(true);
-                }
-              }}
-            >
-              <UtensilsCrossed className="w-4 h-4 mr-2" />
-              <span className="hidden sm:inline">{t('dashboard.menu')}</span>
-            </TabsTrigger>
+              <TabsTrigger value="overview">
+                <LayoutDashboard className="w-4 h-4 mr-2" />
+                <span className="hidden sm:inline">{t('dashboard.overview')}</span>
+              </TabsTrigger>
+              <TabsTrigger value="analytics" className="relative">
+                <BarChart3 className="w-4 h-4 mr-2" />
+                <span className="hidden sm:inline">Analytics</span>
+                {!hasProAccess && <Lock className="w-3 h-3 absolute -top-1 -right-1 text-muted-foreground" />}
+              </TabsTrigger>
+              <TabsTrigger value="notifications" className="relative">
+                <Bell className="w-4 h-4 mr-2" />
+                <span className="hidden sm:inline">Notifiche</span>
+                {!hasProAccess && <Lock className="w-3 h-3 absolute -top-1 -right-1 text-muted-foreground" />}
+              </TabsTrigger>
+              <TabsTrigger value="reviews" className="relative">
+                <MessageSquare className="w-4 h-4 mr-2" />
+                <span className="hidden sm:inline">Recensioni</span>
+                {!hasProAccess && <Lock className="w-3 h-3 absolute -top-1 -right-1 text-muted-foreground" />}
+              </TabsTrigger>
+              <TabsTrigger value="info">
+                <Info className="w-4 h-4 mr-2" />
+                <span className="hidden sm:inline">Info & Foto</span>
+              </TabsTrigger>
+              <TabsTrigger value="bookings" className="relative">
+                <Calendar className="w-4 h-4 mr-2" />
+                <span className="hidden sm:inline">Prenotazioni</span>
+                {!hasProAccess && <Lock className="w-3 h-3 absolute -top-1 -right-1 text-muted-foreground" />}
+              </TabsTrigger>
+              <TabsTrigger value="tables" className="relative">
+                <Table2 className="w-4 h-4 mr-2" />
+                <span className="hidden sm:inline">{t('dashboard.tables')}</span>
+                {!hasProAccess && <Lock className="w-3 h-3 absolute -top-1 -right-1 text-muted-foreground" />}
+              </TabsTrigger>
+              <TabsTrigger value="menu" className="relative">
+                <UtensilsCrossed className="w-4 h-4 mr-2" />
+                <span className="hidden sm:inline">{t('dashboard.menu')}</span>
+                {!hasProAccess && <Lock className="w-3 h-3 absolute -top-1 -right-1 text-muted-foreground" />}
+              </TabsTrigger>
             </TabsList>
             <TabsContent value="overview">
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -285,18 +264,36 @@ const Dashboard = () => {
                 </Card>
               </div>
             </TabsContent>
-            <TabsContent value="analytics">{selectedRestaurantId && <RestaurantAnalytics restaurantId={selectedRestaurantId} />}</TabsContent>
-            <TabsContent value="notifications">{selectedRestaurantId && <NotificationsCenter restaurantId={selectedRestaurantId} />}</TabsContent>
-            <TabsContent value="reviews">{selectedRestaurantId && <ReviewsManagement restaurantId={selectedRestaurantId} />}</TabsContent>
-            <TabsContent value="info">{restaurant && <RestaurantInfo restaurant={restaurant} onUpdate={() => setSelectedRestaurantId(selectedRestaurantId)} />}</TabsContent>
-            <TabsContent value="bookings">{selectedRestaurantId && <BookingsManagement restaurantId={selectedRestaurantId} />}</TabsContent>
-            <TabsContent value="tables">{selectedRestaurantId && <TablesManagement restaurantId={selectedRestaurantId} />}</TabsContent>
-            <TabsContent value="menu">{selectedRestaurantId && <MenuManagement restaurantId={selectedRestaurantId} />}</TabsContent>
+            <TabsContent value="analytics">
+              {hasProAccess && selectedRestaurantId && <RestaurantAnalytics restaurantId={selectedRestaurantId} />}
+            </TabsContent>
+            <TabsContent value="notifications">
+              {hasProAccess && selectedRestaurantId && <NotificationsCenter restaurantId={selectedRestaurantId} />}
+            </TabsContent>
+            <TabsContent value="reviews">
+              {hasProAccess && selectedRestaurantId && <ReviewsManagement restaurantId={selectedRestaurantId} />}
+            </TabsContent>
+            <TabsContent value="info">
+              {restaurant && <RestaurantInfo restaurant={restaurant} onUpdate={() => setSelectedRestaurantId(selectedRestaurantId)} />}
+            </TabsContent>
+            <TabsContent value="bookings">
+              {hasProAccess && selectedRestaurantId && <BookingsManagement restaurantId={selectedRestaurantId} />}
+            </TabsContent>
+            <TabsContent value="tables">
+              {hasProAccess && selectedRestaurantId && <TablesManagement restaurantId={selectedRestaurantId} />}
+            </TabsContent>
+            <TabsContent value="menu">
+              {hasProAccess && selectedRestaurantId && <MenuManagement restaurantId={selectedRestaurantId} />}
+            </TabsContent>
           </Tabs>
         </div>
       </main>
       <Footer />
-      <PaywallModal open={showPaywall} onOpenChange={setShowPaywall} />
+      <PaywallModal 
+        open={showPaywall} 
+        onOpenChange={setShowPaywall}
+        onClose={handlePaywallClose}
+      />
     </div>
   );
 };
