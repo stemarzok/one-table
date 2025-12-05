@@ -12,7 +12,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { User, Settings, LogOut, Globe, Moon, Sun, Shield, CreditCard, LayoutDashboard, Store } from "lucide-react";
+import { User, Settings, LogOut, Globe, Moon, Sun, Shield, CreditCard, LayoutDashboard, Store, ImageIcon } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useNavigate } from "react-router-dom";
@@ -80,6 +80,11 @@ export const BusinessUserMenu = () => {
         <DropdownMenuItem onClick={() => navigate("/dashboard")}>
           <LayoutDashboard className="w-4 h-4 mr-2" />
           Dashboard
+        </DropdownMenuItem>
+        
+        <DropdownMenuItem onClick={() => navigate("/dashboard?tab=info")}>
+          <ImageIcon className="w-4 h-4 mr-2" />
+          Info e Foto
         </DropdownMenuItem>
         
         <DropdownMenuItem onClick={() => navigate("/billing")}>

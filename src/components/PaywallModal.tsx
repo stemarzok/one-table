@@ -173,6 +173,9 @@ export const PaywallModal = ({ open, onOpenChange, onClose }: PaywallModalProps)
         ? new Date(codeData.expires_at).toISOString()
         : new Date(2099, 11, 31).toISOString();
 
+      // Use 'lifetime' for valid billing_period (constraint allows: monthly, yearly, lifetime)
+      const billingPeriod = 'lifetime';
+
       // Check if user already has a subscription
       const { data: existingSub } = await supabase
         .from('subscriptions')
@@ -187,7 +190,7 @@ export const PaywallModal = ({ open, onOpenChange, onClose }: PaywallModalProps)
           .from('subscriptions')
           .update({
             plan_type: 'promo_speciale',
-            billing_period: codeData.duration_days ? 'limited' : 'lifetime',
+            billing_period: billingPeriod,
             status: 'active',
             current_period_start: new Date().toISOString(),
             current_period_end: currentPeriodEnd,
@@ -203,7 +206,7 @@ export const PaywallModal = ({ open, onOpenChange, onClose }: PaywallModalProps)
           .insert({
             user_id: user.id,
             plan_type: 'promo_speciale',
-            billing_period: codeData.duration_days ? 'limited' : 'lifetime',
+            billing_period: billingPeriod,
             status: 'active',
             current_period_start: new Date().toISOString(),
             current_period_end: currentPeriodEnd,
