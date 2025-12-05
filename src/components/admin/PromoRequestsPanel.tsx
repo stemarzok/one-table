@@ -119,12 +119,35 @@ export const PromoRequestsPanel = () => {
   const handleGenerateCode = async (request: PromoRequest) => {
     setGeneratingFor(request.id);
     try {
-      // Check if code already exists for this user
-      const existingCode = codes.find(c => c.user_id === request.user_id && c.valid);
-      if (existingCode) {
+      // Check if user already has an active subscription
+      const { data: activeSub } = await supabase
+        .from('subscriptions')
+        .select('id')
+        .eq('user_id', request.user_id)
+        .eq('status', 'active')
+        .maybeSingle();
+
+      if (activeSub) {
         toast({
           title: "Attenzione",
-          description: "Esiste già un codice valido per questo utente",
+          description: "Questo utente ha già un abbonamento attivo",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Check if code already exists for this user (valid and not expired)
+      const existingValidCode = codes.find(c => {
+        if (c.user_id !== request.user_id || !c.valid) return false;
+        // Check if not expired
+        if (c.expires_at && new Date(c.expires_at) < new Date()) return false;
+        return true;
+      });
+
+      if (existingValidCode) {
+        toast({
+          title: "Attenzione",
+          description: `Esiste già un codice valido per questo utente: ${existingValidCode.code}`,
           variant: "destructive",
         });
         return;
@@ -141,7 +164,13 @@ export const PromoRequestsPanel = () => {
       // Get duration
       const durationStr = selectedDuration[request.id] || 'unlimited';
       const durationDays = durationStr === 'unlimited' ? null : parseInt(durationStr);
-      const expiresAt = durationDays ? addDays(new Date(), durationDays).toISOString() : null;
+      
+      // Calculate expiration date from NOW + duration days (not current date)
+      const expiresAt = durationDays 
+        ? addDays(new Date(), durationDays).toISOString() 
+        : null;
+
+      console.log('Creating code:', { code, durationDays, expiresAt, user_id: request.user_id });
 
       // Insert code
       const { error: codeError } = await supabase
@@ -154,7 +183,10 @@ export const PromoRequestsPanel = () => {
           expires_at: expiresAt
         });
 
-      if (codeError) throw codeError;
+      if (codeError) {
+        console.error('Code creation error:', codeError);
+        throw codeError;
+      }
 
       // Update request status
       const { error: requestError } = await supabase
@@ -174,11 +206,36 @@ export const PromoRequestsPanel = () => {
       console.error('Error generating code:', error);
       toast({
         title: "Errore",
-        description: "Impossibile generare il codice",
+        description: "Impossibile generare il codice: " + (error.message || 'Errore sconosciuto'),
         variant: "destructive",
       });
     } finally {
       setGeneratingFor(null);
+    }
+  };
+
+  const handleRevokeCode = async (codeId: string) => {
+    try {
+      const { error } = await supabase
+        .from('promo_codes')
+        .update({ valid: false })
+        .eq('id', codeId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Codice Revocato",
+        description: "Il codice è stato revocato e non può più essere utilizzato",
+      });
+
+      fetchData();
+    } catch (error) {
+      console.error('Error revoking code:', error);
+      toast({
+        title: "Errore",
+        description: "Impossibile revocare il codice",
+        variant: "destructive",
+      });
     }
   };
 
@@ -408,6 +465,16 @@ export const PromoRequestsPanel = () => {
                         <Badge variant={code.valid ? (isExpired ? "secondary" : "default") : "secondary"}>
                           {!code.valid ? 'Utilizzato' : (isExpired ? 'Scaduto' : 'Valido')}
                         </Badge>
+                        {code.valid && !isExpired && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleRevokeCode(code.id)}
+                            className="text-orange-600 border-orange-600 hover:bg-orange-50"
+                          >
+                            Revoca
+                          </Button>
+                        )}
                         {code.valid && (
                           <Button
                             variant="ghost"

@@ -11,13 +11,12 @@ import { useAdminRole } from "@/hooks/useAdminRole";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
-import { LayoutDashboard, Store, Table2, UtensilsCrossed, Calendar, AlertCircle, Info, CheckCircle, Clock, XCircle, BarChart3, MessageSquare, Lock, ArrowRight, TrendingUp, Users, Bell } from "lucide-react";
+import { LayoutDashboard, Store, Table2, UtensilsCrossed, Calendar, AlertCircle, Info, CheckCircle, Clock, XCircle, BarChart3, MessageSquare, Lock, ArrowRight, TrendingUp, Users } from "lucide-react";
 import { TablesManagement } from "@/components/dashboard/TablesManagement";
 import { MenuManagement } from "@/components/dashboard/MenuManagement";
 import { BookingsManagement } from "@/components/dashboard/BookingsManagement";
 import { RestaurantInfo } from "@/components/dashboard/RestaurantInfo";
 import { RestaurantAnalytics } from "@/components/dashboard/RestaurantAnalytics";
-import { NotificationsCenter } from "@/components/dashboard/NotificationsCenter";
 import { ReviewsManagement } from "@/components/dashboard/ReviewsManagement";
 import { PaywallModal } from "@/components/PaywallModal";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -206,7 +205,7 @@ const Dashboard = () => {
             </div>
           </div>
           <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-8">
-            <TabsList className="grid w-full grid-cols-4 lg:grid-cols-8">
+            <TabsList className="grid w-full grid-cols-3 lg:grid-cols-7">
               <TabsTrigger value="overview">
                 <LayoutDashboard className="w-4 h-4 mr-2" />
                 <span className="hidden sm:inline">{t('dashboard.overview')}</span>
@@ -214,10 +213,6 @@ const Dashboard = () => {
               <TabsTrigger value="info">
                 <Info className="w-4 h-4 mr-2" />
                 <span className="hidden sm:inline">Info & Foto</span>
-              </TabsTrigger>
-              <TabsTrigger value="notifications">
-                <MessageSquare className="w-4 h-4 mr-2" />
-                <span className="hidden sm:inline">Notifiche</span>
               </TabsTrigger>
               <TabsTrigger value="analytics" className="relative">
                 <BarChart3 className="w-4 h-4 mr-2" />
@@ -449,9 +444,6 @@ const Dashboard = () => {
             
             <TabsContent value="info">
               {restaurant && <RestaurantInfo restaurant={restaurant} onUpdate={() => setSelectedRestaurantId(selectedRestaurantId)} />}
-            </TabsContent>
-            <TabsContent value="notifications">
-              {selectedRestaurantId && <NotificationsCenter restaurantId={selectedRestaurantId} />}
             </TabsContent>
             <TabsContent value="analytics">
               {hasProAccess && selectedRestaurantId && <RestaurantAnalytics restaurantId={selectedRestaurantId} />}
