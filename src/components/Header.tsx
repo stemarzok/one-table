@@ -8,7 +8,7 @@ import { MobileUserMenu } from "@/components/MobileUserMenu";
 import { DesktopUserMenu } from "@/components/DesktopUserMenu";
 import { BusinessUserMenu } from "@/components/BusinessUserMenu";
 import { MobileBusinessMenu } from "@/components/MobileBusinessMenu";
-import { NotificationBell } from "@/components/NotificationBell";
+import { NotificationPopover } from "@/components/NotificationPopover";
 
 const Header = () => {
   const { language, setLanguage, t } = useLanguage();
@@ -66,7 +66,7 @@ const Header = () => {
 
           {isLoggedIn ? (
             <div className="hidden md:flex items-center gap-2">
-              {isBusinessMode && <NotificationBell />}
+              {isBusinessMode && <NotificationPopover />}
               {isBusinessMode ? <BusinessUserMenu /> : <DesktopUserMenu />}
             </div>
           ) : (
@@ -88,7 +88,7 @@ const Header = () => {
         {/* Mobile menu - Show user menu icon when logged in, hamburger when not */}
         {isLoggedIn ? (
           <div className="md:hidden flex items-center gap-2">
-            {isBusinessMode && <NotificationBell />}
+            {isBusinessMode && <NotificationPopover />}
             {isBusinessMode ? <MobileBusinessMenu /> : <MobileUserMenu />}
           </div>
         ) : (

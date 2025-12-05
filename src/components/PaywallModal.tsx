@@ -11,7 +11,7 @@ import { toast } from "sonner";
 interface PaywallModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onClose?: () => void; // Callback when user chooses to leave
+  onClose?: () => void;
 }
 
 export const PaywallModal = ({ open, onOpenChange, onClose }: PaywallModalProps) => {
@@ -23,6 +23,8 @@ export const PaywallModal = ({ open, onOpenChange, onClose }: PaywallModalProps)
   const [loading, setLoading] = useState(false);
   const [requestSent, setRequestSent] = useState(false);
   const [hasExistingRequest, setHasExistingRequest] = useState(false);
+  const [hasActiveCode, setHasActiveCode] = useState(false);
+  const [hasActiveSubscription, setHasActiveSubscription] = useState(false);
 
   const handleRequestCode = async () => {
     if (!user || !profile) {
@@ -32,6 +34,36 @@ export const PaywallModal = ({ open, onOpenChange, onClose }: PaywallModalProps)
 
     setLoading(true);
     try {
+      // Check if user already has an active subscription
+      const { data: activeSub } = await supabase
+        .from('subscriptions')
+        .select('id, status')
+        .eq('user_id', user.id)
+        .eq('status', 'active')
+        .maybeSingle();
+
+      if (activeSub) {
+        toast.info("Hai già un abbonamento attivo");
+        setHasActiveSubscription(true);
+        return;
+      }
+
+      // Check if user already has an active code
+      const { data: activeCode } = await supabase
+        .from('promo_codes')
+        .select('id, code')
+        .eq('user_id', user.id)
+        .eq('valid', true)
+        .maybeSingle();
+
+      if (activeCode) {
+        toast.info("Hai già un codice attivo. Inseriscilo per attivare la promo.");
+        setHasActiveCode(true);
+        setShowCodeInput(true);
+        setShowConfirmRequest(false);
+        return;
+      }
+
       // Check if user already has a pending request
       const { data: existingRequest } = await supabase
         .from('promo_requests')
@@ -47,7 +79,7 @@ export const PaywallModal = ({ open, onOpenChange, onClose }: PaywallModalProps)
         return;
       }
 
-      // Create new request
+      // Create new request - THIS IS THE KEY FIX
       const { error } = await supabase
         .from('promo_requests')
         .insert({
@@ -56,31 +88,42 @@ export const PaywallModal = ({ open, onOpenChange, onClose }: PaywallModalProps)
           status: 'pending'
         });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error creating promo request:', error);
+        throw error;
+      }
 
-      toast.success("Richiesta inviata con successo!");
+      toast.success("Richiesta inviata con successo! L'amministratore la riceverà a breve.");
       setRequestSent(true);
     } catch (error: any) {
       console.error('Error creating promo request:', error);
-      toast.error("Errore nell'invio della richiesta");
+      toast.error("Errore nell'invio della richiesta: " + (error.message || 'Errore sconosciuto'));
     } finally {
       setLoading(false);
     }
   };
 
   const handleActivateCode = async () => {
-    if (!user || !promoCode.trim()) return;
+    if (!user || !promoCode.trim()) {
+      toast.error("Inserisci un codice valido");
+      return;
+    }
 
     setLoading(true);
     try {
+      const codeToCheck = promoCode.trim().toUpperCase();
+      console.log('Checking code:', codeToCheck, 'for user:', user.id);
+
       // Verify code exists and is valid for this user
       const { data: codeData, error: codeError } = await supabase
         .from('promo_codes')
         .select('*')
-        .eq('code', promoCode.trim().toUpperCase())
+        .eq('code', codeToCheck)
         .eq('user_id', user.id)
         .eq('valid', true)
         .maybeSingle();
+
+      console.log('Code data:', codeData, 'Error:', codeError);
 
       if (codeError) {
         console.error('Error checking code:', codeError);
@@ -89,7 +132,22 @@ export const PaywallModal = ({ open, onOpenChange, onClose }: PaywallModalProps)
       }
 
       if (!codeData) {
-        toast.error("Codice non valido, già utilizzato o non assegnato a te");
+        // Try to find if code exists but for different user or already used
+        const { data: anyCode } = await supabase
+          .from('promo_codes')
+          .select('*')
+          .eq('code', codeToCheck)
+          .maybeSingle();
+
+        if (!anyCode) {
+          toast.error("Codice non trovato. Verifica di averlo inserito correttamente.");
+        } else if (anyCode.user_id !== user.id) {
+          toast.error("Questo codice non è assegnato al tuo account.");
+        } else if (!anyCode.valid) {
+          toast.error("Questo codice è già stato utilizzato.");
+        } else {
+          toast.error("Codice non valido.");
+        }
         return;
       }
 
@@ -105,7 +163,10 @@ export const PaywallModal = ({ open, onOpenChange, onClose }: PaywallModalProps)
         .update({ valid: false, used_at: new Date().toISOString() })
         .eq('id', codeData.id);
 
-      if (updateCodeError) throw updateCodeError;
+      if (updateCodeError) {
+        console.error('Error updating code:', updateCodeError);
+        throw updateCodeError;
+      }
 
       // Calculate expiration date based on code duration
       const currentPeriodEnd = codeData.expires_at 
@@ -152,7 +213,10 @@ export const PaywallModal = ({ open, onOpenChange, onClose }: PaywallModalProps)
         subError = error;
       }
 
-      if (subError) throw subError;
+      if (subError) {
+        console.error('Error creating subscription:', subError);
+        throw subError;
+      }
 
       toast.success("Codice attivato! Promo Speciale attivo.");
       onOpenChange(false);
@@ -161,7 +225,7 @@ export const PaywallModal = ({ open, onOpenChange, onClose }: PaywallModalProps)
       window.location.reload();
     } catch (error: any) {
       console.error('Error activating code:', error);
-      toast.error("Errore nell'attivazione del codice");
+      toast.error("Errore nell'attivazione del codice: " + (error.message || 'Errore sconosciuto'));
     } finally {
       setLoading(false);
     }
@@ -174,6 +238,8 @@ export const PaywallModal = ({ open, onOpenChange, onClose }: PaywallModalProps)
     setPromoCode("");
     setRequestSent(false);
     setHasExistingRequest(false);
+    setHasActiveCode(false);
+    setHasActiveSubscription(false);
     onOpenChange(false);
     onClose?.();
     navigate('/dashboard');
@@ -184,26 +250,46 @@ export const PaywallModal = ({ open, onOpenChange, onClose }: PaywallModalProps)
     
     setLoading(true);
     try {
-      // Check if user has an existing pending request
-      const { data: existingRequest } = await supabase
-        .from('promo_requests')
+      // Check if user has an active subscription
+      const { data: activeSub } = await supabase
+        .from('subscriptions')
         .select('id, status')
         .eq('user_id', user.id)
+        .eq('status', 'active')
         .maybeSingle();
 
-      // Check if user has an unused code
+      if (activeSub) {
+        toast.info("Hai già un abbonamento attivo!");
+        setHasActiveSubscription(true);
+        return;
+      }
+
+      // Check if user has an unused code that is not expired
       const { data: existingCode } = await supabase
         .from('promo_codes')
-        .select('code')
+        .select('code, expires_at')
         .eq('user_id', user.id)
         .eq('valid', true)
         .maybeSingle();
 
       if (existingCode) {
-        // User has a code, show input
-        setShowCodeInput(true);
-      } else if (existingRequest?.status === 'pending') {
-        // User already requested
+        // Check if code is not expired
+        if (!existingCode.expires_at || new Date(existingCode.expires_at) > new Date()) {
+          setHasActiveCode(true);
+          setShowCodeInput(true);
+          return;
+        }
+      }
+
+      // Check if user has an existing pending request
+      const { data: existingRequest } = await supabase
+        .from('promo_requests')
+        .select('id, status')
+        .eq('user_id', user.id)
+        .eq('status', 'pending')
+        .maybeSingle();
+
+      if (existingRequest) {
         setRequestSent(true);
         setHasExistingRequest(true);
         setShowConfirmRequest(true);
