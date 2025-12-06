@@ -157,17 +157,6 @@ export const PaywallModal = ({ open, onOpenChange, onClose }: PaywallModalProps)
         return;
       }
 
-      // Mark code as used
-      const { error: updateCodeError } = await supabase
-        .from('promo_codes')
-        .update({ valid: false, used_at: new Date().toISOString() })
-        .eq('id', codeData.id);
-
-      if (updateCodeError) {
-        console.error('Error updating code:', updateCodeError);
-        throw updateCodeError;
-      }
-
       // Calculate expiration date based on code duration
       const currentPeriodEnd = codeData.expires_at 
         ? new Date(codeData.expires_at).toISOString()
@@ -218,7 +207,19 @@ export const PaywallModal = ({ open, onOpenChange, onClose }: PaywallModalProps)
 
       if (subError) {
         console.error('Error creating subscription:', subError);
-        throw subError;
+        toast.error("Errore nella creazione dell'abbonamento: " + subError.message);
+        return;
+      }
+
+      // Mark code as used ONLY AFTER subscription is successfully created
+      const { error: updateCodeError } = await supabase
+        .from('promo_codes')
+        .update({ valid: false, used_at: new Date().toISOString() })
+        .eq('id', codeData.id);
+
+      if (updateCodeError) {
+        console.error('Error updating code:', updateCodeError);
+        // Don't throw here - subscription is already created
       }
 
       toast.success("Codice attivato! Promo Speciale attivo.");
