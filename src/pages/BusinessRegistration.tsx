@@ -10,6 +10,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { passwordSchema, emailSchema } from "@/lib/validation";
 
 const BusinessRegistration = () => {
   const { toast } = useToast();
@@ -60,20 +61,33 @@ const BusinessRegistration = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validate password match
-    if (password !== confirmPassword) {
+    // Validate email format
+    const emailResult = emailSchema.safeParse(applicantEmail);
+    if (!emailResult.success) {
       toast({
         title: "Errore",
-        description: "Le password non corrispondono",
+        description: emailResult.error.errors[0].message,
         variant: "destructive",
       });
       return;
     }
 
-    if (password.length < 6) {
+    // Validate password strength
+    const passwordResult = passwordSchema.safeParse(password);
+    if (!passwordResult.success) {
       toast({
         title: "Errore",
-        description: "La password deve contenere almeno 6 caratteri",
+        description: passwordResult.error.errors[0].message,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate password match
+    if (password !== confirmPassword) {
+      toast({
+        title: "Errore",
+        description: "Le password non corrispondono",
         variant: "destructive",
       });
       return;
@@ -203,7 +217,7 @@ const BusinessRegistration = () => {
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Almeno 6 caratteri"
+                    placeholder="Min 8 caratteri, 1 maiuscola, 1 minuscola, 1 numero"
                     required
                     className="mt-2"
                   />
