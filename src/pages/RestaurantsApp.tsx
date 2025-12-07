@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import Header from "@/components/Header";
 import RestaurantList from "@/components/RestaurantList";
-import Footer from "@/components/Footer";
 
 const RestaurantsApp = () => {
   const { isLoggedIn, isBusinessMode } = useAuth();
@@ -27,10 +26,9 @@ const RestaurantsApp = () => {
   return (
     <div className="min-h-screen">
       <Header />
-      <main className="pt-16">
+      <main className="pt-16 pb-16">
         <RestaurantList />
       </main>
-      <Footer />
     </div>
   );
 };
