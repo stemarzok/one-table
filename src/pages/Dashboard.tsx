@@ -1,5 +1,4 @@
 import Header from "@/components/Header";
-import Footer from "@/components/Footer";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -11,11 +10,10 @@ import { useAdminRole } from "@/hooks/useAdminRole";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
-import { LayoutDashboard, Store, Table2, UtensilsCrossed, Calendar, AlertCircle, Info, CheckCircle, Clock, XCircle, BarChart3, MessageSquare, Lock, ArrowRight, TrendingUp, Users } from "lucide-react";
+import { LayoutDashboard, Store, Table2, UtensilsCrossed, Calendar, AlertCircle, CheckCircle, Clock, XCircle, BarChart3, MessageSquare, Lock, ArrowRight, TrendingUp, Users } from "lucide-react";
 import { TablesManagement } from "@/components/dashboard/TablesManagement";
 import { MenuManagement } from "@/components/dashboard/MenuManagement";
 import { BookingsManagement } from "@/components/dashboard/BookingsManagement";
-import { RestaurantInfo } from "@/components/dashboard/RestaurantInfo";
 import { RestaurantAnalytics } from "@/components/dashboard/RestaurantAnalytics";
 import { ReviewsManagement } from "@/components/dashboard/ReviewsManagement";
 import { PaywallModal } from "@/components/PaywallModal";
@@ -167,8 +165,8 @@ const Dashboard = () => {
     setActiveTab(tab);
   };
 
-  if (loading) return <div className="min-h-screen bg-background"><Header /><main className="pt-24 pb-16"><div className="container mx-auto px-4 text-center"><p className="text-lg text-muted-foreground">{t('dashboard.loading')}</p></div></main><Footer /></div>;
-  if (!isAdmin && !hasRole()) return <div className="min-h-screen bg-background"><Header /><main className="pt-24 pb-16"><div className="container mx-auto px-4 max-w-2xl"><Card className="p-12 text-center"><AlertCircle className="w-16 h-16 text-destructive mx-auto mb-4" /><h1 className="text-3xl font-bold mb-4">{t('dashboard.noAccess')}</h1><p className="text-muted-foreground mb-6">{t('dashboard.noAccessMsg')}</p><Button onClick={() => navigate('/business-registration')}>Registra il Tuo Ristorante</Button></Card></div></main><Footer /></div>;
+  if (loading) return <div className="min-h-screen bg-background"><Header /><main className="pt-24 pb-16"><div className="container mx-auto px-4 text-center"><p className="text-lg text-muted-foreground">{t('dashboard.loading')}</p></div></main></div>;
+  if (!isAdmin && !hasRole()) return <div className="min-h-screen bg-background"><Header /><main className="pt-24 pb-16"><div className="container mx-auto px-4 max-w-2xl"><Card className="p-12 text-center"><AlertCircle className="w-16 h-16 text-destructive mx-auto mb-4" /><h1 className="text-3xl font-bold mb-4">{t('dashboard.noAccess')}</h1><p className="text-muted-foreground mb-6">{t('dashboard.noAccessMsg')}</p><Button onClick={() => navigate('/business-registration')}>Registra il Tuo Ristorante</Button></Card></div></main></div>;
 
   return (
     <div className="min-h-screen bg-background">
@@ -205,14 +203,10 @@ const Dashboard = () => {
             </div>
           </div>
           <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-8">
-            <TabsList className="grid w-full grid-cols-3 lg:grid-cols-7">
+            <TabsList className="grid w-full grid-cols-2 lg:grid-cols-6">
               <TabsTrigger value="overview">
                 <LayoutDashboard className="w-4 h-4 mr-2" />
                 <span className="hidden sm:inline">{t('dashboard.overview')}</span>
-              </TabsTrigger>
-              <TabsTrigger value="info">
-                <Info className="w-4 h-4 mr-2" />
-                <span className="hidden sm:inline">Info & Foto</span>
               </TabsTrigger>
               <TabsTrigger value="analytics" className="relative">
                 <BarChart3 className="w-4 h-4 mr-2" />
@@ -425,26 +419,12 @@ const Dashboard = () => {
                         </div>
                         {!hasProAccess && <Lock className="w-4 h-4 ml-auto" />}
                       </Button>
-                      <Button 
-                        variant="outline" 
-                        className="justify-start h-auto py-3"
-                        onClick={() => setActiveTab('info')}
-                      >
-                        <Info className="w-5 h-5 mr-3" />
-                        <div className="text-left">
-                          <p className="font-medium">Modifica Info Ristorante</p>
-                          <p className="text-xs text-muted-foreground">Foto, orari, descrizione</p>
-                        </div>
-                      </Button>
                     </div>
                   </Card>
                 </div>
               </div>
             </TabsContent>
             
-            <TabsContent value="info">
-              {restaurant && <RestaurantInfo restaurant={restaurant} onUpdate={() => setSelectedRestaurantId(selectedRestaurantId)} />}
-            </TabsContent>
             <TabsContent value="analytics">
               {hasProAccess && selectedRestaurantId && <RestaurantAnalytics restaurantId={selectedRestaurantId} />}
             </TabsContent>
@@ -463,7 +443,7 @@ const Dashboard = () => {
           </Tabs>
         </div>
       </main>
-      <Footer />
+      
       <PaywallModal 
         open={showPaywall} 
         onOpenChange={setShowPaywall}

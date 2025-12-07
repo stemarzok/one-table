@@ -6,7 +6,7 @@ import { Separator } from "@/components/ui/separator";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Settings, LogOut, Globe, Moon, Sun, Shield, CreditCard, LayoutDashboard, Store, ImageIcon } from "lucide-react";
+import { Settings, LogOut, Globe, Moon, Sun, Shield, CreditCard, LayoutDashboard, Store } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useNavigate } from "react-router-dom";
@@ -37,7 +37,6 @@ export const MobileBusinessMenu = () => {
 
   const menuItems = [
     { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },
-    { icon: ImageIcon, label: "Info e Foto", path: "/dashboard?tab=info" },
     { icon: CreditCard, label: "Gestione Abbonamento", path: "/billing" },
     { icon: Settings, label: "Impostazioni", path: "/settings" },
     ...(isAdmin ? [{ icon: Shield, label: "Pannello Admin", path: "/admin" }] : []),
