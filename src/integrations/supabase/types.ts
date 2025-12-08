@@ -42,6 +42,7 @@ export type Database = {
           created_at: string
           guests_count: number
           id: string
+          marketing_consent: boolean | null
           restaurant_id: string
           special_requests: string | null
           status: string
@@ -58,6 +59,7 @@ export type Database = {
           created_at?: string
           guests_count: number
           id?: string
+          marketing_consent?: boolean | null
           restaurant_id: string
           special_requests?: string | null
           status?: string
@@ -74,6 +76,7 @@ export type Database = {
           created_at?: string
           guests_count?: number
           id?: string
+          marketing_consent?: boolean | null
           restaurant_id?: string
           special_requests?: string | null
           status?: string
