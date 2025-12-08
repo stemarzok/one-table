@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Calendar, Users, Clock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -32,6 +33,7 @@ export const BookingDialog = ({ restaurantId, restaurantName }: BookingDialogPro
     time: "",
     guests: 2,
     specialRequests: "",
+    marketingConsent: false,
   });
 
   const guestOptions = [1, 2, 3, 4, 5, 6, 7, 8];
@@ -108,6 +110,7 @@ export const BookingDialog = ({ restaurantId, restaurantName }: BookingDialogPro
           guests_count: formData.guests,
           special_requests: formData.specialRequests || null,
           status: "pending",
+          marketing_consent: formData.marketingConsent,
         })
         .select()
         .single();
@@ -134,7 +137,7 @@ export const BookingDialog = ({ restaurantId, restaurantName }: BookingDialogPro
 
       toast.success("Richiesta di prenotazione inviata! Riceverai un'email di conferma.");
       setOpen(false);
-      setFormData({ date: "", time: "", guests: 2, specialRequests: "" });
+      setFormData({ date: "", time: "", guests: 2, specialRequests: "", marketingConsent: false });
     } catch (error: any) {
       console.error("Booking error:", error);
       toast.error(t("booking.bookingError"));
@@ -238,6 +241,18 @@ export const BookingDialog = ({ restaurantId, restaurantName }: BookingDialogPro
               placeholder={t("booking.specialRequestsPlaceholder")}
               rows={3}
             />
+          </div>
+
+          {/* Marketing Consent */}
+          <div className="flex items-start space-x-3 p-3 bg-muted/50 rounded-lg">
+            <Checkbox
+              id="marketing"
+              checked={formData.marketingConsent}
+              onCheckedChange={(checked) => setFormData({ ...formData, marketingConsent: checked === true })}
+            />
+            <Label htmlFor="marketing" className="text-sm leading-relaxed cursor-pointer">
+              Acconsento a ricevere comunicazioni promozionali e offerte speciali dal ristorante
+            </Label>
           </div>
 
           <Button type="submit" className="w-full h-12 text-base" disabled={loading || !formData.time}>

@@ -14,7 +14,7 @@ import { LayoutDashboard, Store, Table2, UtensilsCrossed, Calendar, AlertCircle,
 import { TablesManagement } from "@/components/dashboard/TablesManagement";
 import { MenuManagement } from "@/components/dashboard/MenuManagement";
 import { BookingsManagement } from "@/components/dashboard/BookingsManagement";
-import { RestaurantAnalytics } from "@/components/dashboard/RestaurantAnalytics";
+import { RestaurantAnalyticsAdvanced } from "@/components/dashboard/RestaurantAnalyticsAdvanced";
 import { ReviewsManagement } from "@/components/dashboard/ReviewsManagement";
 import { PaywallModal } from "@/components/PaywallModal";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -203,7 +203,7 @@ const Dashboard = () => {
             </div>
           </div>
           <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-8">
-            <TabsList className="grid w-full grid-cols-2 lg:grid-cols-6">
+            <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6 gap-1">
               <TabsTrigger value="overview">
                 <LayoutDashboard className="w-4 h-4 mr-2" />
                 <span className="hidden sm:inline">{t('dashboard.overview')}</span>
@@ -426,7 +426,7 @@ const Dashboard = () => {
             </TabsContent>
             
             <TabsContent value="analytics">
-              {hasProAccess && selectedRestaurantId && <RestaurantAnalytics restaurantId={selectedRestaurantId} />}
+              {hasProAccess && selectedRestaurantId && <RestaurantAnalyticsAdvanced restaurantId={selectedRestaurantId} />}
             </TabsContent>
             <TabsContent value="reviews">
               {hasProAccess && selectedRestaurantId && <ReviewsManagement restaurantId={selectedRestaurantId} />}
