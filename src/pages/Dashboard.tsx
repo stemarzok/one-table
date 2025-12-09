@@ -10,18 +10,20 @@ import { useAdminRole } from "@/hooks/useAdminRole";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
-import { LayoutDashboard, Store, Table2, UtensilsCrossed, Calendar, AlertCircle, CheckCircle, Clock, XCircle, BarChart3, MessageSquare, Lock, ArrowRight, TrendingUp, Users } from "lucide-react";
+import { LayoutDashboard, Store, Table2, UtensilsCrossed, Calendar, AlertCircle, CheckCircle, Clock, XCircle, BarChart3, MessageSquare, Lock, ArrowRight, TrendingUp, Users, HelpCircle } from "lucide-react";
 import { TablesManagement } from "@/components/dashboard/TablesManagement";
 import { MenuManagement } from "@/components/dashboard/MenuManagement";
 import { BookingsManagement } from "@/components/dashboard/BookingsManagement";
 import { RestaurantAnalyticsAdvanced } from "@/components/dashboard/RestaurantAnalyticsAdvanced";
 import { ReviewsManagement } from "@/components/dashboard/ReviewsManagement";
 import { PaywallModal } from "@/components/PaywallModal";
+import { DashboardTutorial } from "@/components/dashboard/DashboardTutorial";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 const Dashboard = () => {
-  const { isLoggedIn, isBusinessMode } = useAuth();
+  const { isLoggedIn, isBusinessMode, user } = useAuth();
   const { hasRole, loading: businessLoading, businessRoles } = useBusinessRole();
   const { isAdmin, loading: adminLoading } = useAdminRole();
   const subscription = useSubscription();
@@ -31,6 +33,8 @@ const Dashboard = () => {
   const [restaurant, setRestaurant] = useState<any>(null);
   const [showPaywall, setShowPaywall] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
+  const [showTutorial, setShowTutorial] = useState(false);
+  const [tutorialCompleted, setTutorialCompleted] = useState(true);
   const [stats, setStats] = useState({
     tables: 0, 
     menuItems: 0,
@@ -66,6 +70,49 @@ const Dashboard = () => {
       setSearchParams(searchParams, { replace: true });
     }
   }, [searchParams, hasProAccess]);
+
+  // Check if user has completed onboarding tutorial
+  useEffect(() => {
+    const checkOnboardingStatus = async () => {
+      if (user?.id) {
+        const { data } = await supabase
+          .from('profiles')
+          .select('onboarding_completed')
+          .eq('id', user.id)
+          .single();
+        
+        if (data && !data.onboarding_completed) {
+          setShowTutorial(true);
+          setTutorialCompleted(false);
+        } else {
+          setTutorialCompleted(true);
+        }
+      }
+    };
+    checkOnboardingStatus();
+  }, [user?.id]);
+
+  const handleTutorialComplete = async () => {
+    setShowTutorial(false);
+    setTutorialCompleted(true);
+    if (user?.id) {
+      await supabase
+        .from('profiles')
+        .update({ onboarding_completed: true })
+        .eq('id', user.id);
+    }
+  };
+
+  const handleTutorialDismiss = async () => {
+    setShowTutorial(false);
+    setTutorialCompleted(true);
+    if (user?.id) {
+      await supabase
+        .from('profiles')
+        .update({ onboarding_completed: true })
+        .eq('id', user.id);
+    }
+  };
 
   useEffect(() => {
     if (!isLoggedIn) {
@@ -184,24 +231,47 @@ const Dashboard = () => {
                   </div>
                 )}
               </div>
-              {allRestaurants.length > 1 && (
-                <div className="w-full md:w-64">
-                  <Select value={selectedRestaurantId} onValueChange={setSelectedRestaurantId}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleziona ristorante" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {allRestaurants.map((rest) => (
-                        <SelectItem key={rest.id} value={rest.id}>
-                          {rest.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
+              <div className="flex items-center gap-3">
+                {allRestaurants.length > 1 && (
+                  <div className="w-full md:w-64">
+                    <Select value={selectedRestaurantId} onValueChange={setSelectedRestaurantId}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Seleziona ristorante" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {allRestaurants.map((rest) => (
+                          <SelectItem key={rest.id} value={rest.id}>
+                            {rest.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+                {tutorialCompleted && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowTutorial(true)}
+                    className="gap-2"
+                  >
+                    <HelpCircle className="w-4 h-4" />
+                    <span className="hidden sm:inline">Tutorial</span>
+                  </Button>
+                )}
+              </div>
             </div>
           </div>
+          
+          {/* Tutorial Section */}
+          {showTutorial && (
+            <div className="mb-8">
+              <DashboardTutorial 
+                onComplete={handleTutorialComplete} 
+                onDismiss={handleTutorialDismiss} 
+              />
+            </div>
+          )}
           <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-8">
             <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6 gap-1">
               <TabsTrigger value="overview">

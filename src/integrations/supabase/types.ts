@@ -340,6 +340,7 @@ export type Database = {
           id: string
           level: string
           name: string
+          onboarding_completed: boolean | null
           phone: string | null
           points: number
           updated_at: string
@@ -351,6 +352,7 @@ export type Database = {
           id: string
           level?: string
           name: string
+          onboarding_completed?: boolean | null
           phone?: string | null
           points?: number
           updated_at?: string
@@ -362,6 +364,7 @@ export type Database = {
           id?: string
           level?: string
           name?: string
+          onboarding_completed?: boolean | null
           phone?: string | null
           points?: number
           updated_at?: string
