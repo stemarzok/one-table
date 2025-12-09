@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { MobileUserMenu } from "@/components/MobileUserMenu";
 import { DesktopUserMenu } from "@/components/DesktopUserMenu";
 import { BusinessUserMenu } from "@/components/BusinessUserMenu";
@@ -16,21 +16,32 @@ const Header = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 
+  // Determine if we're on a landing page (where header should be transparent initially)
+  const isLandingPage = location.pathname === '/' || location.pathname === '/business';
+  
   // Determine if user is in business section based on current route
   const isInBusinessSection = location.pathname.startsWith('/dashboard') || 
                                location.pathname.startsWith('/business') ||
                                location.pathname.startsWith('/billing') ||
                                location.pathname.startsWith('/onboarding');
 
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 0);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll(); // Check initial state
+    
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   const getLogoLink = () => {
-    // If not logged in and in business section, return to business page
     if (!isLoggedIn && isInBusinessSection) return "/business";
-    // If not logged in and not in business section, return to home
     if (!isLoggedIn) return "/";
-    // If logged in as business user, go to dashboard
     if (isBusinessMode) return "/dashboard";
-    // Regular users always go to restaurants
     return "/restaurants";
   };
 
@@ -42,23 +53,37 @@ const Header = () => {
     }
   };
 
+  // Header classes based on scroll state and page type
+  const headerClasses = isLandingPage
+    ? scrolled
+      ? "fixed top-0 left-0 right-0 z-50 bg-[hsl(0,0%,8%)] shadow-header transition-all duration-200 ease-out"
+      : "fixed top-0 left-0 right-0 z-50 bg-transparent transition-all duration-200 ease-out"
+    : "fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border";
+
+  // Text color based on state
+  const textColorClass = isLandingPage && !scrolled
+    ? "text-white"
+    : scrolled && isLandingPage
+    ? "text-white"
+    : "text-foreground";
+
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border">
+    <header className={headerClasses}>
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         <Link to={getLogoLink()} onClick={handleLogoClick} className="flex items-center gap-0">
-          <span className="text-2xl font-bold text-foreground">One</span>
-          <span className="text-2xl font-bold text-primary">Table</span>
+          <span className={`text-2xl font-extrabold ${isLandingPage ? 'text-white' : 'text-foreground'} transition-colors duration-200`}>One</span>
+          <span className="text-2xl font-extrabold text-primary transition-colors duration-200">Table</span>
         </Link>
         
         <nav className="hidden md:flex items-center gap-8">
           {!isLoggedIn && (
             <>
               {isInBusinessSection && (
-                <Link to="/pricing" className="text-sm font-medium text-foreground hover:text-primary transition-colors">
+                <Link to="/pricing" className={`text-sm font-semibold ${textColorClass} hover:text-primary transition-colors`}>
                   Prezzi
                 </Link>
               )}
-              <Link to={isInBusinessSection ? '/' : '/business'} className="text-sm font-medium text-foreground hover:text-primary transition-colors mr-2">
+              <Link to={isInBusinessSection ? '/' : '/business'} className={`text-sm font-semibold ${textColorClass} hover:text-primary transition-colors mr-2`}>
                 {isInBusinessSection ? 'Home' : t('nav.forBusiness')}
               </Link>
             </>
@@ -72,12 +97,19 @@ const Header = () => {
           ) : (
             <div className="flex items-center gap-3">
               <Link to={isInBusinessSection ? '/business-login' : '/auth'}>
-                <Button variant="outline" className="border-foreground/30 text-foreground hover:bg-foreground/5 hover:border-foreground/50 rounded-full">
+                <Button 
+                  variant="outline" 
+                  className={`rounded-full font-semibold transition-all duration-200 ${
+                    isLandingPage 
+                      ? 'border-white/30 text-white hover:bg-white/10 hover:border-white/50' 
+                      : 'border-foreground/30 text-foreground hover:bg-foreground/5 hover:border-foreground/50'
+                  }`}
+                >
                   {t('nav.login')}
                 </Button>
               </Link>
               <Link to={isInBusinessSection ? '/business-registration' : '/auth#signup'}>
-                <Button className="bg-primary hover:bg-primary/90 text-background font-semibold rounded-full">
+                <Button className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-full btn-premium">
                   Registrati
                 </Button>
               </Link>
@@ -93,7 +125,7 @@ const Header = () => {
           </div>
         ) : (
           <button 
-            className="md:hidden"
+            className={`md:hidden ${textColorClass}`}
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
             {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -103,24 +135,24 @@ const Header = () => {
 
       {/* Mobile menu - Only show when NOT logged in */}
       {mobileMenuOpen && !isLoggedIn && (
-        <div className="md:hidden border-t border-border bg-background">
+        <div className={`md:hidden border-t ${isLandingPage ? 'border-white/10 bg-[hsl(0,0%,8%)]' : 'border-border bg-background'}`}>
           <nav className="container mx-auto px-4 py-4 flex flex-col gap-2">
             {isInBusinessSection && (
-              <Link to="/pricing" className="py-2 text-foreground" onClick={() => setMobileMenuOpen(false)}>
+              <Link to="/pricing" className={`py-2 font-medium ${isLandingPage ? 'text-white' : 'text-foreground'}`} onClick={() => setMobileMenuOpen(false)}>
                 Prezzi
               </Link>
             )}
-            <Link to={isInBusinessSection ? '/' : '/business'} className="py-2 text-foreground" onClick={() => setMobileMenuOpen(false)}>
+            <Link to={isInBusinessSection ? '/' : '/business'} className={`py-2 font-medium ${isLandingPage ? 'text-white' : 'text-foreground'}`} onClick={() => setMobileMenuOpen(false)}>
               {isInBusinessSection ? 'Home' : t('nav.forBusiness')}
             </Link>
-            <div className="flex flex-col gap-2 pt-2 border-t border-border mt-2">
+            <div className="flex flex-col gap-2 pt-2 border-t border-white/10 mt-2">
             <Link to={isInBusinessSection ? '/business-login' : '/auth'} onClick={() => setMobileMenuOpen(false)}>
-              <Button variant="outline" className="w-full border-foreground/30 text-foreground hover:bg-foreground/5 hover:border-foreground/50">
+              <Button variant="outline" className={`w-full font-semibold ${isLandingPage ? 'border-white/30 text-white hover:bg-white/10' : 'border-foreground/30 text-foreground hover:bg-foreground/5'}`}>
                 {t('nav.login')}
               </Button>
             </Link>
             <Link to={isInBusinessSection ? '/business-registration' : '/auth#signup'} onClick={() => setMobileMenuOpen(false)}>
-              <Button className="w-full bg-primary hover:bg-primary/90 text-background font-semibold">
+              <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold">
                 Registrati
               </Button>
             </Link>
