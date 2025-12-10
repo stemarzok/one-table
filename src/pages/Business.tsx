@@ -3,7 +3,6 @@ import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { CheckCircle, TrendingDown, Users, Calendar, BarChart3, Shield, ArrowRight } from "lucide-react";
-import heroBusinessImage from "@/assets/hero-business.jpg";
 import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, useInView, useScroll, useTransform } from "framer-motion";
@@ -75,16 +74,17 @@ const Business = () => {
           className="absolute inset-0 z-0"
           style={{ y: backgroundY }}
         >
-          <div 
-            className="absolute inset-0"
-            style={{
-              backgroundImage: `url(${heroBusinessImage})`,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-            }}
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-[hsl(0,0%,8%)/90] via-[hsl(0,0%,8%)/80] to-[hsl(0,0%,8%)/95]" />
-          <div className="absolute inset-0 mesh-gradient opacity-50" />
+          <video 
+            autoPlay 
+            muted 
+            loop 
+            playsInline
+            className="absolute inset-0 w-full h-full object-cover"
+          >
+            <source src="https://videos.pexels.com/video-files/3298176/3298176-uhd_2560_1440_25fps.mp4" type="video/mp4" />
+          </video>
+          <div className="absolute inset-0 bg-gradient-to-b from-[hsl(0,0%,5%)/80] via-[hsl(0,0%,8%)/70] to-[hsl(0,0%,8%)/90]" />
+          <div className="absolute inset-0 mesh-gradient opacity-40" />
         </motion.div>
         
         <motion.div 
@@ -253,16 +253,8 @@ const Business = () => {
 
       {/* CTA Section */}
       <section ref={ctaRef} className="relative py-32 overflow-hidden">
-        <div 
-          className="absolute inset-0 z-0"
-          style={{
-            backgroundImage: `url(${heroBusinessImage})`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-          }}
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-[hsl(0,0%,8%)/90] via-[hsl(0,0%,8%)/85] to-[hsl(0,0%,8%)/95]" />
-        <div className="absolute inset-0 mesh-gradient opacity-40" />
+        <div className="absolute inset-0 z-0 bg-[hsl(0,0%,8%)]" />
+        <div className="absolute inset-0 mesh-gradient opacity-60" />
         
         <motion.div 
           className="container mx-auto px-4 text-center relative z-10"

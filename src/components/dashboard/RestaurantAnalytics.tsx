@@ -139,7 +139,7 @@ export const RestaurantAnalytics = ({ restaurantId }: AnalyticsProps) => {
     }
   };
 
-  const COLORS = ['#8b5cf6', '#10b981', '#f59e0b', '#ef4444', '#3b82f6'];
+  const COLORS = ['hsl(142, 71%, 45%)', 'hsl(142, 60%, 55%)', 'hsl(142, 50%, 65%)', 'hsl(0, 84%, 60%)', 'hsl(217, 91%, 60%)'];
 
   if (loading) {
     return <div className="text-center py-8">Caricamento analytics...</div>;
@@ -148,9 +148,9 @@ export const RestaurantAnalytics = ({ restaurantId }: AnalyticsProps) => {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">Analytics Ristorante</h2>
+        <h2 className="text-2xl font-bold text-foreground">Analytics Ristorante</h2>
         <Select value={dateRange} onValueChange={setDateRange}>
-          <SelectTrigger className="w-[150px]">
+          <SelectTrigger className="w-[180px] bg-card border-border">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -163,68 +163,78 @@ export const RestaurantAnalytics = ({ restaurantId }: AnalyticsProps) => {
 
       {/* KPI Cards */}
       <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-4">
-        <Card>
+        <Card className="bg-card border-border hover:border-primary/30 transition-all duration-300">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <Calendar className="w-4 h-4 text-blue-500" />
+            <CardTitle className="text-sm font-medium flex items-center gap-2 text-muted-foreground">
+              <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                <Calendar className="w-4 h-4 text-primary" />
+              </div>
               Prenotazioni
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.totalBookings}</div>
-            <p className="text-xs text-muted-foreground">Totali nel periodo</p>
+            <div className="text-3xl font-bold text-foreground">{stats.totalBookings}</div>
+            <p className="text-xs text-muted-foreground mt-1">Totali nel periodo</p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-card border-border hover:border-primary/30 transition-all duration-300">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <Users className="w-4 h-4 text-green-500" />
+            <CardTitle className="text-sm font-medium flex items-center gap-2 text-muted-foreground">
+              <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                <Users className="w-4 h-4 text-primary" />
+              </div>
               Media Ospiti
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.avgGuests}</div>
-            <p className="text-xs text-muted-foreground">Per prenotazione</p>
+            <div className="text-3xl font-bold text-foreground">{stats.avgGuests}</div>
+            <p className="text-xs text-muted-foreground mt-1">Per prenotazione</p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-card border-border hover:border-primary/30 transition-all duration-300">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <TrendingUp className="w-4 h-4 text-purple-500" />
+            <CardTitle className="text-sm font-medium flex items-center gap-2 text-muted-foreground">
+              <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                <TrendingUp className="w-4 h-4 text-primary" />
+              </div>
               Tasso Occupazione
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.occupancyRate}%</div>
-            <p className="text-xs text-muted-foreground">Media periodo</p>
+            <div className="text-3xl font-bold text-foreground">{stats.occupancyRate}%</div>
+            <p className="text-xs text-muted-foreground mt-1">Media periodo</p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-card border-border hover:border-primary/30 transition-all duration-300">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <Clock className="w-4 h-4 text-orange-500" />
+            <CardTitle className="text-sm font-medium flex items-center gap-2 text-muted-foreground">
+              <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                <Clock className="w-4 h-4 text-primary" />
+              </div>
               Orario di Picco
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.peakHour}</div>
-            <p className="text-xs text-muted-foreground">Più prenotato</p>
+            <div className="text-3xl font-bold text-foreground">{stats.peakHour}</div>
+            <p className="text-xs text-muted-foreground mt-1">Più prenotato</p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-card border-border hover:border-primary/30 transition-all duration-300">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <DollarSign className="w-4 h-4 text-yellow-500" />
+            <CardTitle className="text-sm font-medium flex items-center gap-2 text-muted-foreground">
+              <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                <DollarSign className="w-4 h-4 text-primary" />
+              </div>
               Revenue (stima)
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">€{Math.round(stats.revenue).toLocaleString()}</div>
-            <p className="text-xs text-muted-foreground">Totale stimato</p>
+            <div className="text-3xl font-bold text-foreground">€{Math.round(stats.revenue).toLocaleString()}</div>
+            <p className="text-xs text-muted-foreground mt-1">Totale stimato</p>
           </CardContent>
         </Card>
       </div>
@@ -232,72 +242,90 @@ export const RestaurantAnalytics = ({ restaurantId }: AnalyticsProps) => {
       {/* Charts */}
       <div className="grid lg:grid-cols-2 gap-6">
         {/* Booking Trends */}
-        <Card>
+        <Card className="bg-card border-border">
           <CardHeader>
-            <CardTitle>Trend Prenotazioni</CardTitle>
+            <CardTitle className="text-foreground">Trend Prenotazioni</CardTitle>
             <CardDescription>Andamento giornaliero delle prenotazioni</CardDescription>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
               <LineChart data={bookingTrends}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="date" />
-                <YAxis />
-                <Tooltip />
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                <XAxis dataKey="date" stroke="hsl(var(--muted-foreground))" fontSize={12} />
+                <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} />
+                <Tooltip 
+                  contentStyle={{ 
+                    backgroundColor: 'hsl(var(--card))', 
+                    border: '1px solid hsl(var(--border))',
+                    borderRadius: '8px'
+                  }} 
+                />
                 <Legend />
-                <Line type="monotone" dataKey="bookings" stroke="#8b5cf6" strokeWidth={2} name="Totali" />
-                <Line type="monotone" dataKey="confirmed" stroke="#10b981" strokeWidth={2} name="Confermate" />
-                <Line type="monotone" dataKey="cancelled" stroke="#ef4444" strokeWidth={2} name="Cancellate" />
+                <Line type="monotone" dataKey="bookings" stroke="hsl(142, 71%, 45%)" strokeWidth={2} name="Totali" />
+                <Line type="monotone" dataKey="confirmed" stroke="hsl(142, 60%, 55%)" strokeWidth={2} name="Confermate" />
+                <Line type="monotone" dataKey="cancelled" stroke="hsl(0, 84%, 60%)" strokeWidth={2} name="Cancellate" />
               </LineChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
 
         {/* Status Distribution */}
-        <Card>
+        <Card className="bg-card border-border">
           <CardHeader>
-            <CardTitle>Distribuzione Status</CardTitle>
+            <CardTitle className="text-foreground">Distribuzione Status</CardTitle>
             <CardDescription>Stato delle prenotazioni nel periodo</CardDescription>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={bookingTrends}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="date" />
-                <YAxis />
-                <Tooltip />
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                <XAxis dataKey="date" stroke="hsl(var(--muted-foreground))" fontSize={12} />
+                <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} />
+                <Tooltip 
+                  contentStyle={{ 
+                    backgroundColor: 'hsl(var(--card))', 
+                    border: '1px solid hsl(var(--border))',
+                    borderRadius: '8px'
+                  }} 
+                />
                 <Legend />
-                <Bar dataKey="confirmed" stackId="a" fill="#10b981" name="Confermate" />
-                <Bar dataKey="completed" stackId="a" fill="#3b82f6" name="Completate" />
-                <Bar dataKey="cancelled" stackId="a" fill="#ef4444" name="Cancellate" />
+                <Bar dataKey="confirmed" stackId="a" fill="hsl(142, 71%, 45%)" name="Confermate" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="completed" stackId="a" fill="hsl(217, 91%, 60%)" name="Completate" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="cancelled" stackId="a" fill="hsl(0, 84%, 60%)" name="Cancellate" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
 
         {/* Peak Hours */}
-        <Card>
+        <Card className="bg-card border-border">
           <CardHeader>
-            <CardTitle>Orari di Picco</CardTitle>
+            <CardTitle className="text-foreground">Orari di Picco</CardTitle>
             <CardDescription>Distribuzione prenotazioni per fascia oraria</CardDescription>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={timeSlotData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="time" />
-                <YAxis />
-                <Tooltip />
-                <Bar dataKey="count" fill="#8b5cf6" name="Prenotazioni" />
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                <XAxis dataKey="time" stroke="hsl(var(--muted-foreground))" fontSize={12} />
+                <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} />
+                <Tooltip 
+                  contentStyle={{ 
+                    backgroundColor: 'hsl(var(--card))', 
+                    border: '1px solid hsl(var(--border))',
+                    borderRadius: '8px'
+                  }} 
+                />
+                <Bar dataKey="count" fill="hsl(142, 71%, 45%)" name="Prenotazioni" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
 
         {/* Occupancy Pie */}
-        <Card>
+        <Card className="bg-card border-border">
           <CardHeader>
-            <CardTitle>Analisi Comparativa</CardTitle>
+            <CardTitle className="text-foreground">Analisi Comparativa</CardTitle>
             <CardDescription>Confronto stato prenotazioni</CardDescription>
           </CardHeader>
           <CardContent>
@@ -313,15 +341,21 @@ export const RestaurantAnalytics = ({ restaurantId }: AnalyticsProps) => {
                   cy="50%"
                   labelLine={false}
                   label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                  outerRadius={80}
-                  fill="#8884d8"
+                  outerRadius={100}
+                  fill="hsl(142, 71%, 45%)"
                   dataKey="value"
                 >
                   {COLORS.map((color, index) => (
                     <Cell key={`cell-${index}`} fill={color} />
                   ))}
                 </Pie>
-                <Tooltip />
+                <Tooltip 
+                  contentStyle={{ 
+                    backgroundColor: 'hsl(var(--card))', 
+                    border: '1px solid hsl(var(--border))',
+                    borderRadius: '8px'
+                  }} 
+                />
               </PieChart>
             </ResponsiveContainer>
           </CardContent>
