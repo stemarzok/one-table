@@ -139,7 +139,7 @@ export const RestaurantAnalytics = ({ restaurantId }: AnalyticsProps) => {
     }
   };
 
-  const COLORS = ['hsl(142, 71%, 45%)', 'hsl(142, 60%, 55%)', 'hsl(142, 50%, 65%)', 'hsl(0, 84%, 60%)', 'hsl(217, 91%, 60%)'];
+  const COLORS = ['hsl(85, 85%, 45%)', 'hsl(85, 75%, 55%)', 'hsl(85, 65%, 65%)', 'hsl(0, 84%, 60%)', 'hsl(217, 91%, 60%)'];
 
   if (loading) {
     return <div className="text-center py-8">Caricamento analytics...</div>;
@@ -261,8 +261,8 @@ export const RestaurantAnalytics = ({ restaurantId }: AnalyticsProps) => {
                   }} 
                 />
                 <Legend />
-                <Line type="monotone" dataKey="bookings" stroke="hsl(142, 71%, 45%)" strokeWidth={2} name="Totali" />
-                <Line type="monotone" dataKey="confirmed" stroke="hsl(142, 60%, 55%)" strokeWidth={2} name="Confermate" />
+                <Line type="monotone" dataKey="bookings" stroke="hsl(85, 85%, 45%)" strokeWidth={2} name="Totali" />
+                <Line type="monotone" dataKey="confirmed" stroke="hsl(85, 75%, 55%)" strokeWidth={2} name="Confermate" />
                 <Line type="monotone" dataKey="cancelled" stroke="hsl(0, 84%, 60%)" strokeWidth={2} name="Cancellate" />
               </LineChart>
             </ResponsiveContainer>
@@ -289,7 +289,7 @@ export const RestaurantAnalytics = ({ restaurantId }: AnalyticsProps) => {
                   }} 
                 />
                 <Legend />
-                <Bar dataKey="confirmed" stackId="a" fill="hsl(142, 71%, 45%)" name="Confermate" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="confirmed" stackId="a" fill="hsl(85, 85%, 45%)" name="Confermate" radius={[4, 4, 0, 0]} />
                 <Bar dataKey="completed" stackId="a" fill="hsl(217, 91%, 60%)" name="Completate" radius={[4, 4, 0, 0]} />
                 <Bar dataKey="cancelled" stackId="a" fill="hsl(0, 84%, 60%)" name="Cancellate" radius={[4, 4, 0, 0]} />
               </BarChart>
@@ -316,7 +316,7 @@ export const RestaurantAnalytics = ({ restaurantId }: AnalyticsProps) => {
                     borderRadius: '8px'
                   }} 
                 />
-                <Bar dataKey="count" fill="hsl(142, 71%, 45%)" name="Prenotazioni" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="count" fill="hsl(85, 85%, 45%)" name="Prenotazioni" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>

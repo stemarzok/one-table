@@ -33,12 +33,12 @@ const Hero = () => {
           playsInline
           className="absolute inset-0 w-full h-full object-cover"
         >
-          <source src="https://videos.pexels.com/video-files/3195394/3195394-uhd_2560_1440_25fps.mp4" type="video/mp4" />
+          <source src="https://videos.pexels.com/video-files/3129671/3129671-uhd_2560_1440_30fps.mp4" type="video/mp4" />
         </video>
-        {/* Premium Dark Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-b from-[hsl(0,0%,5%)/80] via-[hsl(0,0%,8%)/70] to-[hsl(0,0%,8%)/90]" />
+        {/* Strong Dark Overlay for readability */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/60 to-black/80" />
         {/* Mesh Gradient Overlay */}
-        <div className="absolute inset-0 mesh-gradient opacity-40" />
+        <div className="absolute inset-0 mesh-gradient opacity-30" />
       </motion.div>
       
       <motion.div 
