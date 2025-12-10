@@ -81,10 +81,11 @@ const Business = () => {
             playsInline
             className="absolute inset-0 w-full h-full object-cover"
           >
-            <source src="https://videos.pexels.com/video-files/3298176/3298176-uhd_2560_1440_25fps.mp4" type="video/mp4" />
+            <source src="https://videos.pexels.com/video-files/4253274/4253274-uhd_2560_1440_25fps.mp4" type="video/mp4" />
           </video>
-          <div className="absolute inset-0 bg-gradient-to-b from-[hsl(0,0%,5%)/80] via-[hsl(0,0%,8%)/70] to-[hsl(0,0%,8%)/90]" />
-          <div className="absolute inset-0 mesh-gradient opacity-40" />
+          {/* Strong Dark Overlay for readability */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/60 to-black/80" />
+          <div className="absolute inset-0 mesh-gradient opacity-30" />
         </motion.div>
         
         <motion.div 
