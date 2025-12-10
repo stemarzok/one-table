@@ -1,9 +1,8 @@
 import { Star, Award, TrendingUp } from "lucide-react";
-import heroImage from "@/assets/hero-modern.jpg";
 import SearchBar from "./SearchBar";
 import RestaurantFilters from "./RestaurantFilters";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { useState, useEffect, useRef } from "react";
+import { useState, useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 
 const Hero = () => {
@@ -22,23 +21,24 @@ const Hero = () => {
 
   return (
     <section ref={heroRef} className="relative min-h-screen flex items-center overflow-hidden">
-      {/* Animated Background with Parallax */}
+      {/* Video Background with Parallax */}
       <motion.div 
         className="absolute inset-0 z-0"
         style={{ y: backgroundY }}
       >
-        <div 
-          className="absolute inset-0"
-          style={{
-            backgroundImage: `url(${heroImage})`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-          }}
-        />
+        <video 
+          autoPlay 
+          muted 
+          loop 
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover"
+        >
+          <source src="https://videos.pexels.com/video-files/3195394/3195394-uhd_2560_1440_25fps.mp4" type="video/mp4" />
+        </video>
         {/* Premium Dark Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-b from-[hsl(0,0%,8%)/90] via-[hsl(0,0%,8%)/80] to-[hsl(0,0%,8%)/95]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[hsl(0,0%,5%)/80] via-[hsl(0,0%,8%)/70] to-[hsl(0,0%,8%)/90]" />
         {/* Mesh Gradient Overlay */}
-        <div className="absolute inset-0 mesh-gradient opacity-60" />
+        <div className="absolute inset-0 mesh-gradient opacity-40" />
       </motion.div>
       
       <motion.div 

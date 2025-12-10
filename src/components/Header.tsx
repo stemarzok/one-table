@@ -56,7 +56,7 @@ const Header = () => {
   // Header classes based on scroll state and page type
   const headerClasses = isLandingPage
     ? scrolled
-      ? "fixed top-0 left-0 right-0 z-50 bg-[hsl(0,0%,8%)] shadow-header transition-all duration-200 ease-out"
+      ? "fixed top-0 left-0 right-0 z-50 bg-[hsl(0,0%,8%)/85] backdrop-blur-md shadow-header transition-all duration-200 ease-out"
       : "fixed top-0 left-0 right-0 z-50 bg-transparent transition-all duration-200 ease-out"
     : "fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border";
 
@@ -79,13 +79,20 @@ const Header = () => {
           {!isLoggedIn && (
             <>
               {isInBusinessSection && (
-                <Link to="/pricing" className={`text-sm font-semibold ${textColorClass} hover:text-primary transition-colors`}>
-                  Prezzi
+                <>
+                  <Link to="/" className={`text-sm font-semibold ${textColorClass} hover:text-primary transition-colors`}>
+                    Home
+                  </Link>
+                  <Link to="/pricing" className={`text-sm font-semibold ${textColorClass} hover:text-primary transition-colors mr-2`}>
+                    Prezzi
+                  </Link>
+                </>
+              )}
+              {!isInBusinessSection && (
+                <Link to="/business" className={`text-sm font-semibold ${textColorClass} hover:text-primary transition-colors mr-2`}>
+                  {t('nav.forBusiness')}
                 </Link>
               )}
-              <Link to={isInBusinessSection ? '/' : '/business'} className={`text-sm font-semibold ${textColorClass} hover:text-primary transition-colors mr-2`}>
-                {isInBusinessSection ? 'Home' : t('nav.forBusiness')}
-              </Link>
             </>
           )}
 
@@ -137,14 +144,20 @@ const Header = () => {
       {mobileMenuOpen && !isLoggedIn && (
         <div className={`md:hidden border-t ${isLandingPage ? 'border-white/10 bg-[hsl(0,0%,8%)]' : 'border-border bg-background'}`}>
           <nav className="container mx-auto px-4 py-4 flex flex-col gap-2">
-            {isInBusinessSection && (
-              <Link to="/pricing" className={`py-2 font-medium ${isLandingPage ? 'text-white' : 'text-foreground'}`} onClick={() => setMobileMenuOpen(false)}>
-                Prezzi
+            {isInBusinessSection ? (
+              <>
+                <Link to="/" className={`py-2 font-medium ${isLandingPage ? 'text-white' : 'text-foreground'}`} onClick={() => setMobileMenuOpen(false)}>
+                  Home
+                </Link>
+                <Link to="/pricing" className={`py-2 font-medium ${isLandingPage ? 'text-white' : 'text-foreground'}`} onClick={() => setMobileMenuOpen(false)}>
+                  Prezzi
+                </Link>
+              </>
+            ) : (
+              <Link to="/business" className={`py-2 font-medium ${isLandingPage ? 'text-white' : 'text-foreground'}`} onClick={() => setMobileMenuOpen(false)}>
+                {t('nav.forBusiness')}
               </Link>
             )}
-            <Link to={isInBusinessSection ? '/' : '/business'} className={`py-2 font-medium ${isLandingPage ? 'text-white' : 'text-foreground'}`} onClick={() => setMobileMenuOpen(false)}>
-              {isInBusinessSection ? 'Home' : t('nav.forBusiness')}
-            </Link>
             <div className="flex flex-col gap-2 pt-2 border-t border-white/10 mt-2">
             <Link to={isInBusinessSection ? '/business-login' : '/auth'} onClick={() => setMobileMenuOpen(false)}>
               <Button variant="outline" className={`w-full font-semibold ${isLandingPage ? 'border-white/30 text-white hover:bg-white/10' : 'border-foreground/30 text-foreground hover:bg-foreground/5'}`}>

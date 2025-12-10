@@ -14,7 +14,9 @@ const LevelBenefits = () => {
     {
       name: t('levels.bronze'),
       icon: Star,
-      gradient: "from-amber-600/20 to-amber-500/10",
+      bgColor: "bg-card",
+      borderColor: "border-amber-500/30 hover:border-amber-500/50",
+      iconBg: "bg-amber-500/10",
       iconColor: "text-amber-500",
       range: "0-100",
       benefits: [
@@ -26,7 +28,9 @@ const LevelBenefits = () => {
     {
       name: t('levels.silver'),
       icon: Award,
-      gradient: "from-slate-400/20 to-slate-300/10",
+      bgColor: "bg-card",
+      borderColor: "border-slate-400/30 hover:border-slate-400/50",
+      iconBg: "bg-slate-400/10",
       iconColor: "text-slate-400",
       range: "101-300",
       benefits: [
@@ -38,7 +42,9 @@ const LevelBenefits = () => {
     {
       name: t('levels.gold'),
       icon: Crown,
-      gradient: "from-yellow-500/20 to-amber-400/10",
+      bgColor: "bg-card",
+      borderColor: "border-yellow-500/30 hover:border-yellow-500/50",
+      iconBg: "bg-yellow-500/10",
       iconColor: "text-yellow-500",
       range: "301-600",
       benefits: [
@@ -51,7 +57,9 @@ const LevelBenefits = () => {
     {
       name: t('levels.platinum'),
       icon: Trophy,
-      gradient: "from-primary/20 to-primary/5",
+      bgColor: "bg-card",
+      borderColor: "border-primary/30 hover:border-primary/50",
+      iconBg: "bg-primary/10",
       iconColor: "text-primary",
       range: "601+",
       benefits: [
@@ -120,24 +128,24 @@ const LevelBenefits = () => {
               return (
                 <motion.div key={index} variants={cardVariants}>
                   <Card 
-                    className={`p-8 bg-gradient-to-br ${level.gradient} border-border/50 hover:border-primary/30 min-w-[300px] transition-all duration-300 hover-lift`}
+                    className={`p-8 ${level.bgColor} border ${level.borderColor} min-w-[300px] transition-all duration-300 hover-lift`}
                   >
-                    <div className="w-16 h-16 rounded-2xl bg-card flex items-center justify-center mb-6 shadow-soft">
+                    <div className={`w-16 h-16 rounded-2xl ${level.iconBg} flex items-center justify-center mb-6`}>
                       <Icon className={`w-8 h-8 ${level.iconColor}`} />
                     </div>
                     
-                    <h3 className="text-2xl font-bold text-card-foreground mb-3">
+                    <h3 className="text-2xl font-bold text-foreground mb-3">
                       {level.name}
                     </h3>
                     
-                    <Badge className="mb-6 bg-primary/10 text-primary border-primary/20 font-semibold">
+                    <Badge className={`mb-6 ${level.iconBg} ${level.iconColor} border-transparent font-semibold`}>
                       {level.range} punti
                     </Badge>
                     
                     <ul className="space-y-3">
                       {level.benefits.map((benefit, i) => (
                         <li key={i} className="flex items-start gap-3 text-muted-foreground">
-                          <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2 flex-shrink-0" />
+                          <div className={`w-1.5 h-1.5 rounded-full ${level.iconColor.replace('text-', 'bg-')} mt-2 flex-shrink-0`} />
                           <span className="text-sm font-medium">{benefit}</span>
                         </li>
                       ))}

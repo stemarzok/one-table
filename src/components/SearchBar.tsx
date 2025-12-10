@@ -70,20 +70,20 @@ const SearchBar = ({ onSearch, showFilters, onToggleFilters, variant = 'default'
     <form onSubmit={handleSubmit} className="w-full max-w-3xl mx-auto relative">
       <div className={`flex gap-2 rounded-full p-2 ${
         isHero 
-          ? 'bg-white/10 backdrop-blur-md border border-white/20' 
+          ? 'bg-[hsl(0,0%,15%)/90] backdrop-blur-md border border-white/30 shadow-lg' 
           : 'bg-background/95 backdrop-blur-sm shadow-2xl border-2 border-primary/20'
       }`}>
         <div className="flex-1 relative">
           <Search className={`absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 ${
-            isHero ? 'text-white/60' : 'text-muted-foreground'
+            isHero ? 'text-white/70' : 'text-muted-foreground'
           }`} />
           <Input
             type="text"
             value={query}
             onChange={(e) => handleInputChange(e.target.value)}
             placeholder={t('hero.search')}
-            className={`pl-12 border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 text-lg ${
-              isHero ? 'text-white placeholder:text-white/60' : 'text-foreground'
+            className={`pl-12 border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 text-lg font-medium ${
+              isHero ? 'text-white placeholder:text-white/50' : 'text-foreground'
             }`}
           />
         </div>
