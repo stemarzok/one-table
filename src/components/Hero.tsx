@@ -35,10 +35,10 @@ const Hero = () => {
           className="absolute inset-0 w-full h-full object-cover"
           poster={heroModern}
         >
-          <source src="https://videos.pexels.com/video-files/3195394/3195394-uhd_2560_1440_25fps.mp4" type="video/mp4" />
+          <source src="https://videos.pexels.com/video-files/5765906/5765906-hd_1920_1080_24fps.mp4" type="video/mp4" />
         </video>
         {/* Strong Dark Overlay for readability */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/75 via-black/65 to-black/85" />
+        <div className="absolute inset-0 bg-black/80" />
         {/* Mesh Gradient Overlay */}
         <div className="absolute inset-0 mesh-gradient opacity-20" />
       </motion.div>
@@ -119,7 +119,7 @@ const Hero = () => {
               transition={{ duration: 0.6, delay: 0.9 }}
             >
               <motion.div 
-                className="flex items-center gap-4 px-6 py-4 bg-white/5 backdrop-blur-md rounded-2xl border border-white/10 hover:bg-white/10 transition-all duration-300"
+                className="flex items-center gap-4 px-6 py-4 bg-black/60 backdrop-blur-md rounded-2xl border border-white/20 hover:bg-black/70 transition-all duration-300"
                 whileHover={{ scale: 1.02, y: -4 }}
               >
                 <div className="w-14 h-14 rounded-xl bg-primary/20 flex items-center justify-center">
@@ -132,7 +132,7 @@ const Hero = () => {
               </motion.div>
               
               <motion.div 
-                className="flex items-center gap-4 px-6 py-4 bg-white/5 backdrop-blur-md rounded-2xl border border-white/10 hover:bg-white/10 transition-all duration-300"
+                className="flex items-center gap-4 px-6 py-4 bg-black/60 backdrop-blur-md rounded-2xl border border-white/20 hover:bg-black/70 transition-all duration-300"
                 whileHover={{ scale: 1.02, y: -4 }}
               >
                 <div className="w-14 h-14 rounded-xl bg-primary/20 flex items-center justify-center">
