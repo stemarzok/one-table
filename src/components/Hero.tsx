@@ -4,6 +4,7 @@ import RestaurantFilters from "./RestaurantFilters";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useState, useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
+import heroModern from "@/assets/hero-modern.jpg";
 
 const Hero = () => {
   const { t } = useLanguage();
@@ -32,13 +33,14 @@ const Hero = () => {
           loop 
           playsInline
           className="absolute inset-0 w-full h-full object-cover"
+          poster={heroModern}
         >
-          <source src="https://videos.pexels.com/video-files/3129671/3129671-uhd_2560_1440_30fps.mp4" type="video/mp4" />
+          <source src="https://videos.pexels.com/video-files/3195394/3195394-uhd_2560_1440_25fps.mp4" type="video/mp4" />
         </video>
         {/* Strong Dark Overlay for readability */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/60 to-black/80" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/75 via-black/65 to-black/85" />
         {/* Mesh Gradient Overlay */}
-        <div className="absolute inset-0 mesh-gradient opacity-30" />
+        <div className="absolute inset-0 mesh-gradient opacity-20" />
       </motion.div>
       
       <motion.div 
@@ -68,7 +70,7 @@ const Hero = () => {
               transition={{ duration: 0.7, delay: 0.3 }}
             >
               {t('hero.title1')}
-              <span className="block text-gradient mt-2">
+              <span className="block text-primary mt-2">
                 {t('hero.title2')}
               </span>
             </motion.h1>

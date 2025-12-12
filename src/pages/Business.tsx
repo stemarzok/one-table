@@ -6,6 +6,7 @@ import { CheckCircle, TrendingDown, Users, Calendar, BarChart3, Shield, ArrowRig
 import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, useInView, useScroll, useTransform } from "framer-motion";
+import heroRestaurant from "@/assets/hero-restaurant.jpg";
 
 const Business = () => {
   const navigate = useNavigate();
@@ -80,12 +81,13 @@ const Business = () => {
             loop 
             playsInline
             className="absolute inset-0 w-full h-full object-cover"
+            poster={heroRestaurant}
           >
-            <source src="https://videos.pexels.com/video-files/4253274/4253274-uhd_2560_1440_25fps.mp4" type="video/mp4" />
+            <source src="https://videos.pexels.com/video-files/3195394/3195394-uhd_2560_1440_25fps.mp4" type="video/mp4" />
           </video>
           {/* Strong Dark Overlay for readability */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/60 to-black/80" />
-          <div className="absolute inset-0 mesh-gradient opacity-30" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/75 via-black/65 to-black/85" />
+          <div className="absolute inset-0 mesh-gradient opacity-20" />
         </motion.div>
         
         <motion.div 
@@ -99,9 +101,9 @@ const Business = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.2 }}
             >
-              Riduci i No-Show,
-              <span className="block text-gradient mt-2">
-                Aumenta i Ricavi
+              Aumenta i Ricavi
+              <span className="block text-primary mt-2">
+                Riduci i No-Show
               </span>
             </motion.h1>
             
@@ -252,10 +254,16 @@ const Business = () => {
         </div>
       </section>
 
-      {/* CTA Section */}
+      {/* CTA Section with Background Image */}
       <section ref={ctaRef} className="relative py-32 overflow-hidden">
-        <div className="absolute inset-0 z-0 bg-[hsl(0,0%,8%)]" />
-        <div className="absolute inset-0 mesh-gradient opacity-60" />
+        <div className="absolute inset-0 z-0">
+          <img 
+            src={heroRestaurant} 
+            alt="Restaurant interior" 
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-black/75" />
+        </div>
         
         <motion.div 
           className="container mx-auto px-4 text-center relative z-10"

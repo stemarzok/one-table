@@ -18,12 +18,12 @@ const LevelBenefits = () => {
     {
       name: t('levels.bronze'),
       icon: Star,
-      bgGradient: "from-amber-900/20 via-amber-800/10 to-amber-900/5",
-      borderColor: "border-amber-500/40",
-      iconBg: "bg-gradient-to-br from-amber-500 to-amber-600",
-      iconColor: "text-white",
-      badgeBg: "bg-amber-500/20 text-amber-400 border-amber-500/30",
-      accentColor: "bg-amber-500",
+      bgColor: "bg-[hsl(85,100%,50%)/8]",
+      borderColor: "border-primary/30",
+      iconBg: "bg-primary",
+      iconColor: "text-black",
+      badgeClass: "bg-primary/20 text-primary border-primary/30",
+      accentColor: "bg-primary",
       range: "0-100",
       benefits: [
         "Prenotazioni standard",
@@ -34,12 +34,12 @@ const LevelBenefits = () => {
     {
       name: t('levels.silver'),
       icon: Award,
-      bgGradient: "from-slate-600/20 via-slate-500/10 to-slate-600/5",
-      borderColor: "border-slate-400/40",
-      iconBg: "bg-gradient-to-br from-slate-400 to-slate-500",
-      iconColor: "text-white",
-      badgeBg: "bg-slate-400/20 text-slate-300 border-slate-400/30",
-      accentColor: "bg-slate-400",
+      bgColor: "bg-[hsl(85,100%,50%)/10]",
+      borderColor: "border-primary/40",
+      iconBg: "bg-primary",
+      iconColor: "text-black",
+      badgeClass: "bg-primary/20 text-primary border-primary/30",
+      accentColor: "bg-primary",
       range: "101-300",
       benefits: [
         "Priorità nelle prenotazioni",
@@ -50,12 +50,12 @@ const LevelBenefits = () => {
     {
       name: t('levels.gold'),
       icon: Crown,
-      bgGradient: "from-yellow-600/20 via-yellow-500/10 to-yellow-600/5",
-      borderColor: "border-yellow-500/40",
-      iconBg: "bg-gradient-to-br from-yellow-400 to-yellow-600",
-      iconColor: "text-white",
-      badgeBg: "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
-      accentColor: "bg-yellow-500",
+      bgColor: "bg-[hsl(85,100%,50%)/12]",
+      borderColor: "border-primary/50",
+      iconBg: "bg-primary",
+      iconColor: "text-black",
+      badgeClass: "bg-primary/20 text-primary border-primary/30",
+      accentColor: "bg-primary",
       range: "301-600",
       benefits: [
         "Prenotazioni garantite",
@@ -67,11 +67,11 @@ const LevelBenefits = () => {
     {
       name: t('levels.platinum'),
       icon: Trophy,
-      bgGradient: "from-primary/20 via-primary/10 to-primary/5",
-      borderColor: "border-primary/40",
-      iconBg: "bg-gradient-to-br from-primary to-[hsl(85,90%,35%)]",
-      iconColor: "text-white",
-      badgeBg: "bg-primary/20 text-primary border-primary/30",
+      bgColor: "bg-[hsl(85,100%,50%)/15]",
+      borderColor: "border-primary/60",
+      iconBg: "bg-primary",
+      iconColor: "text-black",
+      badgeClass: "bg-primary/20 text-primary border-primary/30",
       accentColor: "bg-primary",
       range: "601+",
       benefits: [
@@ -140,10 +140,10 @@ const LevelBenefits = () => {
           transition={{ duration: 0.6 }}
           className="text-center mb-16"
         >
-          <h2 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white mb-4 tracking-tight">
-            {t('levels.title')}
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white mb-6 tracking-tight leading-tight py-2">
+            I Tuoi Vantaggi per Livello
           </h2>
-          <p className="text-lg text-white/60 max-w-2xl mx-auto">
+          <p className="text-lg text-white/70 max-w-2xl mx-auto">
             Più sei affidabile, più vantaggi esclusivi ottieni
           </p>
         </motion.div>
@@ -154,7 +154,7 @@ const LevelBenefits = () => {
             <Button
               variant="ghost"
               size="icon"
-              className="absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-black/50 hover:bg-black/70 text-white rounded-full w-12 h-12 backdrop-blur-sm border border-white/10 hidden md:flex"
+              className="absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-black/60 hover:bg-black/80 text-white rounded-full w-12 h-12 backdrop-blur-sm border border-white/20 hidden md:flex"
               onClick={() => scroll('left')}
             >
               <ChevronLeft className="w-6 h-6" />
@@ -165,7 +165,7 @@ const LevelBenefits = () => {
             <Button
               variant="ghost"
               size="icon"
-              className="absolute right-0 top-1/2 -translate-y-1/2 z-20 bg-black/50 hover:bg-black/70 text-white rounded-full w-12 h-12 backdrop-blur-sm border border-white/10 hidden md:flex"
+              className="absolute right-0 top-1/2 -translate-y-1/2 z-20 bg-black/60 hover:bg-black/80 text-white rounded-full w-12 h-12 backdrop-blur-sm border border-white/20 hidden md:flex"
               onClick={() => scroll('right')}
             >
               <ChevronRight className="w-6 h-6" />
@@ -174,8 +174,7 @@ const LevelBenefits = () => {
           
           <motion.div 
             ref={scrollContainerRef}
-            className="overflow-x-auto pb-6 -mx-4 px-4 scroll-smooth cursor-grab active:cursor-grabbing"
-            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+            className="overflow-x-auto pb-6 -mx-4 px-4 scroll-smooth cursor-grab active:cursor-grabbing hide-scrollbar"
             onScroll={checkScroll}
             variants={containerVariants}
             initial="hidden"
@@ -196,13 +195,13 @@ const LevelBenefits = () => {
                     className="group"
                   >
                     <Card 
-                      className={`p-8 bg-gradient-to-br ${level.bgGradient} border-2 ${level.borderColor} w-[320px] h-[420px] flex flex-col transition-all duration-500 hover:shadow-2xl hover:shadow-primary/20 backdrop-blur-sm relative overflow-hidden`}
+                      className={`p-8 ${level.bgColor} border-2 ${level.borderColor} w-[320px] h-[420px] flex flex-col transition-all duration-500 hover:shadow-2xl hover:shadow-primary/20 backdrop-blur-sm relative overflow-hidden`}
                     >
                       {/* Animated glow effect on hover */}
-                      <div className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-t from-transparent via-transparent to-white/5`} />
+                      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-t from-transparent via-transparent to-primary/5" />
                       
                       {/* Decorative corner accent */}
-                      <div className={`absolute top-0 right-0 w-32 h-32 ${level.accentColor} opacity-10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2`} />
+                      <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
                       
                       <div className={`w-16 h-16 rounded-2xl ${level.iconBg} flex items-center justify-center mb-6 shadow-lg relative z-10`}>
                         <Icon className={`w-8 h-8 ${level.iconColor}`} />
@@ -212,7 +211,7 @@ const LevelBenefits = () => {
                         {level.name}
                       </h3>
                       
-                      <Badge className={`mb-6 ${level.badgeBg} font-semibold w-fit relative z-10`}>
+                      <Badge className={`mb-6 ${level.badgeClass} font-semibold w-fit relative z-10 border`}>
                         {level.range} punti
                       </Badge>
                       
@@ -220,12 +219,12 @@ const LevelBenefits = () => {
                         {level.benefits.map((benefit, i) => (
                           <motion.li 
                             key={i} 
-                            className="flex items-start gap-3 text-white/70"
+                            className="flex items-start gap-3 text-white/80"
                             initial={{ opacity: 0, x: -10 }}
                             animate={isInView ? { opacity: 1, x: 0 } : {}}
                             transition={{ delay: 0.5 + (index * 0.1) + (i * 0.05) }}
                           >
-                            <div className={`w-2 h-2 rounded-full ${level.accentColor} mt-2 flex-shrink-0 shadow-sm shadow-current`} />
+                            <div className={`w-2 h-2 rounded-full ${level.accentColor} mt-2 flex-shrink-0`} />
                             <span className="text-sm font-medium">{benefit}</span>
                           </motion.li>
                         ))}
@@ -239,7 +238,7 @@ const LevelBenefits = () => {
           
           {/* Scroll indicator hint */}
           <div className="flex justify-center mt-4 gap-2 md:hidden">
-            <span className="text-white/40 text-sm">← Scorri per vedere tutti →</span>
+            <span className="text-white/50 text-sm">← Scorri per vedere tutti →</span>
           </div>
         </div>
       </div>
