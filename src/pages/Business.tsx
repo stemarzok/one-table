@@ -83,11 +83,10 @@ const Business = () => {
             className="absolute inset-0 w-full h-full object-cover"
             poster={heroRestaurant}
           >
-            <source src="https://videos.pexels.com/video-files/3195394/3195394-uhd_2560_1440_25fps.mp4" type="video/mp4" />
+            <source src="https://videos.pexels.com/video-files/4057696/4057696-hd_1920_1080_25fps.mp4" type="video/mp4" />
           </video>
           {/* Strong Dark Overlay for readability */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/75 via-black/65 to-black/85" />
-          <div className="absolute inset-0 mesh-gradient opacity-20" />
+          <div className="absolute inset-0 bg-black/80" />
         </motion.div>
         
         <motion.div 
