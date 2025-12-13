@@ -27,18 +27,13 @@ const Hero = () => {
         className="absolute inset-0 z-0"
         style={{ y: backgroundY }}
       >
-        <video 
-          autoPlay 
-          muted 
-          loop 
-          playsInline
+        <img 
+          src={heroModern}
+          alt="Restaurant interior"
           className="absolute inset-0 w-full h-full object-cover"
-          poster={heroModern}
-        >
-          <source src="https://videos.pexels.com/video-files/3195394/3195394-uhd_2560_1440_25fps.mp4" type="video/mp4" />
-        </video>
+        />
         {/* Strong Dark Overlay for readability */}
-        <div className="absolute inset-0 bg-black/80" />
+        <div className="absolute inset-0 bg-black/60" />
         {/* Mesh Gradient Overlay */}
         <div className="absolute inset-0 mesh-gradient opacity-20" />
       </motion.div>
