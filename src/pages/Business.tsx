@@ -83,7 +83,7 @@ const Business = () => {
             className="absolute inset-0 w-full h-full object-cover"
             poster={heroRestaurant}
           >
-            <source src="https://videos.pexels.com/video-files/4057696/4057696-hd_1920_1080_25fps.mp4" type="video/mp4" />
+            <source src="https://videos.pexels.com/video-files/3297381/3297381-uhd_2560_1440_25fps.mp4" type="video/mp4" />
           </video>
           {/* Strong Dark Overlay for readability */}
           <div className="absolute inset-0 bg-black/80" />
@@ -117,7 +117,7 @@ const Business = () => {
             </motion.p>
             
             <motion.div 
-              className="flex items-center gap-4 px-6 py-5 bg-white/5 backdrop-blur-md rounded-2xl border border-white/10 mb-10 max-w-md"
+              className="flex items-center gap-4 px-6 py-5 bg-[hsl(0,0%,8%)] backdrop-blur-md rounded-2xl border border-white/20 mb-10 max-w-md shadow-xl"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.5 }}
