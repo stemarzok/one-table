@@ -35,7 +35,7 @@ const Hero = () => {
           className="absolute inset-0 w-full h-full object-cover"
           poster={heroModern}
         >
-          <source src="https://videos.pexels.com/video-files/5765906/5765906-hd_1920_1080_24fps.mp4" type="video/mp4" />
+          <source src="https://videos.pexels.com/video-files/3195394/3195394-uhd_2560_1440_25fps.mp4" type="video/mp4" />
         </video>
         {/* Strong Dark Overlay for readability */}
         <div className="absolute inset-0 bg-black/80" />
@@ -110,43 +110,45 @@ const Hero = () => {
                 <RestaurantFilters />
               </motion.div>
             )}
-          
-            {/* Stats with 3D Cards */}
-            <motion.div 
-              className="flex flex-wrap justify-center gap-6 mt-12"
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.9 }}
-            >
-              <motion.div 
-                className="flex items-center gap-4 px-6 py-4 bg-black/60 backdrop-blur-md rounded-2xl border border-white/20 hover:bg-black/70 transition-all duration-300"
-                whileHover={{ scale: 1.02, y: -4 }}
-              >
-                <div className="w-14 h-14 rounded-xl bg-primary/20 flex items-center justify-center">
-                  <Star className="w-7 h-7 text-primary" fill="currentColor" />
-                </div>
-                <div className="text-left">
-                  <div className="text-3xl font-extrabold text-white">4.9/5</div>
-                  <div className="text-sm text-white/70 font-medium">{t('hero.rating')}</div>
-                </div>
-              </motion.div>
-              
-              <motion.div 
-                className="flex items-center gap-4 px-6 py-4 bg-black/60 backdrop-blur-md rounded-2xl border border-white/20 hover:bg-black/70 transition-all duration-300"
-                whileHover={{ scale: 1.02, y: -4 }}
-              >
-                <div className="w-14 h-14 rounded-xl bg-primary/20 flex items-center justify-center">
-                  <TrendingUp className="w-7 h-7 text-primary" />
-                </div>
-                <div className="text-left">
-                  <div className="text-3xl font-extrabold text-white">500+</div>
-                  <div className="text-sm text-white/70 font-medium">{t('hero.partners')}</div>
-                </div>
-              </motion.div>
-            </motion.div>
           </div>
         </div>
       </motion.div>
+      
+      {/* Stats Cards - FIXED position, not affected by scroll opacity */}
+      <div className="container mx-auto px-4 z-30 relative">
+        <motion.div 
+          className="flex flex-wrap justify-center gap-6 pb-24"
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.9 }}
+        >
+          <motion.div 
+            className="flex items-center gap-4 px-6 py-4 bg-[hsl(0,0%,8%)] backdrop-blur-md rounded-2xl border border-white/20 shadow-xl"
+            whileHover={{ scale: 1.02, y: -4 }}
+          >
+            <div className="w-14 h-14 rounded-xl bg-primary/20 flex items-center justify-center">
+              <Star className="w-7 h-7 text-primary" fill="currentColor" />
+            </div>
+            <div className="text-left">
+              <div className="text-3xl font-extrabold text-white">4.9/5</div>
+              <div className="text-sm text-white/70 font-medium">{t('hero.rating')}</div>
+            </div>
+          </motion.div>
+          
+          <motion.div 
+            className="flex items-center gap-4 px-6 py-4 bg-[hsl(0,0%,8%)] backdrop-blur-md rounded-2xl border border-white/20 shadow-xl"
+            whileHover={{ scale: 1.02, y: -4 }}
+          >
+            <div className="w-14 h-14 rounded-xl bg-primary/20 flex items-center justify-center">
+              <TrendingUp className="w-7 h-7 text-primary" />
+            </div>
+            <div className="text-left">
+              <div className="text-3xl font-extrabold text-white">500+</div>
+              <div className="text-sm text-white/70 font-medium">{t('hero.partners')}</div>
+            </div>
+          </motion.div>
+        </motion.div>
+      </div>
       
       {/* Bottom Gradient Fade */}
       <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background to-transparent z-20" />

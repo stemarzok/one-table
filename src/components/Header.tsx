@@ -56,7 +56,7 @@ const Header = () => {
   // Header classes based on scroll state and page type
   const headerClasses = isLandingPage
     ? scrolled
-      ? "fixed top-0 left-0 right-0 z-50 bg-[hsl(0,0%,5%)] backdrop-blur-md shadow-header transition-all duration-200 ease-out"
+      ? "fixed top-0 left-0 right-0 z-50 bg-[hsl(0,0%,5%)/95] backdrop-blur-md shadow-header transition-all duration-200 ease-out"
       : "fixed top-0 left-0 right-0 z-50 bg-transparent transition-all duration-200 ease-out"
     : "fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border";
 
