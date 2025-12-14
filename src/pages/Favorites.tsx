@@ -112,7 +112,7 @@ const Favorites = () => {
               <p className="text-muted-foreground mb-6">
                 Inizia ad aggiungere i tuoi ristoranti preferiti per trovarli facilmente qui
               </p>
-              <Button onClick={() => navigate('/')}>
+              <Button onClick={() => navigate('/restaurants')}>
                 Esplora Ristoranti
               </Button>
             </Card>

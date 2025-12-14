@@ -32,16 +32,25 @@ export const NotificationPopover = () => {
   const [open, setOpen] = useState(false);
 
   const fetchNotifications = async () => {
-    if (!user || businessRoles.length === 0) return;
+    if (!user) return;
 
+    // Fetch notifications for user directly and for their restaurants
     const restaurantIds = businessRoles.map(r => r.restaurant_id);
     
-    const { data, error } = await supabase
+    let query = supabase
       .from('notifications')
       .select('*')
-      .in('restaurant_id', restaurantIds)
       .order('created_at', { ascending: false })
       .limit(20);
+
+    // Build OR filter for user notifications OR restaurant notifications
+    if (restaurantIds.length > 0) {
+      query = query.or(`user_id.eq.${user.id},restaurant_id.in.(${restaurantIds.join(',')})`);
+    } else {
+      query = query.eq('user_id', user.id);
+    }
+    
+    const { data, error } = await query;
 
     if (!error && data) {
       setNotifications(data);
@@ -52,9 +61,8 @@ export const NotificationPopover = () => {
   useEffect(() => {
     fetchNotifications();
 
-    // Subscribe to realtime updates
-    if (businessRoles.length > 0) {
-      const restaurantIds = businessRoles.map(r => r.restaurant_id);
+    // Subscribe to realtime updates for user notifications
+    if (user) {
       const channel = supabase
         .channel('notification-popover')
         .on(
@@ -62,8 +70,7 @@ export const NotificationPopover = () => {
           {
             event: '*',
             schema: 'public',
-            table: 'notifications',
-            filter: `restaurant_id=in.(${restaurantIds.join(',')})`
+            table: 'notifications'
           },
           () => fetchNotifications()
         )
@@ -85,15 +92,24 @@ export const NotificationPopover = () => {
   };
 
   const markAllAsRead = async () => {
-    if (!user || businessRoles.length === 0) return;
+    if (!user) return;
     
     const restaurantIds = businessRoles.map(r => r.restaurant_id);
     
-    await supabase
-      .from('notifications')
-      .update({ is_read: true })
-      .in('restaurant_id', restaurantIds)
-      .eq('is_read', false);
+    // Mark all user notifications and restaurant notifications as read
+    if (restaurantIds.length > 0) {
+      await supabase
+        .from('notifications')
+        .update({ is_read: true })
+        .or(`user_id.eq.${user.id},restaurant_id.in.(${restaurantIds.join(',')})`)
+        .eq('is_read', false);
+    } else {
+      await supabase
+        .from('notifications')
+        .update({ is_read: true })
+        .eq('user_id', user.id)
+        .eq('is_read', false);
+    }
     
     fetchNotifications();
   };
