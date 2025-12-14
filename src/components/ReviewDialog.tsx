@@ -138,7 +138,8 @@ export const ReviewDialog = ({ restaurantId, bookingId, onReviewSubmitted }: Rev
       onReviewSubmitted?.();
     } catch (error: any) {
       console.error("Review error:", error);
-      toast.error(t("review.reviewError"));
+      console.error("Review error details:", error?.message, error?.code, error?.details);
+      toast.error(error?.message || t("review.reviewError"));
     } finally {
       setLoading(false);
     }
