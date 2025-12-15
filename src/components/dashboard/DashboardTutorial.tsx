@@ -27,16 +27,6 @@ const tutorialSteps = [
     description: "Questa è la tua area di controllo per gestire il ristorante. Qui trovi una panoramica completa delle statistiche e delle attività recenti.",
   },
   {
-    icon: Table2,
-    title: "Gestione Tavoli",
-    description: "Configura i tavoli del tuo ristorante: aggiungi numero tavolo, capacità posti e posizione (interno/esterno). I clienti potranno prenotare in base alla disponibilità.",
-  },
-  {
-    icon: UtensilsCrossed,
-    title: "Il Tuo Menu",
-    description: "Crea e gestisci il menu del ristorante. Aggiungi piatti con nome, descrizione, categoria e prezzo. Puoi anche caricare foto per ogni piatto.",
-  },
-  {
     icon: Calendar,
     title: "Prenotazioni",
     description: "Visualizza e gestisci tutte le prenotazioni. Puoi confermare, modificare o cancellare le richieste dei clienti. Riceverai notifiche per ogni nuova prenotazione.",
@@ -45,11 +35,6 @@ const tutorialSteps = [
     icon: MessageSquare,
     title: "Recensioni",
     description: "Leggi le recensioni dei clienti e rispondi per migliorare la tua reputazione online. Le risposte sono visibili a tutti gli utenti.",
-  },
-  {
-    icon: BarChart3,
-    title: "Analytics",
-    description: "Monitora l'andamento del tuo ristorante con grafici dettagliati su prenotazioni, occupazione, e trend. Esporta i dati in formato CSV.",
   },
 ];
 

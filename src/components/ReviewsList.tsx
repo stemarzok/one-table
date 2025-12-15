@@ -67,10 +67,22 @@ export const ReviewsList = ({ restaurantId }: ReviewsListProps) => {
   const [reportingReview, setReportingReview] = useState<string | null>(null);
   const [reportReason, setReportReason] = useState("");
   const [reportedReviews, setReportedReviews] = useState<Set<string>>(new Set());
+  const [restaurantName, setRestaurantName] = useState<string>("");
 
-  // Check if user has role for this specific restaurant
+  // Fetch restaurant name and check role
   useEffect(() => {
-    const checkRole = async () => {
+    const fetchRestaurantAndRole = async () => {
+      // Get restaurant name
+      const { data: restaurantData } = await supabase
+        .from("restaurants")
+        .select("name")
+        .eq("id", restaurantId)
+        .maybeSingle();
+      
+      if (restaurantData) {
+        setRestaurantName(restaurantData.name);
+      }
+
       if (!user) return;
       const { data } = await supabase
         .from("business_roles")
@@ -92,7 +104,7 @@ export const ReviewsList = ({ restaurantId }: ReviewsListProps) => {
         }
       }
     };
-    checkRole();
+    fetchRestaurantAndRole();
   }, [user, restaurantId]);
 
   useEffect(() => {
@@ -326,7 +338,9 @@ export const ReviewsList = ({ restaurantId }: ReviewsListProps) => {
                     <div key={response.id} className="space-y-1">
                       <div className="flex items-center gap-2">
                         <MessageSquare className="w-4 h-4 text-primary" />
-                        <span className="font-semibold text-sm">{response.profiles.name}</span>
+                        <span className="font-semibold text-sm">
+                          {restaurantName || "Ristorante"}
+                        </span>
                         <span className="text-xs text-muted-foreground">
                           {new Date(response.created_at).toLocaleDateString('it-IT')}
                         </span>
