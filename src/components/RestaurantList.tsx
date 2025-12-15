@@ -14,7 +14,9 @@ interface Restaurant {
   city: string;
   price_range: string | null;
   cover_image_url: string | null;
+  logo_url: string | null;
   is_active: boolean;
+  avg_rating?: number;
 }
 
 const RestaurantList = () => {
@@ -38,11 +40,25 @@ const RestaurantList = () => {
     try {
       const { data, error } = await supabase
         .from('restaurants')
-        .select('*')
+        .select('id, name, cuisine_type, address, city, price_range, cover_image_url, logo_url, is_active')
         .eq('is_active', true);
 
       if (error) throw error;
-      setRestaurants(data || []);
+      
+      // Fetch ratings for each restaurant
+      const restaurantsWithRatings = await Promise.all(
+        (data || []).map(async (restaurant) => {
+          const { data: ratingData } = await supabase
+            .rpc('get_restaurant_rating', { restaurant_id_param: restaurant.id });
+          
+          return {
+            ...restaurant,
+            avg_rating: ratingData?.[0]?.avg_rating || 0
+          };
+        })
+      );
+      
+      setRestaurants(restaurantsWithRatings);
     } catch (error) {
       console.error('Error fetching restaurants:', error);
     } finally {
@@ -120,7 +136,7 @@ const RestaurantList = () => {
             cuisine: r.cuisine_type || '',
             location: r.address,
             city: r.city.toLowerCase(),
-            rating: 4.5,
+            rating: r.avg_rating || 0,
             priceRange: r.price_range || '€€',
             image: r.cover_image_url || '',
             available: true,
@@ -144,9 +160,10 @@ const RestaurantList = () => {
                   cuisine={restaurant.cuisine_type || 'Cucina Italiana'}
                   location={restaurant.address}
                   city={restaurant.city}
-                  rating={4.5}
+                  rating={restaurant.avg_rating || 0}
                   priceRange={restaurant.price_range || '€€'}
                   image={restaurant.cover_image_url || 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&q=80'}
+                  logoUrl={restaurant.logo_url}
                   available={true}
                   sponsored={false}
                   coordinates={{ lat: 0, lng: 0 }}
