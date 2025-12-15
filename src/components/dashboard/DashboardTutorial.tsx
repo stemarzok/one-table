@@ -3,8 +3,11 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { 
   LayoutDashboard, 
-  Store, 
-  Bell,
+  Table2, 
+  UtensilsCrossed, 
+  Calendar, 
+  MessageSquare, 
+  BarChart3,
   ChevronRight,
   ChevronLeft,
   X,
@@ -24,14 +27,29 @@ const tutorialSteps = [
     description: "Questa è la tua area di controllo per gestire il ristorante. Qui trovi una panoramica completa delle statistiche e delle attività recenti.",
   },
   {
-    icon: Store,
-    title: "Info Ristorante",
-    description: "Nella sezione Info puoi aggiornare le informazioni del tuo ristorante: logo, foto di copertina, descrizione, orari di apertura e contatti.",
+    icon: Calendar,
+    title: "Prenotazioni",
+    description: "Visualizza e gestisci tutte le prenotazioni. Puoi confermare, modificare o cancellare le richieste dei clienti. Riceverai notifiche per ogni nuova prenotazione.",
   },
   {
-    icon: Bell,
-    title: "Notifiche",
-    description: "Riceverai notifiche in tempo reale per nuove prenotazioni, recensioni e altre attività importanti. Clicca sulla campanella in alto per visualizzarle.",
+    icon: MessageSquare,
+    title: "Recensioni",
+    description: "Leggi le recensioni dei clienti e rispondi per migliorare la tua reputazione online. Le risposte sono visibili a tutti gli utenti.",
+  },
+  {
+    icon: Table2,
+    title: "Gestione Tavoli",
+    description: "Configura i tavoli del tuo ristorante: numero di posti, posizione (interno/esterno) e disponibilità.",
+  },
+  {
+    icon: UtensilsCrossed,
+    title: "Menu",
+    description: "Aggiungi e modifica i piatti del tuo menu. Puoi gestire prezzi, descrizioni e disponibilità di ogni piatto.",
+  },
+  {
+    icon: BarChart3,
+    title: "Analisi",
+    description: "Monitora le performance del tuo ristorante con grafici e statistiche dettagliate su prenotazioni, recensioni e trend.",
   },
 ];
 

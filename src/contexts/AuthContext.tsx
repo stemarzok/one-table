@@ -10,6 +10,7 @@ interface Profile {
   level?: string;
   points?: number;
   avatar_url?: string;
+  onboarding_completed?: boolean;
 }
 
 interface AuthContextType {

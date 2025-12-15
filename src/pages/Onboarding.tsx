@@ -53,6 +53,12 @@ const Onboarding = () => {
       return;
     }
 
+    // Check if onboarding already completed - redirect to dashboard
+    if (profile?.onboarding_completed) {
+      navigate("/dashboard");
+      return;
+    }
+
     const checkRestaurant = async () => {
       if (!profile?.id) return;
 
@@ -214,9 +220,7 @@ const Onboarding = () => {
       // Mark onboarding as completed
       await supabase
         .from('profiles')
-        .update({ 
-          avatar_url: 'onboarding_completed' // Flag per indicare che l'onboarding è stato completato
-        })
+        .update({ onboarding_completed: true })
         .eq('id', profile?.id);
 
       setTimeout(() => {
@@ -229,12 +233,19 @@ const Onboarding = () => {
     }
   };
 
-  const skipStep = () => {
+  const skipStep = async () => {
     if (currentStep === 1) {
       setCurrentStep(2);
     } else if (currentStep === 2) {
       setCurrentStep(3);
     } else {
+      // Mark onboarding as completed when skipping the last step
+      if (profile?.id) {
+        await supabase
+          .from('profiles')
+          .update({ onboarding_completed: true })
+          .eq('id', profile.id);
+      }
       navigate('/dashboard');
     }
   };
