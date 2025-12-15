@@ -289,6 +289,7 @@ export const BookingsManagement = ({ restaurantId }: BookingsManagementProps) =>
                   </div>
                 </div>
 
+                {/* Actions for pending bookings */}
                 {booking.status === "pending" && (
                   <div className="flex md:flex-col gap-2">
                     <Button
@@ -308,18 +309,8 @@ export const BookingsManagement = ({ restaurantId }: BookingsManagementProps) =>
                     </Button>
                   </div>
                 )}
-                
-                {booking.status === "pending" && new Date(booking.booking_date) < new Date() && (
-                  <Button
-                    variant="outline"
-                    onClick={() => updateBookingStatus(booking.id, "cancelled")}
-                    className="w-full"
-                  >
-                    <XCircle className="w-4 h-4 mr-2" />
-                    Annulla (scaduta)
-                  </Button>
-                )}
 
+                {/* Actions for confirmed bookings */}
                 {booking.status === "confirmed" && (
                   <div className="flex md:flex-col gap-2">
                     <Button
@@ -333,6 +324,34 @@ export const BookingsManagement = ({ restaurantId }: BookingsManagementProps) =>
                       onClick={() => updateBookingStatus(booking.id, "cancelled")}
                       className="flex-1 md:flex-none"
                     >
+                      Annulla
+                    </Button>
+                  </div>
+                )}
+
+                {/* Actions for cancelled bookings - can be restored to confirmed */}
+                {booking.status === "cancelled" && (
+                  <div className="flex md:flex-col gap-2">
+                    <Button
+                      variant="outline"
+                      onClick={() => updateBookingStatus(booking.id, "confirmed")}
+                      className="flex-1 md:flex-none"
+                    >
+                      <CheckCircle className="w-4 h-4 mr-2" />
+                      Ripristina
+                    </Button>
+                  </div>
+                )}
+
+                {/* Actions for completed bookings - can still be cancelled if needed */}
+                {booking.status === "completed" && (
+                  <div className="flex md:flex-col gap-2">
+                    <Button
+                      variant="outline"
+                      onClick={() => updateBookingStatus(booking.id, "cancelled")}
+                      className="flex-1 md:flex-none"
+                    >
+                      <XCircle className="w-4 h-4 mr-2" />
                       Annulla
                     </Button>
                   </div>
