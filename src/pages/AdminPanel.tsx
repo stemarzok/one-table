@@ -16,6 +16,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PromoteUserPanel } from "@/components/admin/PromoteUserPanel";
 import { GlobalStats } from "@/components/admin/GlobalStats";
 import { PromoRequestsPanel } from "@/components/admin/PromoRequestsPanel";
+import { ReviewReportsPanel } from "@/components/admin/ReviewReportsPanel";
 
 interface Application {
   id: string;
@@ -209,8 +210,9 @@ const AdminPanel = () => {
           <h1 className="text-4xl font-bold mb-8">Pannello Amministratore</h1>
 
           <Tabs defaultValue="applications" className="space-y-6">
-            <TabsList className="grid w-full max-w-3xl grid-cols-4">
+            <TabsList className="grid w-full max-w-4xl grid-cols-5">
               <TabsTrigger value="applications">Richieste</TabsTrigger>
+              <TabsTrigger value="reviews">Recensioni</TabsTrigger>
               <TabsTrigger value="promo">Codici Promo</TabsTrigger>
               <TabsTrigger value="stats">Statistiche</TabsTrigger>
               <TabsTrigger value="users">Utenti</TabsTrigger>
@@ -388,6 +390,10 @@ const AdminPanel = () => {
               </div>
             </div>
           )}
+            </TabsContent>
+
+            <TabsContent value="reviews">
+              <ReviewReportsPanel />
             </TabsContent>
 
             <TabsContent value="promo">
