@@ -139,6 +139,20 @@ const Favorites = () => {
                       </div>
                     )}
                     
+                    {/* Dark gradient overlay at bottom with logo and name */}
+                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent p-4">
+                      <div className="flex items-center gap-3">
+                        {restaurant.logo_url && (
+                          <img 
+                            src={restaurant.logo_url} 
+                            alt={`${restaurant.name} logo`}
+                            className="w-10 h-10 rounded-full object-cover border-2 border-white/30"
+                          />
+                        )}
+                        <h3 className="text-lg font-bold text-white truncate">{restaurant.name}</h3>
+                      </div>
+                    </div>
+                    
                     <Button
                       size="icon"
                       variant="secondary"
@@ -157,9 +171,6 @@ const Favorites = () => {
                     onClick={() => navigate(`/restaurant/${restaurant.id}`)}
                   >
                     <div className="flex items-start justify-between mb-2">
-                      <h3 className="text-xl font-semibold text-foreground group-hover:text-primary transition-colors">
-                        {restaurant.name}
-                      </h3>
                       {restaurant.price_range && (
                         <div className="flex items-center text-muted-foreground">
                           <span className="text-sm">{restaurant.price_range}</span>
