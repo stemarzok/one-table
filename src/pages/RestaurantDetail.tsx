@@ -97,22 +97,30 @@ const RestaurantDetail = () => {
             alt={restaurant.name}
             className="w-full h-full object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
-          
-          <div className="absolute bottom-0 left-0 right-0 p-8">
+          {/* Dark gradient overlay at bottom with logo and name */}
+          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent p-8">
             <div className="container mx-auto">
               <div className="flex flex-wrap items-end justify-between gap-4">
-                <div>
-                  <h1 className="text-4xl md:text-5xl font-bold text-white mb-2">{restaurant.name}</h1>
-                  <div className="flex flex-wrap items-center gap-4 text-white/90">
-                    {restaurant.cuisine_type && (
-                      <Badge variant="secondary" className="text-base">
-                        {restaurant.cuisine_type}
-                      </Badge>
-                    )}
-                    <div className="flex items-center gap-1">
-                      <MapPin className="w-5 h-5" />
-                      <span>{restaurant.city}</span>
+                <div className="flex items-center gap-4">
+                  {restaurant.logo_url && (
+                    <img 
+                      src={restaurant.logo_url} 
+                      alt={`${restaurant.name} logo`}
+                      className="w-16 h-16 md:w-20 md:h-20 rounded-full object-cover border-2 border-white/30"
+                    />
+                  )}
+                  <div>
+                    <h1 className="text-3xl md:text-5xl font-bold text-white mb-2">{restaurant.name}</h1>
+                    <div className="flex flex-wrap items-center gap-4 text-white/90">
+                      {restaurant.cuisine_type && (
+                        <Badge variant="secondary" className="text-base">
+                          {restaurant.cuisine_type}
+                        </Badge>
+                      )}
+                      <div className="flex items-center gap-1">
+                        <MapPin className="w-5 h-5" />
+                        <span>{restaurant.city}</span>
+                      </div>
                     </div>
                   </div>
                 </div>
