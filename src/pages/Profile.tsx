@@ -9,7 +9,6 @@ import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Trophy, Mail, User, Upload, Lock, Star, Calendar, Heart, Phone } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
@@ -43,7 +42,6 @@ const Profile = () => {
       return;
     }
     
-    // Business users should not access this profile page
     if (isBusinessMode) {
       navigate("/dashboard");
       return;
@@ -56,7 +54,6 @@ const Profile = () => {
     }
   }, [isLoggedIn, profile, navigate, isBusinessMode]);
 
-  // Fetch reviews count
   useEffect(() => {
     const fetchReviewsCount = async () => {
       if (!user?.id) return;
@@ -77,7 +74,6 @@ const Profile = () => {
   const userPoints = profile?.points ?? 0;
   const currentLevel = profile?.level ?? "Bronze";
   
-  // Fix level progression: Bronze → Silver → Gold → Platinum
   const getLevelInfo = (level: string, points: number) => {
     switch (level) {
       case "Bronze":
@@ -169,7 +165,6 @@ const Profile = () => {
       return;
     }
 
-    // Verify password first
     const { error: signInError } = await supabase.auth.signInWithPassword({
       email: profile?.email || '',
       password: passwordForEmail,
@@ -217,7 +212,6 @@ const Profile = () => {
     }
   };
 
-  // Don't render for business users
   if (isBusinessMode) {
     return null;
   }
@@ -231,7 +225,7 @@ const Profile = () => {
           <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-8">{t('profile.title')}</h1>
           
           <div className="grid gap-8">
-            {/* Profile Section - First */}
+            {/* Profile Card with Avatar and Points */}
             <Card className="p-8">
               <div className="flex flex-col md:flex-row gap-8 items-start">
                 <div className="relative">
@@ -258,176 +252,54 @@ const Profile = () => {
                   />
                 </div>
 
-                <div className="flex-1 w-full">
-                  <h2 className="text-2xl font-bold text-foreground mb-6">{profile?.name}</h2>
-                  
-                  <Accordion type="single" collapsible className="w-full">
-                    <AccordionItem value="profile-info">
-                      <AccordionTrigger className="text-base font-semibold">
-                        <span className="flex items-center gap-2">
-                          <User className="w-4 h-4" />
-                          Dati Personali
-                        </span>
-                      </AccordionTrigger>
-                      <AccordionContent>
-                        <form onSubmit={handleProfileUpdate} className="space-y-4 pt-4">
-                          <div className="space-y-2">
-                            <Label htmlFor="name">{t('profile.username')}</Label>
-                            <div className="relative">
-                              <User className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
-                              <Input id="name" value={name} onChange={(e) => setName(e.target.value)} className="pl-10" />
-                            </div>
-                          </div>
-
-                          <div className="space-y-2">
-                            <Label htmlFor="email">{t('profile.email')}</Label>
-                            <div className="relative">
-                              <Mail className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
-                              <Input id="email" value={email} disabled className="pl-10 bg-muted" />
-                            </div>
-                          </div>
-
-                          <div className="space-y-2">
-                            <Label htmlFor="phone">{t('profile.phone')}</Label>
-                            <div className="relative">
-                              <Phone className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
-                              <Input id="phone" value={phone} onChange={(e) => setPhone(e.target.value)} className="pl-10" />
-                            </div>
-                          </div>
-
-                          <Button type="submit" className="w-full">{t('profile.saveChanges')}</Button>
-                        </form>
-                      </AccordionContent>
-                    </AccordionItem>
-
-                    <AccordionItem value="change-password">
-                      <AccordionTrigger className="text-base font-semibold">
-                        <span className="flex items-center gap-2">
-                          <Lock className="w-4 h-4" />
-                          {t('profile.changePassword')}
-                        </span>
-                      </AccordionTrigger>
-                      <AccordionContent>
-                        <form onSubmit={handlePasswordChange} className="space-y-4 pt-4">
-                          <div className="space-y-2">
-                            <Label htmlFor="current">{t('profile.currentPassword')}</Label>
-                            <div className="relative">
-                              <Lock className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
-                              <Input id="current" type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} className="pl-10" />
-                            </div>
-                          </div>
-
-                          <div className="space-y-2">
-                            <Label htmlFor="new">{t('profile.newPassword')}</Label>
-                            <div className="relative">
-                              <Lock className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
-                              <Input id="new" type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className="pl-10" />
-                            </div>
-                          </div>
-
-                          <div className="space-y-2">
-                            <Label htmlFor="confirm">{t('profile.confirmPassword')}</Label>
-                            <div className="relative">
-                              <Lock className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
-                              <Input id="confirm" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className="pl-10" />
-                            </div>
-                          </div>
-
-                          <Button type="submit" className="w-full">{t('profile.changePassword')}</Button>
-                        </form>
-                      </AccordionContent>
-                    </AccordionItem>
-
-                    <AccordionItem value="change-email">
-                      <AccordionTrigger className="text-base font-semibold">
-                        <span className="flex items-center gap-2">
-                          <Mail className="w-4 h-4" />
-                          Cambia Email
-                        </span>
-                      </AccordionTrigger>
-                      <AccordionContent>
-                        <form onSubmit={handleEmailChange} className="space-y-4 pt-4">
-                          <div className="space-y-2">
-                            <Label htmlFor="newEmail">Nuova Email</Label>
-                            <div className="relative">
-                              <Mail className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
-                              <Input
-                                id="newEmail"
-                                type="email"
-                                value={newEmail}
-                                onChange={(e) => setNewEmail(e.target.value)}
-                                placeholder="nuova@email.com"
-                                className="pl-10"
-                              />
-                            </div>
-                          </div>
-                          <div className="space-y-2">
-                            <Label htmlFor="passwordForEmail">Password Attuale</Label>
-                            <div className="relative">
-                              <Lock className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
-                              <Input
-                                id="passwordForEmail"
-                                type="password"
-                                value={passwordForEmail}
-                                onChange={(e) => setPasswordForEmail(e.target.value)}
-                                placeholder="••••••••"
-                                className="pl-10"
-                              />
-                            </div>
-                          </div>
-                          <Button type="submit" className="w-full">
-                            Cambia Email
-                          </Button>
-                        </form>
-                      </AccordionContent>
-                    </AccordionItem>
-                  </Accordion>
-                </div>
-              </div>
-            </Card>
-
-            {/* Points and Level Section */}
-            <Card className="p-8">
-              <div className="space-y-6">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-xl font-semibold">{t('profile.loyaltyLevel')}</h3>
-                  <Button 
-                    variant="outline" 
-                    className="px-4 py-2"
-                    onClick={() => setShowLevelModal(true)}
-                  >
-                    <Trophy className="w-4 h-4 mr-2" />
-                    {getLevelDisplayName(currentLevel)}
-                  </Button>
-                </div>
-
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-2xl font-bold">{userPoints} {t('profile.points')}</span>
+                <div className="flex-1 w-full space-y-4">
+                  <div>
+                    <h2 className="text-2xl font-bold text-foreground">{profile?.name}</h2>
+                    <p className="text-muted-foreground">{profile?.email}</p>
                   </div>
-                  
-                  {levelInfo.nextLevel && (
-                    <>
-                      <Progress value={Math.max(0, Math.min(100, levelInfo.progress))} className="h-3" />
-                      <p className="text-sm text-muted-foreground">
-                        Ti mancano {Math.max(0, levelInfo.pointsToNext)} punti per raggiungere il livello {levelInfo.nextLevel}
-                      </p>
-                    </>
-                  )}
-                  
-                  {!levelInfo.nextLevel && (
-                    <p className="text-sm text-primary font-medium">
-                      Hai raggiunto il livello massimo! 🎉
-                    </p>
-                  )}
-                </div>
 
-                {/* Points History */}
-                {user?.id && <PointsHistorySection userId={user.id} />}
+                  {/* Level and Points Section */}
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">{t('profile.loyaltyLevel')}</span>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        className="px-3 py-1"
+                        onClick={() => setShowLevelModal(true)}
+                      >
+                        <Trophy className="w-4 h-4 mr-1" />
+                        {getLevelDisplayName(currentLevel)}
+                      </Button>
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <span className="text-2xl font-bold">{userPoints} {t('profile.points')}</span>
+                    </div>
+                    
+                    {levelInfo.nextLevel && (
+                      <>
+                        <Progress value={Math.max(0, Math.min(100, levelInfo.progress))} className="h-3" />
+                        <p className="text-xs text-muted-foreground">
+                          Ti mancano {Math.max(0, levelInfo.pointsToNext)} punti per raggiungere il livello {levelInfo.nextLevel}
+                        </p>
+                      </>
+                    )}
+                    
+                    {!levelInfo.nextLevel && (
+                      <p className="text-sm text-primary font-medium">
+                        Hai raggiunto il livello massimo! 🎉
+                      </p>
+                    )}
+
+                    {/* Points History */}
+                    {user?.id && <PointsHistorySection userId={user.id} />}
+                  </div>
+                </div>
               </div>
             </Card>
 
-            {/* Quick Access Cards - After points */}
+            {/* Quick Access Cards */}
             <div className="grid gap-6 md:grid-cols-3">
               <Card className="p-6 hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate('/my-bookings')}>
                 <div className="flex items-center gap-4">
@@ -465,6 +337,108 @@ const Profile = () => {
                 </div>
               </Card>
             </div>
+
+            {/* Personal Data Card */}
+            <Card className="p-8">
+              <h3 className="text-xl font-semibold mb-6">{t('profile.title')}</h3>
+              <form onSubmit={handleProfileUpdate} className="space-y-6">
+                <div className="space-y-2">
+                  <Label htmlFor="name">{t('profile.username')}</Label>
+                  <div className="relative">
+                    <User className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
+                    <Input id="name" value={name} onChange={(e) => setName(e.target.value)} className="pl-10" />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="email">{t('profile.email')}</Label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
+                    <Input id="email" value={email} disabled className="pl-10 bg-muted" />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="phone">{t('profile.phone')}</Label>
+                  <div className="relative">
+                    <Phone className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
+                    <Input id="phone" value={phone} onChange={(e) => setPhone(e.target.value)} className="pl-10" />
+                  </div>
+                </div>
+
+                <Button type="submit" className="w-full">{t('profile.saveChanges')}</Button>
+              </form>
+            </Card>
+
+            {/* Change Password Card */}
+            <Card className="p-8">
+              <h3 className="text-xl font-semibold mb-6">{t('profile.changePassword')}</h3>
+              <form onSubmit={handlePasswordChange} className="space-y-6">
+                <div className="space-y-2">
+                  <Label htmlFor="current">{t('profile.currentPassword')}</Label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
+                    <Input id="current" type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} className="pl-10" />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="new">{t('profile.newPassword')}</Label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
+                    <Input id="new" type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className="pl-10" />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="confirm">{t('profile.confirmPassword')}</Label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
+                    <Input id="confirm" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className="pl-10" />
+                  </div>
+                </div>
+
+                <Button type="submit" className="w-full">{t('profile.changePassword')}</Button>
+              </form>
+            </Card>
+
+            {/* Change Email Card */}
+            <Card className="p-8">
+              <h3 className="text-xl font-semibold mb-6">Cambia Email</h3>
+              <form onSubmit={handleEmailChange} className="space-y-6">
+                <div className="space-y-2">
+                  <Label htmlFor="newEmail">Nuova Email</Label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
+                    <Input
+                      id="newEmail"
+                      type="email"
+                      value={newEmail}
+                      onChange={(e) => setNewEmail(e.target.value)}
+                      placeholder="nuova@email.com"
+                      className="pl-10"
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="passwordForEmail">Password Attuale</Label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
+                    <Input
+                      id="passwordForEmail"
+                      type="password"
+                      value={passwordForEmail}
+                      onChange={(e) => setPasswordForEmail(e.target.value)}
+                      placeholder="••••••••"
+                      className="pl-10"
+                    />
+                  </div>
+                </div>
+                <Button type="submit" className="w-full">
+                  Cambia Email
+                </Button>
+              </form>
+            </Card>
           </div>
         </div>
       </main>
