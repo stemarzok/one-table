@@ -367,6 +367,44 @@ export type Database = {
           },
         ]
       }
+      points_history: {
+        Row: {
+          booking_id: string | null
+          created_at: string
+          id: string
+          points_change: number
+          reason: string
+          restaurant_name: string | null
+          user_id: string
+        }
+        Insert: {
+          booking_id?: string | null
+          created_at?: string
+          id?: string
+          points_change: number
+          reason: string
+          restaurant_name?: string | null
+          user_id: string
+        }
+        Update: {
+          booking_id?: string | null
+          created_at?: string
+          id?: string
+          points_change?: number
+          reason?: string
+          restaurant_name?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "points_history_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
