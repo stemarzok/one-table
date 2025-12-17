@@ -9,13 +9,19 @@ import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Trophy, Mail, User, Upload, Lock, Star, Calendar, Heart, Phone } from "lucide-react";
+import { Trophy, Mail, User, Upload, Lock, Star, Calendar, Heart, Phone, ChevronDown } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import LevelBenefitsModal from "@/components/LevelBenefitsModal";
 import PointsHistorySection from "@/components/PointsHistorySection";
+import UserReviewsSection from "@/components/UserReviewsSection";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 
 const Profile = () => {
   const { t } = useLanguage();
@@ -35,6 +41,10 @@ const Profile = () => {
   const [passwordForEmail, setPasswordForEmail] = useState("");
   const [showLevelModal, setShowLevelModal] = useState(false);
   const [reviewsCount, setReviewsCount] = useState(0);
+  const [showReviewsSection, setShowReviewsSection] = useState(false);
+  const [personalDataOpen, setPersonalDataOpen] = useState(false);
+  const [passwordOpen, setPasswordOpen] = useState(false);
+  const [emailOpen, setEmailOpen] = useState(false);
 
   useEffect(() => {
     if (!isLoggedIn) {
@@ -154,6 +164,7 @@ const Profile = () => {
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
+      setPasswordOpen(false);
     }
   };
 
@@ -183,6 +194,7 @@ const Profile = () => {
       toast({ title: "Email aggiornata", description: "Controlla la nuova email per confermare il cambiamento" });
       setNewEmail("");
       setPasswordForEmail("");
+      setEmailOpen(false);
     }
   };
 
@@ -325,7 +337,10 @@ const Profile = () => {
                 </div>
               </Card>
 
-              <Card className="p-6">
+              <Card 
+                className="p-6 hover:shadow-lg transition-shadow cursor-pointer" 
+                onClick={() => setShowReviewsSection(true)}
+              >
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
                     <Star className="w-6 h-6 text-primary" />
@@ -338,106 +353,137 @@ const Profile = () => {
               </Card>
             </div>
 
-            {/* Personal Data Card */}
+            {/* Account Settings Card with Accordion */}
             <Card className="p-8">
               <h3 className="text-xl font-semibold mb-6">{t('profile.title')}</h3>
-              <form onSubmit={handleProfileUpdate} className="space-y-6">
-                <div className="space-y-2">
-                  <Label htmlFor="name">{t('profile.username')}</Label>
-                  <div className="relative">
-                    <User className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
-                    <Input id="name" value={name} onChange={(e) => setName(e.target.value)} className="pl-10" />
-                  </div>
-                </div>
+              
+              <div className="space-y-4">
+                {/* Personal Data Section */}
+                <Collapsible open={personalDataOpen} onOpenChange={setPersonalDataOpen}>
+                  <CollapsibleTrigger className="flex items-center justify-between w-full p-4 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
+                    <div className="flex items-center gap-3">
+                      <User className="w-5 h-5 text-primary" />
+                      <span className="font-medium">Dati Personali</span>
+                    </div>
+                    <ChevronDown className={`w-5 h-5 transition-transform ${personalDataOpen ? 'rotate-180' : ''}`} />
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="pt-4 px-4">
+                    <form onSubmit={handleProfileUpdate} className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="name">{t('profile.username')}</Label>
+                        <div className="relative">
+                          <User className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
+                          <Input id="name" value={name} onChange={(e) => setName(e.target.value)} className="pl-10" />
+                        </div>
+                      </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="email">{t('profile.email')}</Label>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
-                    <Input id="email" value={email} disabled className="pl-10 bg-muted" />
-                  </div>
-                </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="email">{t('profile.email')}</Label>
+                        <div className="relative">
+                          <Mail className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
+                          <Input id="email" value={email} disabled className="pl-10 bg-muted" />
+                        </div>
+                      </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="phone">{t('profile.phone')}</Label>
-                  <div className="relative">
-                    <Phone className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
-                    <Input id="phone" value={phone} onChange={(e) => setPhone(e.target.value)} className="pl-10" />
-                  </div>
-                </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="phone">{t('profile.phone')}</Label>
+                        <div className="relative">
+                          <Phone className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
+                          <Input id="phone" value={phone} onChange={(e) => setPhone(e.target.value)} className="pl-10" />
+                        </div>
+                      </div>
 
-                <Button type="submit" className="w-full">{t('profile.saveChanges')}</Button>
-              </form>
-            </Card>
+                      <Button type="submit" className="w-full">{t('profile.saveChanges')}</Button>
+                    </form>
+                  </CollapsibleContent>
+                </Collapsible>
 
-            {/* Change Password Card */}
-            <Card className="p-8">
-              <h3 className="text-xl font-semibold mb-6">{t('profile.changePassword')}</h3>
-              <form onSubmit={handlePasswordChange} className="space-y-6">
-                <div className="space-y-2">
-                  <Label htmlFor="current">{t('profile.currentPassword')}</Label>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
-                    <Input id="current" type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} className="pl-10" />
-                  </div>
-                </div>
+                {/* Change Password Section */}
+                <Collapsible open={passwordOpen} onOpenChange={setPasswordOpen}>
+                  <CollapsibleTrigger className="flex items-center justify-between w-full p-4 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
+                    <div className="flex items-center gap-3">
+                      <Lock className="w-5 h-5 text-primary" />
+                      <span className="font-medium">{t('profile.changePassword')}</span>
+                    </div>
+                    <ChevronDown className={`w-5 h-5 transition-transform ${passwordOpen ? 'rotate-180' : ''}`} />
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="pt-4 px-4">
+                    <form onSubmit={handlePasswordChange} className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="current">{t('profile.currentPassword')}</Label>
+                        <div className="relative">
+                          <Lock className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
+                          <Input id="current" type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} className="pl-10" />
+                        </div>
+                      </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="new">{t('profile.newPassword')}</Label>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
-                    <Input id="new" type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className="pl-10" />
-                  </div>
-                </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="new">{t('profile.newPassword')}</Label>
+                        <div className="relative">
+                          <Lock className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
+                          <Input id="new" type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className="pl-10" />
+                        </div>
+                      </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="confirm">{t('profile.confirmPassword')}</Label>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
-                    <Input id="confirm" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className="pl-10" />
-                  </div>
-                </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="confirm">{t('profile.confirmPassword')}</Label>
+                        <div className="relative">
+                          <Lock className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
+                          <Input id="confirm" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className="pl-10" />
+                        </div>
+                      </div>
 
-                <Button type="submit" className="w-full">{t('profile.changePassword')}</Button>
-              </form>
-            </Card>
+                      <Button type="submit" className="w-full">{t('profile.changePassword')}</Button>
+                    </form>
+                  </CollapsibleContent>
+                </Collapsible>
 
-            {/* Change Email Card */}
-            <Card className="p-8">
-              <h3 className="text-xl font-semibold mb-6">Cambia Email</h3>
-              <form onSubmit={handleEmailChange} className="space-y-6">
-                <div className="space-y-2">
-                  <Label htmlFor="newEmail">Nuova Email</Label>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
-                    <Input
-                      id="newEmail"
-                      type="email"
-                      value={newEmail}
-                      onChange={(e) => setNewEmail(e.target.value)}
-                      placeholder="nuova@email.com"
-                      className="pl-10"
-                    />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="passwordForEmail">Password Attuale</Label>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
-                    <Input
-                      id="passwordForEmail"
-                      type="password"
-                      value={passwordForEmail}
-                      onChange={(e) => setPasswordForEmail(e.target.value)}
-                      placeholder="••••••••"
-                      className="pl-10"
-                    />
-                  </div>
-                </div>
-                <Button type="submit" className="w-full">
-                  Cambia Email
-                </Button>
-              </form>
+                {/* Change Email Section */}
+                <Collapsible open={emailOpen} onOpenChange={setEmailOpen}>
+                  <CollapsibleTrigger className="flex items-center justify-between w-full p-4 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
+                    <div className="flex items-center gap-3">
+                      <Mail className="w-5 h-5 text-primary" />
+                      <span className="font-medium">Cambia Email</span>
+                    </div>
+                    <ChevronDown className={`w-5 h-5 transition-transform ${emailOpen ? 'rotate-180' : ''}`} />
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="pt-4 px-4">
+                    <form onSubmit={handleEmailChange} className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="newEmail">Nuova Email</Label>
+                        <div className="relative">
+                          <Mail className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
+                          <Input
+                            id="newEmail"
+                            type="email"
+                            value={newEmail}
+                            onChange={(e) => setNewEmail(e.target.value)}
+                            placeholder="nuova@email.com"
+                            className="pl-10"
+                          />
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="passwordForEmail">Password Attuale</Label>
+                        <div className="relative">
+                          <Lock className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
+                          <Input
+                            id="passwordForEmail"
+                            type="password"
+                            value={passwordForEmail}
+                            onChange={(e) => setPasswordForEmail(e.target.value)}
+                            placeholder="••••••••"
+                            className="pl-10"
+                          />
+                        </div>
+                      </div>
+                      <Button type="submit" className="w-full">
+                        Cambia Email
+                      </Button>
+                    </form>
+                  </CollapsibleContent>
+                </Collapsible>
+              </div>
             </Card>
           </div>
         </div>
@@ -450,6 +496,13 @@ const Profile = () => {
         onOpenChange={setShowLevelModal} 
         currentLevel={currentLevel}
       />
+
+      {showReviewsSection && user?.id && (
+        <UserReviewsSection 
+          userId={user.id} 
+          onClose={() => setShowReviewsSection(false)} 
+        />
+      )}
     </div>
   );
 };
