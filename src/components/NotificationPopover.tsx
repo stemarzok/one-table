@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Bell, Check, CheckCheck } from "lucide-react";
+import { Bell, CheckCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -13,6 +13,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useBusinessRole } from "@/hooks/useBusinessRole";
 import { format } from "date-fns";
 import { it } from "date-fns/locale";
+import { useNavigate } from "react-router-dom";
 
 interface Notification {
   id: string;
@@ -25,8 +26,9 @@ interface Notification {
 }
 
 export const NotificationPopover = () => {
-  const { user } = useAuth();
+  const { user, isBusinessMode } = useAuth();
   const { businessRoles } = useBusinessRole();
+  const navigate = useNavigate();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [open, setOpen] = useState(false);
@@ -34,7 +36,6 @@ export const NotificationPopover = () => {
   const fetchNotifications = async () => {
     if (!user) return;
 
-    // Fetch notifications for user directly and for their restaurants
     const restaurantIds = businessRoles.map(r => r.restaurant_id);
     
     let query = supabase
@@ -43,8 +44,7 @@ export const NotificationPopover = () => {
       .order('created_at', { ascending: false })
       .limit(20);
 
-    // Build OR filter for user notifications OR restaurant notifications
-    if (restaurantIds.length > 0) {
+    if (isBusinessMode && restaurantIds.length > 0) {
       query = query.or(`user_id.eq.${user.id},restaurant_id.in.(${restaurantIds.join(',')})`);
     } else {
       query = query.eq('user_id', user.id);
@@ -61,7 +61,6 @@ export const NotificationPopover = () => {
   useEffect(() => {
     fetchNotifications();
 
-    // Subscribe to realtime updates for user notifications
     if (user) {
       const channel = supabase
         .channel('notification-popover')
@@ -80,15 +79,37 @@ export const NotificationPopover = () => {
         supabase.removeChannel(channel);
       };
     }
-  }, [user, businessRoles]);
+  }, [user, businessRoles, isBusinessMode]);
 
-  const markAsRead = async (notificationId: string) => {
+  const handleNotificationClick = async (notification: Notification) => {
     await supabase
       .from('notifications')
       .update({ is_read: true })
-      .eq('id', notificationId);
+      .eq('id', notification.id);
     
     fetchNotifications();
+    setOpen(false);
+
+    if (notification.link) {
+      navigate(notification.link);
+    } else {
+      const type = notification.type;
+      if (isBusinessMode) {
+        if (type === 'booking' || type === 'new_booking' || type === 'booking_cancelled') {
+          navigate('/dashboard?tab=prenotazioni');
+        } else if (type === 'review' || type === 'new_review') {
+          navigate('/dashboard?tab=recensioni');
+        } else if (type === 'application_approved' || type === 'application_rejected') {
+          navigate('/dashboard');
+        }
+      } else {
+        if (type === 'booking' || type === 'booking_confirmed' || type === 'booking_cancelled') {
+          navigate('/profile');
+        } else if (type === 'points' || type === 'level_up') {
+          navigate('/profile');
+        }
+      }
+    }
   };
 
   const markAllAsRead = async () => {
@@ -96,8 +117,7 @@ export const NotificationPopover = () => {
     
     const restaurantIds = businessRoles.map(r => r.restaurant_id);
     
-    // Mark all user notifications and restaurant notifications as read
-    if (restaurantIds.length > 0) {
+    if (isBusinessMode && restaurantIds.length > 0) {
       await supabase
         .from('notifications')
         .update({ is_read: true })
@@ -161,7 +181,7 @@ export const NotificationPopover = () => {
                   className={`p-4 cursor-pointer hover:bg-muted/50 transition-colors ${
                     !notification.is_read ? 'bg-primary/5' : ''
                   }`}
-                  onClick={() => markAsRead(notification.id)}
+                  onClick={() => handleNotificationClick(notification)}
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex-1 min-w-0">

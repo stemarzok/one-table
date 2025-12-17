@@ -98,7 +98,7 @@ const Header = () => {
 
           {isLoggedIn ? (
             <div className="hidden md:flex items-center gap-2">
-              {isBusinessMode && <NotificationPopover />}
+              <NotificationPopover />
               {isBusinessMode ? <BusinessUserMenu /> : <DesktopUserMenu />}
             </div>
           ) : (
@@ -127,7 +127,7 @@ const Header = () => {
         {/* Mobile menu - Show user menu icon when logged in, hamburger when not */}
         {isLoggedIn ? (
           <div className="md:hidden flex items-center gap-2">
-            {isBusinessMode && <NotificationPopover />}
+            <NotificationPopover />
             {isBusinessMode ? <MobileBusinessMenu /> : <MobileUserMenu />}
           </div>
         ) : (
