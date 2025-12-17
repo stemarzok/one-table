@@ -138,9 +138,11 @@ export const NotificationPopover = () => {
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
-          variant="ghost"
+          variant="secondary"
           size="icon"
           className="relative rounded-full"
+          aria-label="Notifiche"
+          title="Notifiche"
         >
           <Bell className="w-5 h-5" />
           {unreadCount > 0 && (
