@@ -181,7 +181,7 @@ const UserReviewsSection = ({ userId, onClose }: UserReviewsSectionProps) => {
                 <div className="flex items-start justify-between">
                   <div className="space-y-1">
                     <button
-                      onClick={() => navigate(`/restaurants/${review.restaurant_id}`)}
+                      onClick={() => navigate(`/restaurant/${review.restaurant_id}`)}
                       className="font-semibold text-primary hover:underline flex items-center gap-1"
                     >
                       {review.restaurant?.name || "Ristorante"}

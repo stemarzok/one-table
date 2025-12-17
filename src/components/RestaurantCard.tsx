@@ -35,8 +35,15 @@ const RestaurantCard = ({
   const navigate = useNavigate();
   const { toggleFavorite, isFavorite } = useFavorites();
 
+  const handleCardClick = () => {
+    navigate(`/restaurant/${id}`);
+  };
+
   return (
-    <Card className="overflow-hidden hover:shadow-elegant transition-all duration-300 hover:-translate-y-1 bg-gradient-card border-border/50">
+    <Card 
+      className="overflow-hidden hover:shadow-elegant transition-all duration-300 hover:-translate-y-1 bg-gradient-card border-border/50 cursor-pointer"
+      onClick={handleCardClick}
+    >
       <div className="relative h-48 overflow-hidden">
         <img 
           src={image} 
@@ -97,7 +104,10 @@ const RestaurantCard = ({
         <div className="flex items-center justify-between">
           <span className="text-lg font-semibold text-primary">{priceRange}</span>
           <Button 
-            onClick={() => navigate(`/restaurant/${id}?tab=booking`)}
+            onClick={(e) => {
+              e.stopPropagation();
+              navigate(`/restaurant/${id}?tab=booking`);
+            }}
             className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-full"
           >
             Prenota Ora
