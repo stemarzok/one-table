@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Star, MessageSquare, Flag, AlertTriangle } from "lucide-react";
+import { Star, MessageSquare, Flag, AlertTriangle, ThumbsUp, ThumbsDown } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -33,6 +33,8 @@ interface Review {
   comment: string | null;
   photos: string[] | null;
   created_at: string;
+  is_edited?: boolean;
+  edited_at?: string | null;
   profiles: {
     name: string;
     avatar_url: string | null;
@@ -40,6 +42,9 @@ interface Review {
   };
   responses?: ReviewResponse[];
   is_reported?: boolean;
+  likes_count: number;
+  dislikes_count: number;
+  user_reaction?: boolean | null; // true = like, false = dislike, null = no reaction
 }
 
 interface ReviewResponse {
@@ -55,9 +60,17 @@ interface ReviewsListProps {
   restaurantId: string;
 }
 
+const formatReviewerName = (fullName: string): string => {
+  const parts = fullName.trim().split(/\s+/);
+  if (parts.length === 1) return parts[0];
+  const firstName = parts[0];
+  const lastInitial = parts[parts.length - 1].charAt(0).toUpperCase();
+  return `${firstName} ${lastInitial}.`;
+};
+
 export const ReviewsList = ({ restaurantId }: ReviewsListProps) => {
   const { t } = useLanguage();
-  const { user } = useAuth();
+  const { user, isBusinessMode } = useAuth();
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
   const [respondingTo, setRespondingTo] = useState<string | null>(null);
@@ -68,6 +81,7 @@ export const ReviewsList = ({ restaurantId }: ReviewsListProps) => {
   const [reportReason, setReportReason] = useState("");
   const [reportedReviews, setReportedReviews] = useState<Set<string>>(new Set());
   const [restaurantName, setRestaurantName] = useState<string>("");
+  const [sortBy, setSortBy] = useState<"recent" | "relevant">("recent");
 
   // Fetch restaurant name and check role
   useEffect(() => {
@@ -109,7 +123,7 @@ export const ReviewsList = ({ restaurantId }: ReviewsListProps) => {
 
   useEffect(() => {
     fetchReviews();
-  }, [restaurantId]);
+  }, [restaurantId, sortBy]);
 
   const fetchReviews = async () => {
     try {
@@ -119,12 +133,12 @@ export const ReviewsList = ({ restaurantId }: ReviewsListProps) => {
         .select("*")
         .eq("restaurant_id", restaurantId)
         .order("created_at", { ascending: false })
-        .limit(10);
+        .limit(50);
 
       if (reviewsError) throw reviewsError;
 
-      // Then get profile info and responses for each review
-      const reviewsWithProfiles = await Promise.all(
+      // Then get profile info, responses, and likes for each review
+      const reviewsWithDetails = await Promise.all(
         (reviewsData || []).map(async (review) => {
           const { data: profile } = await supabase
             .from("profiles")
@@ -155,19 +169,107 @@ export const ReviewsList = ({ restaurantId }: ReviewsListProps) => {
             })
           );
 
+          // Get likes count
+          const { count: likesCount } = await supabase
+            .from("review_likes")
+            .select("*", { count: "exact", head: true })
+            .eq("review_id", review.id)
+            .eq("is_like", true);
+
+          // Get dislikes count
+          const { count: dislikesCount } = await supabase
+            .from("review_likes")
+            .select("*", { count: "exact", head: true })
+            .eq("review_id", review.id)
+            .eq("is_like", false);
+
+          // Get user's reaction if logged in
+          let userReaction: boolean | null = null;
+          if (user) {
+            const { data: reactionData } = await supabase
+              .from("review_likes")
+              .select("is_like")
+              .eq("review_id", review.id)
+              .eq("user_id", user.id)
+              .maybeSingle();
+            
+            if (reactionData) {
+              userReaction = reactionData.is_like;
+            }
+          }
+
           return {
             ...review,
-            profiles: profile || { name: "User", avatar_url: null, level: "Bronze" },
+            profiles: profile || { name: "Utente", avatar_url: null, level: "Bronze" },
             responses: responsesWithProfiles,
+            likes_count: likesCount || 0,
+            dislikes_count: dislikesCount || 0,
+            user_reaction: userReaction,
           };
         })
       );
 
-      setReviews(reviewsWithProfiles || []);
+      // Sort reviews
+      let sortedReviews = [...reviewsWithDetails];
+      if (sortBy === "relevant") {
+        sortedReviews.sort((a, b) => (b.likes_count - b.dislikes_count) - (a.likes_count - a.dislikes_count));
+      }
+
+      setReviews(sortedReviews || []);
     } catch (error) {
       console.error("Error fetching reviews:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleReaction = async (reviewId: string, isLike: boolean) => {
+    if (!user || isBusinessMode) {
+      toast.error("Solo i clienti possono votare le recensioni");
+      return;
+    }
+
+    const review = reviews.find(r => r.id === reviewId);
+    if (!review) return;
+
+    try {
+      // Check if user already has a reaction
+      const { data: existingReaction } = await supabase
+        .from("review_likes")
+        .select("id, is_like")
+        .eq("review_id", reviewId)
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (existingReaction) {
+        if (existingReaction.is_like === isLike) {
+          // Remove reaction if clicking same button
+          await supabase
+            .from("review_likes")
+            .delete()
+            .eq("id", existingReaction.id);
+        } else {
+          // Update reaction
+          await supabase
+            .from("review_likes")
+            .update({ is_like: isLike })
+            .eq("id", existingReaction.id);
+        }
+      } else {
+        // Create new reaction
+        await supabase
+          .from("review_likes")
+          .insert({
+            review_id: reviewId,
+            user_id: user.id,
+            is_like: isLike,
+          });
+      }
+
+      fetchReviews();
+    } catch (error) {
+      console.error("Error handling reaction:", error);
+      toast.error("Errore nel votare la recensione");
     }
   };
 
@@ -246,6 +348,20 @@ export const ReviewsList = ({ restaurantId }: ReviewsListProps) => {
 
   return (
     <div className="space-y-4">
+      {/* Sort Controls */}
+      <div className="flex items-center justify-between">
+        <span className="text-sm text-muted-foreground">{reviews.length} recensioni</span>
+        <Select value={sortBy} onValueChange={(v) => setSortBy(v as "recent" | "relevant")}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Ordina per..." />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="recent">Più recenti</SelectItem>
+            <SelectItem value="relevant">Più rilevanti</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
       {reviews.map((review) => (
         <Card key={review.id} className="p-6">
           <div className="flex items-start gap-4">
@@ -259,10 +375,15 @@ export const ReviewsList = ({ restaurantId }: ReviewsListProps) => {
             <div className="flex-1 space-y-2">
               <div className="flex items-center justify-between flex-wrap gap-2">
                 <div className="flex items-center gap-2">
-                  <h4 className="font-semibold">{review.profiles.name}</h4>
+                  <h4 className="font-semibold">{formatReviewerName(review.profiles.name)}</h4>
                   <Badge className={`text-xs ${getLevelBadgeColor(review.profiles.level)}`}>
                     {review.profiles.level}
                   </Badge>
+                  {review.is_edited && (
+                    <Badge variant="secondary" className="text-xs">
+                      modificata
+                    </Badge>
+                  )}
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-sm text-muted-foreground">
@@ -331,6 +452,32 @@ export const ReviewsList = ({ restaurantId }: ReviewsListProps) => {
                   ))}
                 </div>
               )}
+
+              {/* Like/Dislike Section */}
+              <div className="flex items-center gap-4 mt-3 pt-3 border-t">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className={`flex items-center gap-1 ${review.user_reaction === true ? 'text-primary' : 'text-muted-foreground'}`}
+                  onClick={() => handleReaction(review.id, true)}
+                  disabled={!user || isBusinessMode}
+                  title={!user ? "Accedi per votare" : isBusinessMode ? "I ristoratori non possono votare" : "Mi piace"}
+                >
+                  <ThumbsUp className={`h-4 w-4 ${review.user_reaction === true ? 'fill-primary' : ''}`} />
+                  <span>{review.likes_count}</span>
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className={`flex items-center gap-1 ${review.user_reaction === false ? 'text-destructive' : 'text-muted-foreground'}`}
+                  onClick={() => handleReaction(review.id, false)}
+                  disabled={!user || isBusinessMode}
+                  title={!user ? "Accedi per votare" : isBusinessMode ? "I ristoratori non possono votare" : "Non mi piace"}
+                >
+                  <ThumbsDown className={`h-4 w-4 ${review.user_reaction === false ? 'fill-destructive' : ''}`} />
+                  <span>{review.dislikes_count}</span>
+                </Button>
+              </div>
 
               {review.responses && review.responses.length > 0 && (
                 <div className="mt-4 space-y-3 pl-4 border-l-2 border-primary/20">

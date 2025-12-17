@@ -638,6 +638,38 @@ export type Database = {
           },
         ]
       }
+      review_likes: {
+        Row: {
+          created_at: string
+          id: string
+          is_like: boolean
+          review_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_like: boolean
+          review_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_like?: boolean
+          review_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "review_likes_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "reviews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       review_reports: {
         Row: {
           admin_notes: string | null
@@ -757,8 +789,10 @@ export type Database = {
           booking_id: string | null
           comment: string | null
           created_at: string
+          edited_at: string | null
           food_rating: number | null
           id: string
+          is_edited: boolean | null
           photos: string[] | null
           rating: number
           restaurant_id: string
@@ -771,8 +805,10 @@ export type Database = {
           booking_id?: string | null
           comment?: string | null
           created_at?: string
+          edited_at?: string | null
           food_rating?: number | null
           id?: string
+          is_edited?: boolean | null
           photos?: string[] | null
           rating: number
           restaurant_id: string
@@ -785,8 +821,10 @@ export type Database = {
           booking_id?: string | null
           comment?: string | null
           created_at?: string
+          edited_at?: string | null
           food_rating?: number | null
           id?: string
+          is_edited?: boolean | null
           photos?: string[] | null
           rating?: number
           restaurant_id?: string
