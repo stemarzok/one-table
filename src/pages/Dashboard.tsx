@@ -10,7 +10,7 @@ import { useAdminRole } from "@/hooks/useAdminRole";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
-import { LayoutDashboard, Store, Table2, UtensilsCrossed, Calendar, AlertCircle, CheckCircle, Clock, XCircle, BarChart3, MessageSquare, Lock, ArrowRight, TrendingUp, Users, HelpCircle } from "lucide-react";
+import { LayoutDashboard, Store, Table2, UtensilsCrossed, Calendar, AlertCircle, CheckCircle, Clock, XCircle, BarChart3, MessageSquare, Lock, ArrowRight, TrendingUp, Users, HelpCircle, Megaphone } from "lucide-react";
 import { TablesManagement } from "@/components/dashboard/TablesManagement";
 import { MenuManagement } from "@/components/dashboard/MenuManagement";
 import { BookingsManagement } from "@/components/dashboard/BookingsManagement";
@@ -18,6 +18,7 @@ import { RestaurantAnalyticsAdvanced } from "@/components/dashboard/RestaurantAn
 import { ReviewsManagement } from "@/components/dashboard/ReviewsManagement";
 import { PaywallModal } from "@/components/PaywallModal";
 import { DashboardTutorial } from "@/components/dashboard/DashboardTutorial";
+import { SponsorshipManagement } from "@/components/dashboard/SponsorshipManagement";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -273,7 +274,7 @@ const Dashboard = () => {
             </div>
           )}
           <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-8">
-            <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6 gap-1">
+            <TabsList className="grid w-full grid-cols-4 lg:grid-cols-7 gap-1">
               <TabsTrigger value="overview">
                 <LayoutDashboard className="w-4 h-4 mr-2" />
                 <span className="hidden sm:inline">{t('dashboard.overview')}</span>
@@ -302,6 +303,10 @@ const Dashboard = () => {
                 <UtensilsCrossed className="w-4 h-4 mr-2" />
                 <span className="hidden sm:inline">{t('dashboard.menu')}</span>
                 {!hasProAccess && <Lock className="w-3 h-3 absolute -top-1 -right-1 text-muted-foreground" />}
+              </TabsTrigger>
+              <TabsTrigger value="sponsorship" className="relative">
+                <Megaphone className="w-4 h-4 mr-2" />
+                <span className="hidden sm:inline">Promo</span>
               </TabsTrigger>
             </TabsList>
             
@@ -509,6 +514,9 @@ const Dashboard = () => {
             </TabsContent>
             <TabsContent value="menu">
               {hasProAccess && selectedRestaurantId && <MenuManagement restaurantId={selectedRestaurantId} />}
+            </TabsContent>
+            <TabsContent value="sponsorship">
+              {selectedRestaurantId && <SponsorshipManagement restaurantId={selectedRestaurantId} />}
             </TabsContent>
           </Tabs>
         </div>
