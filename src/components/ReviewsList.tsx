@@ -61,8 +61,21 @@ interface ReviewsListProps {
 }
 
 const formatReviewerName = (fullName: string): string => {
-  const parts = fullName.trim().split(/\s+/);
-  if (parts.length === 1) return parts[0];
+  const name = fullName?.trim() || "Utente";
+  const parts = name.split(/\s+/);
+  
+  // If it's the default "Utente" name, show just "Utente"
+  if (name === "Utente") {
+    return "Utente";
+  }
+  
+  // For single word names, show Name + first initial (e.g., "Marco" -> "Marco M.")
+  if (parts.length === 1) {
+    const initial = parts[0].charAt(0).toUpperCase();
+    return `${parts[0]} ${initial}.`;
+  }
+  
+  // For full names, show first name + last initial (e.g., "Paolo Rossi" -> "Paolo R.")
   const firstName = parts[0];
   const lastInitial = parts[parts.length - 1].charAt(0).toUpperCase();
   return `${firstName} ${lastInitial}.`;
