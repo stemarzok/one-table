@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { Bell, CheckCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -14,6 +14,7 @@ import { useBusinessRole } from "@/hooks/useBusinessRole";
 import { format } from "date-fns";
 import { it } from "date-fns/locale";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 interface Notification {
   id: string;
@@ -25,6 +26,47 @@ interface Notification {
   link: string | null;
 }
 
+// Request browser notification permission
+const requestNotificationPermission = async () => {
+  if (!("Notification" in window)) {
+    console.log("Browser does not support notifications");
+    return false;
+  }
+  
+  if (Notification.permission === "granted") {
+    return true;
+  }
+  
+  if (Notification.permission !== "denied") {
+    const permission = await Notification.requestPermission();
+    return permission === "granted";
+  }
+  
+  return false;
+};
+
+// Show browser notification
+const showBrowserNotification = (title: string, message: string, onClick?: () => void) => {
+  if (Notification.permission === "granted") {
+    const notification = new Notification(title, {
+      body: message,
+      icon: "/favicon.ico",
+      badge: "/favicon.ico",
+      tag: "onetable-notification",
+      requireInteraction: false,
+    });
+    
+    notification.onclick = () => {
+      window.focus();
+      notification.close();
+      onClick?.();
+    };
+    
+    // Auto close after 5 seconds
+    setTimeout(() => notification.close(), 5000);
+  }
+};
+
 export const NotificationPopover = () => {
   const { user, isBusinessMode } = useAuth();
   const { businessRoles } = useBusinessRole();
@@ -32,8 +74,15 @@ export const NotificationPopover = () => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [open, setOpen] = useState(false);
+  const previousNotificationsRef = useRef<Set<string>>(new Set());
+  const isInitialLoadRef = useRef(true);
 
-  const fetchNotifications = async () => {
+  // Request notification permission on mount
+  useEffect(() => {
+    requestNotificationPermission();
+  }, []);
+
+  const fetchNotifications = useCallback(async () => {
     if (!user) return;
 
     const restaurantIds = businessRoles.map(r => r.restaurant_id);
@@ -53,33 +102,99 @@ export const NotificationPopover = () => {
     const { data, error } = await query;
 
     if (!error && data) {
+      // Check for new notifications and show browser notification
+      if (!isInitialLoadRef.current) {
+        const newNotifications = data.filter(
+          n => !previousNotificationsRef.current.has(n.id) && !n.is_read
+        );
+        
+        newNotifications.forEach(notification => {
+          showBrowserNotification(
+            notification.title,
+            notification.message,
+            () => {
+              if (notification.link) {
+                navigate(notification.link);
+              }
+            }
+          );
+          
+          // Also show in-app toast
+          toast(notification.title, {
+            description: notification.message,
+          });
+        });
+      }
+      
+      // Update previous notifications set
+      previousNotificationsRef.current = new Set(data.map(n => n.id));
+      isInitialLoadRef.current = false;
+      
       setNotifications(data);
       setUnreadCount(data.filter(n => !n.is_read).length);
     }
-  };
+  }, [user, businessRoles, isBusinessMode, navigate]);
 
   useEffect(() => {
     fetchNotifications();
 
     if (user) {
+      const restaurantIds = businessRoles.map(r => r.restaurant_id);
+      
+      // Subscribe to notifications for user
       const channel = supabase
-        .channel('notification-popover')
+        .channel('notifications-realtime')
         .on(
           'postgres_changes',
           {
-            event: '*',
+            event: 'INSERT',
+            schema: 'public',
+            table: 'notifications',
+            filter: `user_id=eq.${user.id}`
+          },
+          (payload) => {
+            console.log('New notification received:', payload);
+            fetchNotifications();
+          }
+        )
+        .on(
+          'postgres_changes',
+          {
+            event: 'UPDATE',
             schema: 'public',
             table: 'notifications'
           },
           () => fetchNotifications()
-        )
-        .subscribe();
+        );
+      
+      // Also subscribe to restaurant notifications if in business mode
+      if (isBusinessMode && restaurantIds.length > 0) {
+        restaurantIds.forEach(restaurantId => {
+          channel.on(
+            'postgres_changes',
+            {
+              event: 'INSERT',
+              schema: 'public',
+              table: 'notifications',
+              filter: `restaurant_id=eq.${restaurantId}`
+            },
+            (payload) => {
+              console.log('New restaurant notification received:', payload);
+              fetchNotifications();
+            }
+          );
+        });
+      }
+      
+      channel.subscribe((status) => {
+        console.log('Notification channel status:', status);
+      });
 
       return () => {
         supabase.removeChannel(channel);
       };
     }
-  }, [user, businessRoles, isBusinessMode]);
+  }, [user, businessRoles, isBusinessMode, fetchNotifications]);
 
   const handleNotificationClick = async (notification: Notification) => {
     await supabase
