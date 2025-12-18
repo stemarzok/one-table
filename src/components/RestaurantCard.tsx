@@ -98,10 +98,25 @@ const RestaurantCard = ({
         </Button>
       </div>
       
-      <div className="p-6">
-        <div className="flex items-start justify-between mb-3">
-          <div className="flex-1 min-w-0">
-            <p className="text-sm text-muted-foreground truncate">{cuisine}</p>
+      <div className="p-5">
+        {/* Rating e Tags in alto */}
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex flex-wrap gap-1.5 flex-1 min-w-0">
+            {displayTags.length > 0 ? (
+              displayTags.map((tag, index) => (
+                <Badge 
+                  key={index} 
+                  variant="secondary" 
+                  className="text-xs px-2 py-0.5"
+                >
+                  {tag}
+                </Badge>
+              ))
+            ) : (
+              <Badge variant="secondary" className="text-xs px-2 py-0.5">
+                Ristorante
+              </Badge>
+            )}
           </div>
           {rating > 0 && (
             <div className="flex items-center gap-1 bg-primary/10 px-2 py-1 rounded-lg ml-2 flex-shrink-0">
@@ -110,27 +125,14 @@ const RestaurantCard = ({
             </div>
           )}
         </div>
-
-        {/* Tags compatti */}
-        {displayTags.length > 0 && (
-          <div className="flex flex-wrap gap-1.5 mb-3">
-            {displayTags.map((tag, index) => (
-              <Badge 
-                key={index} 
-                variant="secondary" 
-                className="text-xs px-2 py-0.5 bg-muted/80"
-              >
-                {tag}
-              </Badge>
-            ))}
-          </div>
-        )}
         
+        {/* Indirizzo */}
         <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
           <MapPin className="w-4 h-4 flex-shrink-0" />
           <span className="truncate">{location}</span>
         </div>
         
+        {/* Prezzo e bottone */}
         <div className="flex items-center justify-between">
           <span className="text-lg font-semibold text-primary">{priceRange}</span>
           <Button 
