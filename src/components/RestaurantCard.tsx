@@ -89,7 +89,7 @@ const RestaurantCard = ({
       
       {/* Content Section */}
       <div className="p-4 bg-card">
-        {/* Logo and Name */}
+        {/* Logo, Name and Price */}
         <div className="flex items-center gap-3 mb-2">
           {logoUrl && (
             <img 
@@ -99,6 +99,7 @@ const RestaurantCard = ({
             />
           )}
           <h3 className="text-lg font-bold text-foreground truncate flex-1">{name}</h3>
+          <span className="text-sm font-semibold text-primary flex-shrink-0">{priceRange}</span>
         </div>
         
         {/* Tags */}
@@ -126,10 +127,9 @@ const RestaurantCard = ({
           <span className="truncate">{location}</span>
         </div>
         
-        {/* Price and Rating Dots */}
-        <div className="flex items-center justify-between">
-          <span className="text-base font-semibold text-primary">{priceRange}</span>
-          {rating > 0 && (
+        {/* Rating with dots, number and review count - bottom left */}
+        {rating > 0 && (
+          <div className="flex items-center gap-2">
             <div className="flex items-center gap-1">
               {[...Array(totalDots)].map((_, i) => (
                 <div
@@ -140,8 +140,10 @@ const RestaurantCard = ({
                 />
               ))}
             </div>
-          )}
-        </div>
+            <span className="text-sm font-medium text-foreground">{rating.toFixed(1)}</span>
+            <span className="text-xs text-muted-foreground">recensioni</span>
+          </div>
+        )}
       </div>
     </Card>
   );
