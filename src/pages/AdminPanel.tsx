@@ -11,12 +11,13 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useAdminRole } from "@/hooks/useAdminRole";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { AlertCircle, CheckCircle, XCircle, FileText, Clock } from "lucide-react";
+import { AlertCircle, CheckCircle, XCircle, FileText, Clock, BarChart3 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PromoteUserPanel } from "@/components/admin/PromoteUserPanel";
 import { GlobalStats } from "@/components/admin/GlobalStats";
 import { PromoRequestsPanel } from "@/components/admin/PromoRequestsPanel";
 import { ReviewReportsPanel } from "@/components/admin/ReviewReportsPanel";
+import { UserBehaviorAnalytics } from "@/components/admin/UserBehaviorAnalytics";
 
 interface Application {
   id: string;
@@ -210,11 +211,12 @@ const AdminPanel = () => {
           <h1 className="text-4xl font-bold mb-8">Pannello Amministratore</h1>
 
           <Tabs defaultValue="applications" className="space-y-6">
-            <TabsList className="grid w-full max-w-4xl grid-cols-5">
+            <TabsList className="grid w-full max-w-5xl grid-cols-6">
               <TabsTrigger value="applications">Richieste</TabsTrigger>
               <TabsTrigger value="reviews">Recensioni</TabsTrigger>
-              <TabsTrigger value="promo">Codici Promo</TabsTrigger>
+              <TabsTrigger value="promo">Promo</TabsTrigger>
               <TabsTrigger value="stats">Statistiche</TabsTrigger>
+              <TabsTrigger value="analytics">Analytics</TabsTrigger>
               <TabsTrigger value="users">Utenti</TabsTrigger>
             </TabsList>
 
@@ -402,6 +404,10 @@ const AdminPanel = () => {
 
             <TabsContent value="stats">
               <GlobalStats />
+            </TabsContent>
+
+            <TabsContent value="analytics">
+              <UserBehaviorAnalytics />
             </TabsContent>
 
             <TabsContent value="users">

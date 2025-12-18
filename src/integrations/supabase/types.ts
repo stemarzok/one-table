@@ -567,6 +567,7 @@ export type Database = {
           extra_features: string[] | null
           id: string
           is_active: boolean
+          is_sponsored: boolean | null
           is_verified: boolean | null
           legal_representative: string | null
           logo_url: string | null
@@ -577,6 +578,8 @@ export type Database = {
           phone: string
           price_range: string | null
           specializations: string[] | null
+          sponsor_end_date: string | null
+          sponsor_start_date: string | null
           updated_at: string
           verification_status:
             | Database["public"]["Enums"]["application_status"]
@@ -596,6 +599,7 @@ export type Database = {
           extra_features?: string[] | null
           id?: string
           is_active?: boolean
+          is_sponsored?: boolean | null
           is_verified?: boolean | null
           legal_representative?: string | null
           logo_url?: string | null
@@ -606,6 +610,8 @@ export type Database = {
           phone: string
           price_range?: string | null
           specializations?: string[] | null
+          sponsor_end_date?: string | null
+          sponsor_start_date?: string | null
           updated_at?: string
           verification_status?:
             | Database["public"]["Enums"]["application_status"]
@@ -625,6 +631,7 @@ export type Database = {
           extra_features?: string[] | null
           id?: string
           is_active?: boolean
+          is_sponsored?: boolean | null
           is_verified?: boolean | null
           legal_representative?: string | null
           logo_url?: string | null
@@ -635,6 +642,8 @@ export type Database = {
           phone?: string
           price_range?: string | null
           specializations?: string[] | null
+          sponsor_end_date?: string | null
+          sponsor_start_date?: string | null
           updated_at?: string
           verification_status?:
             | Database["public"]["Enums"]["application_status"]
@@ -912,6 +921,78 @@ export type Database = {
           stripe_subscription_id?: string | null
           trial_end?: string | null
           updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_analytics: {
+        Row: {
+          created_at: string
+          element_class: string | null
+          element_id: string | null
+          event_type: string
+          id: string
+          metadata: Json | null
+          page_path: string
+          session_id: string
+          user_id: string | null
+          viewport_height: number | null
+          viewport_width: number | null
+          x_position: number | null
+          y_position: number | null
+        }
+        Insert: {
+          created_at?: string
+          element_class?: string | null
+          element_id?: string | null
+          event_type: string
+          id?: string
+          metadata?: Json | null
+          page_path: string
+          session_id: string
+          user_id?: string | null
+          viewport_height?: number | null
+          viewport_width?: number | null
+          x_position?: number | null
+          y_position?: number | null
+        }
+        Update: {
+          created_at?: string
+          element_class?: string | null
+          element_id?: string | null
+          event_type?: string
+          id?: string
+          metadata?: Json | null
+          page_path?: string
+          session_id?: string
+          user_id?: string | null
+          viewport_height?: number | null
+          viewport_width?: number | null
+          x_position?: number | null
+          y_position?: number | null
+        }
+        Relationships: []
+      }
+      user_searches: {
+        Row: {
+          created_at: string
+          filters: Json | null
+          id: string
+          search_query: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          filters?: Json | null
+          id?: string
+          search_query: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          filters?: Json | null
+          id?: string
+          search_query?: string
           user_id?: string
         }
         Relationships: []

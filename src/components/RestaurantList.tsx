@@ -1,10 +1,13 @@
 import RestaurantCard from "./RestaurantCard";
-import RestaurantFilters, { FilterState } from "./RestaurantFilters";
-import SearchBar from "./SearchBar";
+import { FilterState } from "./RestaurantFilters";
+import UnifiedSearchBar from "./UnifiedSearchBar";
+import SponsoredCarousel from "./SponsoredCarousel";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useState, useMemo, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2 } from "lucide-react";
+import { Loader2, MapPin } from "lucide-react";
+import Map from "@/components/Map";
 
 interface Restaurant {
   id: string;
@@ -28,6 +31,8 @@ const RestaurantList = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showMap, setShowMap] = useState(false);
+  const [userLocation, setUserLocation] = useState<{lat: number; lng: number} | null>(null);
   const itemsPerPage = 9;
   const [filters, setFilters] = useState<FilterState>({
     city: "all",
@@ -39,6 +44,8 @@ const RestaurantList = () => {
     occasions: [],
     extraFeatures: []
   });
+
+  const mapboxToken = import.meta.env.VITE_MAPBOX_TOKEN || "";
 
   useEffect(() => {
     fetchRestaurants();
@@ -53,7 +60,6 @@ const RestaurantList = () => {
 
       if (error) throw error;
       
-      // Fetch ratings for each restaurant
       const restaurantsWithRatings = await Promise.all(
         (data || []).map(async (restaurant) => {
           const { data: ratingData } = await supabase
@@ -78,10 +84,21 @@ const RestaurantList = () => {
     }
   };
 
+  const handleNearMe = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setUserLocation({ lat: position.coords.latitude, lng: position.coords.longitude });
+          setShowMap(true);
+        },
+        () => alert("Non è stato possibile ottenere la tua posizione.")
+      );
+    }
+  };
+
   const filteredRestaurants = useMemo(() => {
     let filtered = [...restaurants];
 
-    // Filtra per ricerca
     if (searchQuery) {
       filtered = filtered.filter(r => 
         r.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -89,56 +106,36 @@ const RestaurantList = () => {
       );
     }
 
-    // Filtra per città
     if (filters.city !== "all") {
       filtered = filtered.filter(r => r.city.toLowerCase() === filters.city.toLowerCase());
     }
 
-    // Filtra per prezzo
     if (filters.priceRange !== "all") {
       filtered = filtered.filter(r => r.price_range === filters.priceRange);
     }
 
-    // Filtra per tipo di cucina
     if (filters.cuisineTypes.length > 0) {
-      filtered = filtered.filter(r => 
-        r.cuisine_types?.some(type => filters.cuisineTypes.includes(type))
-      );
+      filtered = filtered.filter(r => r.cuisine_types?.some(type => filters.cuisineTypes.includes(type)));
     }
 
-    // Filtra per specializzazione
     if (filters.specializations.length > 0) {
-      filtered = filtered.filter(r => 
-        r.specializations?.some(spec => filters.specializations.includes(spec))
-      );
+      filtered = filtered.filter(r => r.specializations?.some(spec => filters.specializations.includes(spec)));
     }
 
-    // Filtra per occasione
     if (filters.occasions.length > 0) {
-      filtered = filtered.filter(r => 
-        r.occasions?.some(occ => filters.occasions.includes(occ))
-      );
+      filtered = filtered.filter(r => r.occasions?.some(occ => filters.occasions.includes(occ)));
     }
 
-    // Filtra per extra features
     if (filters.extraFeatures.length > 0) {
-      filtered = filtered.filter(r => 
-        r.extra_features?.some(feat => filters.extraFeatures.includes(feat))
-      );
+      filtered = filtered.filter(r => r.extra_features?.some(feat => filters.extraFeatures.includes(feat)));
     }
 
-    // Ordina
-    if (filters.sortBy === "rating-desc") {
-      filtered.sort((a, b) => (b.avg_rating || 0) - (a.avg_rating || 0));
-    } else if (filters.sortBy === "rating-asc") {
-      filtered.sort((a, b) => (a.avg_rating || 0) - (b.avg_rating || 0));
-    } else if (filters.sortBy === "price-asc") {
-      const priceOrder = { "€": 1, "€€": 2, "€€€": 3, "€€€€": 4 };
-      filtered.sort((a, b) => (priceOrder[a.price_range as keyof typeof priceOrder] || 2) - (priceOrder[b.price_range as keyof typeof priceOrder] || 2));
-    } else if (filters.sortBy === "price-desc") {
-      const priceOrder = { "€": 1, "€€": 2, "€€€": 3, "€€€€": 4 };
-      filtered.sort((a, b) => (priceOrder[b.price_range as keyof typeof priceOrder] || 2) - (priceOrder[a.price_range as keyof typeof priceOrder] || 2));
-    }
+    // Sort
+    const priceOrder = { "€": 1, "€€": 2, "€€€": 3, "€€€€": 4 };
+    if (filters.sortBy === "rating-desc") filtered.sort((a, b) => (b.avg_rating || 0) - (a.avg_rating || 0));
+    else if (filters.sortBy === "rating-asc") filtered.sort((a, b) => (a.avg_rating || 0) - (b.avg_rating || 0));
+    else if (filters.sortBy === "price-asc") filtered.sort((a, b) => (priceOrder[a.price_range as keyof typeof priceOrder] || 2) - (priceOrder[b.price_range as keyof typeof priceOrder] || 2));
+    else if (filters.sortBy === "price-desc") filtered.sort((a, b) => (priceOrder[b.price_range as keyof typeof priceOrder] || 2) - (priceOrder[a.price_range as keyof typeof priceOrder] || 2));
 
     return filtered;
   }, [searchQuery, filters, restaurants]);
@@ -149,54 +146,36 @@ const RestaurantList = () => {
     return filteredRestaurants.slice(startIdx, startIdx + itemsPerPage);
   }, [filteredRestaurants, currentPage]);
 
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchQuery, filters]);
+  useEffect(() => { setCurrentPage(1); }, [searchQuery, filters]);
 
   if (loading) {
     return (
-      <section id="ristoranti" className="py-24 bg-muted/30">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center justify-center min-h-[400px]">
-            <Loader2 className="w-12 h-12 animate-spin text-primary" />
-          </div>
+      <section className="py-24 bg-muted/30">
+        <div className="container mx-auto px-4 flex items-center justify-center min-h-[400px]">
+          <Loader2 className="w-12 h-12 animate-spin text-primary" />
         </div>
       </section>
     );
   }
 
   return (
-    <section id="ristoranti" className="py-24 bg-muted/30">
+    <section className="py-16 bg-muted/30">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-12">
-          <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
-            Ristoranti Partner
-          </h2>
+        <div className="text-center mb-10">
+          <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">Ristoranti Partner</h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
             Scopri i migliori ristoranti e prenota il tuo tavolo con un click
           </p>
           
-          <div className="max-w-2xl mx-auto mb-8">
-            <SearchBar onSearch={(q) => setSearchQuery(q)} />
-          </div>
+          <UnifiedSearchBar 
+            onSearch={setSearchQuery}
+            onFilterChange={setFilters}
+            onNearMe={handleNearMe}
+            filters={filters}
+          />
         </div>
-        
-        <RestaurantFilters 
-          onFilterChange={setFilters}
-          restaurants={restaurants.map(r => ({
-            id: parseInt(r.id) || 0,
-            name: r.name,
-            cuisine: r.cuisine_type || '',
-            location: r.address,
-            city: r.city.toLowerCase(),
-            rating: r.avg_rating || 0,
-            priceRange: r.price_range || '€€',
-            image: r.cover_image_url || '',
-            available: true,
-            sponsored: false,
-            coordinates: { lat: 0, lng: 0 }
-          }))}
-        />
+
+        <SponsoredCarousel />
         
         {paginatedRestaurants.length === 0 ? (
           <div className="text-center py-12">
@@ -230,27 +209,27 @@ const RestaurantList = () => {
 
             {totalPages > 1 && (
               <div className="flex justify-center items-center gap-2 mt-12">
-                <Button
-                  variant="outline"
-                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                  disabled={currentPage === 1}
-                >
-                  Precedente
-                </Button>
-                <span className="text-muted-foreground mx-4">
-                  Pagina {currentPage} di {totalPages}
-                </span>
-                <Button
-                  variant="outline"
-                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                  disabled={currentPage === totalPages}
-                >
-                  Successiva
-                </Button>
+                <Button variant="outline" onClick={() => setCurrentPage((p) => Math.max(1, p - 1))} disabled={currentPage === 1}>Precedente</Button>
+                <span className="text-muted-foreground mx-4">Pagina {currentPage} di {totalPages}</span>
+                <Button variant="outline" onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages}>Successiva</Button>
               </div>
             )}
           </>
         )}
+
+        <Dialog open={showMap} onOpenChange={setShowMap}>
+          <DialogContent className="max-w-6xl h-[80vh]">
+            <DialogHeader><DialogTitle>Ristoranti vicino a te</DialogTitle></DialogHeader>
+            {!mapboxToken ? (
+              <div className="flex flex-col items-center justify-center h-full p-8">
+                <MapPin className="w-16 h-16 text-primary" />
+                <p className="text-muted-foreground text-center mt-4">Token Mapbox mancante</p>
+              </div>
+            ) : userLocation ? (
+              <Map accessToken={mapboxToken} center={[userLocation.lng, userLocation.lat]} zoom={12} restaurants={[]} userLocation={userLocation} />
+            ) : null}
+          </DialogContent>
+        </Dialog>
       </div>
     </section>
   );
