@@ -20,14 +20,13 @@ export const RestaurantInfo = ({ restaurant, onUpdate }: RestaurantInfoProps) =>
   const [uploading, setUploading] = useState(false);
   const [name, setName] = useState(restaurant?.name || "");
   const [description, setDescription] = useState(restaurant?.description || "");
-  const [cuisineType, setCuisineType] = useState(restaurant?.cuisine_type || "");
   const [priceRange, setPriceRange] = useState(restaurant?.price_range || "");
   const [address, setAddress] = useState(restaurant?.address || "");
   const [city, setCity] = useState(restaurant?.city || "");
   const [phone, setPhone] = useState(restaurant?.phone || "");
   const [email, setEmail] = useState(restaurant?.email || "");
   
-  // Nuovi stati per le categorie
+  // Stati per le categorie
   const [cuisineTypes, setCuisineTypes] = useState<string[]>(restaurant?.cuisine_types || []);
   const [specializations, setSpecializations] = useState<string[]>(restaurant?.specializations || []);
   const [occasions, setOccasions] = useState<string[]>(restaurant?.occasions || []);
@@ -83,6 +82,12 @@ export const RestaurantInfo = ({ restaurant, onUpdate }: RestaurantInfoProps) =>
     }
   };
 
+  // Genera la stringa cuisine_type dalla selezione
+  const generateCuisineTypeString = () => {
+    const allSelected = [...cuisineTypes, ...specializations.slice(0, 1)];
+    return allSelected.slice(0, 2).join(" • ") || "";
+  };
+
   const handleInfoUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -92,7 +97,7 @@ export const RestaurantInfo = ({ restaurant, onUpdate }: RestaurantInfoProps) =>
         .update({
           name,
           description,
-          cuisine_type: cuisineType,
+          cuisine_type: generateCuisineTypeString(),
           price_range: priceRange,
           address,
           city,
@@ -202,16 +207,6 @@ export const RestaurantInfo = ({ restaurant, onUpdate }: RestaurantInfoProps) =>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="cuisineType">Tipo di Cucina (descrizione breve)</Label>
-              <Input
-                id="cuisineType"
-                value={cuisineType}
-                onChange={(e) => setCuisineType(e.target.value)}
-                placeholder="Es: Cucina Italiana Contemporanea"
-              />
-            </div>
-
-            <div className="space-y-2">
               <Label htmlFor="priceRange">Fascia di Prezzo</Label>
               <Select value={priceRange} onValueChange={setPriceRange}>
                 <SelectTrigger>
@@ -257,16 +252,16 @@ export const RestaurantInfo = ({ restaurant, onUpdate }: RestaurantInfoProps) =>
                 required
               />
             </div>
-          </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="address">Indirizzo Completo *</Label>
-            <Input
-              id="address"
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
-              required
-            />
+            <div className="space-y-2">
+              <Label htmlFor="address">Indirizzo Completo *</Label>
+              <Input
+                id="address"
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+                required
+              />
+            </div>
           </div>
 
           <div className="space-y-2">
@@ -275,22 +270,24 @@ export const RestaurantInfo = ({ restaurant, onUpdate }: RestaurantInfoProps) =>
               id="description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              rows={4}
+              rows={3}
               placeholder="Racconta la storia del tuo ristorante..."
             />
           </div>
 
           {/* Categorie Selezionabili */}
           <div className="space-y-6 pt-4 border-t border-border">
-            <h4 className="text-lg font-semibold">Categorie e Tag</h4>
-            <p className="text-sm text-muted-foreground">
-              Seleziona le categorie che descrivono meglio il tuo ristorante. Questi tag aiuteranno i clienti a trovarti.
-            </p>
+            <div>
+              <h4 className="text-lg font-semibold mb-2">Categorie e Tag</h4>
+              <p className="text-sm text-muted-foreground">
+                Seleziona le categorie che descrivono meglio il tuo ristorante. Questi tag aiuteranno i clienti a trovarti.
+              </p>
+            </div>
 
             {/* Tipo di Cucina */}
             <div className="space-y-3">
-              <Label className="flex items-center gap-2">
-                <ChefHat className="w-4 h-4" />
+              <Label className="flex items-center gap-2 text-base">
+                <ChefHat className="w-4 h-4 text-primary" />
                 Tipo di Cucina
               </Label>
               <div className="flex flex-wrap gap-2">
@@ -298,19 +295,24 @@ export const RestaurantInfo = ({ restaurant, onUpdate }: RestaurantInfoProps) =>
                   <Badge
                     key={type}
                     variant={cuisineTypes.includes(type) ? "default" : "outline"}
-                    className="cursor-pointer hover:bg-primary/80 transition-colors"
+                    className="cursor-pointer hover:bg-primary/80 transition-colors py-1.5 px-3"
                     onClick={() => toggleCategory(type, cuisineTypes, setCuisineTypes)}
                   >
                     {type}
                   </Badge>
                 ))}
               </div>
+              {cuisineTypes.length > 0 && (
+                <p className="text-xs text-muted-foreground">
+                  Selezionati: {cuisineTypes.join(", ")}
+                </p>
+              )}
             </div>
 
             {/* Specializzazione */}
             <div className="space-y-3">
-              <Label className="flex items-center gap-2">
-                <Utensils className="w-4 h-4" />
+              <Label className="flex items-center gap-2 text-base">
+                <Utensils className="w-4 h-4 text-primary" />
                 Specializzazione / Format
               </Label>
               <div className="flex flex-wrap gap-2">
@@ -318,19 +320,24 @@ export const RestaurantInfo = ({ restaurant, onUpdate }: RestaurantInfoProps) =>
                   <Badge
                     key={spec}
                     variant={specializations.includes(spec) ? "default" : "outline"}
-                    className="cursor-pointer hover:bg-primary/80 transition-colors"
+                    className="cursor-pointer hover:bg-primary/80 transition-colors py-1.5 px-3"
                     onClick={() => toggleCategory(spec, specializations, setSpecializations)}
                   >
                     {spec}
                   </Badge>
                 ))}
               </div>
+              {specializations.length > 0 && (
+                <p className="text-xs text-muted-foreground">
+                  Selezionati: {specializations.join(", ")}
+                </p>
+              )}
             </div>
 
             {/* Occasioni */}
             <div className="space-y-3">
-              <Label className="flex items-center gap-2">
-                <Calendar className="w-4 h-4" />
+              <Label className="flex items-center gap-2 text-base">
+                <Calendar className="w-4 h-4 text-primary" />
                 Occasione e Contesto
               </Label>
               <div className="flex flex-wrap gap-2">
@@ -338,19 +345,24 @@ export const RestaurantInfo = ({ restaurant, onUpdate }: RestaurantInfoProps) =>
                   <Badge
                     key={occasion}
                     variant={occasions.includes(occasion) ? "default" : "outline"}
-                    className="cursor-pointer hover:bg-primary/80 transition-colors"
+                    className="cursor-pointer hover:bg-primary/80 transition-colors py-1.5 px-3"
                     onClick={() => toggleCategory(occasion, occasions, setOccasions)}
                   >
                     {occasion}
                   </Badge>
                 ))}
               </div>
+              {occasions.length > 0 && (
+                <p className="text-xs text-muted-foreground">
+                  Selezionati: {occasions.join(", ")}
+                </p>
+              )}
             </div>
 
             {/* Extra Features */}
             <div className="space-y-3">
-              <Label className="flex items-center gap-2">
-                <Sparkles className="w-4 h-4" />
+              <Label className="flex items-center gap-2 text-base">
+                <Sparkles className="w-4 h-4 text-primary" />
                 Extra e Servizi
               </Label>
               <div className="flex flex-wrap gap-2">
@@ -358,17 +370,22 @@ export const RestaurantInfo = ({ restaurant, onUpdate }: RestaurantInfoProps) =>
                   <Badge
                     key={feature}
                     variant={extraFeatures.includes(feature) ? "default" : "outline"}
-                    className="cursor-pointer hover:bg-primary/80 transition-colors"
+                    className="cursor-pointer hover:bg-primary/80 transition-colors py-1.5 px-3"
                     onClick={() => toggleCategory(feature, extraFeatures, setExtraFeatures)}
                   >
                     {feature}
                   </Badge>
                 ))}
               </div>
+              {extraFeatures.length > 0 && (
+                <p className="text-xs text-muted-foreground">
+                  Selezionati: {extraFeatures.join(", ")}
+                </p>
+              )}
             </div>
           </div>
 
-          <Button type="submit" className="w-full">
+          <Button type="submit" className="w-full" size="lg">
             <Save className="w-4 h-4 mr-2" />
             Salva Modifiche
           </Button>
