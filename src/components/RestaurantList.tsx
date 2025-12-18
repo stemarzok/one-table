@@ -17,6 +17,10 @@ interface Restaurant {
   logo_url: string | null;
   is_active: boolean;
   avg_rating?: number;
+  cuisine_types?: string[];
+  specializations?: string[];
+  occasions?: string[];
+  extra_features?: string[];
 }
 
 const RestaurantList = () => {
@@ -29,7 +33,11 @@ const RestaurantList = () => {
     city: "all",
     radius: 5,
     priceRange: "all",
-    sortBy: "rating-desc"
+    sortBy: "rating-desc",
+    cuisineTypes: [],
+    specializations: [],
+    occasions: [],
+    extraFeatures: []
   });
 
   useEffect(() => {
@@ -40,7 +48,7 @@ const RestaurantList = () => {
     try {
       const { data, error } = await supabase
         .from('restaurants')
-        .select('id, name, cuisine_type, address, city, price_range, cover_image_url, logo_url, is_active')
+        .select('id, name, cuisine_type, address, city, price_range, cover_image_url, logo_url, is_active, cuisine_types, specializations, occasions, extra_features')
         .eq('is_active', true);
 
       if (error) throw error;
@@ -53,7 +61,11 @@ const RestaurantList = () => {
           
           return {
             ...restaurant,
-            avg_rating: ratingData?.[0]?.avg_rating || 0
+            avg_rating: ratingData?.[0]?.avg_rating || 0,
+            cuisine_types: restaurant.cuisine_types || [],
+            specializations: restaurant.specializations || [],
+            occasions: restaurant.occasions || [],
+            extra_features: restaurant.extra_features || []
           };
         })
       );
@@ -85,6 +97,47 @@ const RestaurantList = () => {
     // Filtra per prezzo
     if (filters.priceRange !== "all") {
       filtered = filtered.filter(r => r.price_range === filters.priceRange);
+    }
+
+    // Filtra per tipo di cucina
+    if (filters.cuisineTypes.length > 0) {
+      filtered = filtered.filter(r => 
+        r.cuisine_types?.some(type => filters.cuisineTypes.includes(type))
+      );
+    }
+
+    // Filtra per specializzazione
+    if (filters.specializations.length > 0) {
+      filtered = filtered.filter(r => 
+        r.specializations?.some(spec => filters.specializations.includes(spec))
+      );
+    }
+
+    // Filtra per occasione
+    if (filters.occasions.length > 0) {
+      filtered = filtered.filter(r => 
+        r.occasions?.some(occ => filters.occasions.includes(occ))
+      );
+    }
+
+    // Filtra per extra features
+    if (filters.extraFeatures.length > 0) {
+      filtered = filtered.filter(r => 
+        r.extra_features?.some(feat => filters.extraFeatures.includes(feat))
+      );
+    }
+
+    // Ordina
+    if (filters.sortBy === "rating-desc") {
+      filtered.sort((a, b) => (b.avg_rating || 0) - (a.avg_rating || 0));
+    } else if (filters.sortBy === "rating-asc") {
+      filtered.sort((a, b) => (a.avg_rating || 0) - (b.avg_rating || 0));
+    } else if (filters.sortBy === "price-asc") {
+      const priceOrder = { "€": 1, "€€": 2, "€€€": 3, "€€€€": 4 };
+      filtered.sort((a, b) => (priceOrder[a.price_range as keyof typeof priceOrder] || 2) - (priceOrder[b.price_range as keyof typeof priceOrder] || 2));
+    } else if (filters.sortBy === "price-desc") {
+      const priceOrder = { "€": 1, "€€": 2, "€€€": 3, "€€€€": 4 };
+      filtered.sort((a, b) => (priceOrder[b.price_range as keyof typeof priceOrder] || 2) - (priceOrder[a.price_range as keyof typeof priceOrder] || 2));
     }
 
     return filtered;
@@ -167,6 +220,10 @@ const RestaurantList = () => {
                   available={true}
                   sponsored={false}
                   coordinates={{ lat: 0, lng: 0 }}
+                  cuisineTypes={restaurant.cuisine_types}
+                  specializations={restaurant.specializations}
+                  occasions={restaurant.occasions}
+                  extraFeatures={restaurant.extra_features}
                 />
               ))}
             </div>

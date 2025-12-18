@@ -18,6 +18,10 @@ interface RestaurantCardProps {
   available: boolean;
   sponsored: boolean;
   coordinates: { lat: number; lng: number };
+  cuisineTypes?: string[];
+  specializations?: string[];
+  occasions?: string[];
+  extraFeatures?: string[];
 }
 
 const RestaurantCard = ({ 
@@ -30,7 +34,11 @@ const RestaurantCard = ({
   image,
   logoUrl,
   available,
-  sponsored
+  sponsored,
+  cuisineTypes = [],
+  specializations = [],
+  occasions = [],
+  extraFeatures = []
 }: RestaurantCardProps) => {
   const navigate = useNavigate();
   const { toggleFavorite, isFavorite } = useFavorites();
@@ -38,6 +46,13 @@ const RestaurantCard = ({
   const handleCardClick = () => {
     navigate(`/restaurant/${id}`);
   };
+
+  // Combina i primi tag per mostrare (max 3)
+  const displayTags = [
+    ...(cuisineTypes?.slice(0, 1) || []),
+    ...(specializations?.slice(0, 1) || []),
+    ...(occasions?.slice(0, 1) || [])
+  ].slice(0, 3);
 
   return (
     <Card 
@@ -85,20 +100,35 @@ const RestaurantCard = ({
       
       <div className="p-6">
         <div className="flex items-start justify-between mb-3">
-          <div>
-            <p className="text-sm text-muted-foreground">{cuisine}</p>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm text-muted-foreground truncate">{cuisine}</p>
           </div>
           {rating > 0 && (
-            <div className="flex items-center gap-1 bg-primary/10 px-2 py-1 rounded-lg">
+            <div className="flex items-center gap-1 bg-primary/10 px-2 py-1 rounded-lg ml-2 flex-shrink-0">
               <Star className="w-4 h-4 text-primary" fill="currentColor" />
               <span className="font-semibold text-sm">{rating.toFixed(1)}</span>
             </div>
           )}
         </div>
+
+        {/* Tags compatti */}
+        {displayTags.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 mb-3">
+            {displayTags.map((tag, index) => (
+              <Badge 
+                key={index} 
+                variant="secondary" 
+                className="text-xs px-2 py-0.5 bg-muted/80"
+              >
+                {tag}
+              </Badge>
+            ))}
+          </div>
+        )}
         
         <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
-          <MapPin className="w-4 h-4" />
-          {location}
+          <MapPin className="w-4 h-4 flex-shrink-0" />
+          <span className="truncate">{location}</span>
         </div>
         
         <div className="flex items-center justify-between">
