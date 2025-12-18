@@ -1,7 +1,6 @@
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Star, MapPin, Heart } from "lucide-react";
+import { MapPin, Heart } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useFavorites } from "@/hooks/useFavorites";
 
@@ -54,96 +53,94 @@ const RestaurantCard = ({
     ...(occasions?.slice(0, 1) || [])
   ].slice(0, 3);
 
+  // Convert rating to filled dots (out of 5)
+  const filledDots = Math.round(rating);
+  const totalDots = 5;
+
   return (
     <Card 
-      className="overflow-hidden hover:shadow-elegant transition-all duration-300 hover:-translate-y-1 bg-gradient-card border-border/50 cursor-pointer"
+      className="overflow-hidden hover:shadow-elegant transition-all duration-300 hover:-translate-y-1 bg-card border-border/50 cursor-pointer group"
       onClick={handleCardClick}
     >
+      {/* Image Section */}
       <div className="relative h-48 overflow-hidden">
         <img 
           src={image} 
           alt={name}
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
         />
-        {/* Dark gradient overlay at bottom with logo and name */}
-        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent p-4">
-          <div className="flex items-center gap-3">
-            {logoUrl && (
-              <img 
-                src={logoUrl} 
-                alt={`${name} logo`}
-                className="w-10 h-10 rounded-full object-cover border-2 border-white/30"
-              />
-            )}
-            <h3 className="text-lg font-bold text-white truncate">{name}</h3>
-          </div>
-        </div>
         {sponsored && (
-          <Badge className="absolute top-4 right-4 bg-primary text-primary-foreground">
+          <Badge className="absolute top-3 right-3 bg-primary text-primary-foreground text-xs">
             Sponsorizzato
           </Badge>
         )}
-        <Button
-          size="icon"
-          variant="secondary"
-          className="absolute top-4 left-4 bg-background/90 hover:bg-background"
+        <button
+          className="absolute top-3 left-3 w-8 h-8 rounded-full bg-background/90 hover:bg-background flex items-center justify-center transition-colors"
           onClick={(e) => {
             e.stopPropagation();
             toggleFavorite(String(id));
           }}
         >
           <Heart 
-            className={`w-5 h-5 ${isFavorite(String(id)) ? 'fill-primary text-primary' : ''}`} 
+            className={`w-4 h-4 ${isFavorite(String(id)) ? 'fill-primary text-primary' : 'text-muted-foreground'}`} 
           />
-        </Button>
+        </button>
       </div>
       
-      <div className="p-5">
-        {/* Rating e Tags in alto */}
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex flex-wrap gap-1.5 flex-1 min-w-0">
-            {displayTags.length > 0 ? (
-              displayTags.map((tag, index) => (
-                <Badge 
-                  key={index} 
-                  variant="secondary" 
-                  className="text-xs px-2 py-0.5"
-                >
-                  {tag}
-                </Badge>
-              ))
-            ) : (
-              <Badge variant="secondary" className="text-xs px-2 py-0.5">
-                Ristorante
+      {/* Content Section */}
+      <div className="p-4 bg-card">
+        {/* Logo and Name */}
+        <div className="flex items-center gap-3 mb-2">
+          {logoUrl && (
+            <img 
+              src={logoUrl} 
+              alt={`${name} logo`}
+              className="w-10 h-10 rounded-full object-cover border border-border"
+            />
+          )}
+          <h3 className="text-lg font-bold text-foreground truncate flex-1">{name}</h3>
+        </div>
+        
+        {/* Tags */}
+        <div className="flex flex-wrap gap-1.5 mb-2">
+          {displayTags.length > 0 ? (
+            displayTags.map((tag, index) => (
+              <Badge 
+                key={index} 
+                variant="secondary" 
+                className="text-xs px-2 py-0.5"
+              >
+                {tag}
               </Badge>
-            )}
-          </div>
-          {rating > 0 && (
-            <div className="flex items-center gap-1 bg-primary/10 px-2 py-1 rounded-lg ml-2 flex-shrink-0">
-              <Star className="w-4 h-4 text-primary" fill="currentColor" />
-              <span className="font-semibold text-sm">{rating.toFixed(1)}</span>
-            </div>
+            ))
+          ) : (
+            <Badge variant="secondary" className="text-xs px-2 py-0.5">
+              Ristorante
+            </Badge>
           )}
         </div>
         
-        {/* Indirizzo */}
-        <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
+        {/* Location */}
+        <div className="flex items-center gap-2 text-sm text-muted-foreground mb-3">
           <MapPin className="w-4 h-4 flex-shrink-0" />
           <span className="truncate">{location}</span>
         </div>
         
-        {/* Prezzo e bottone */}
+        {/* Price and Rating Dots */}
         <div className="flex items-center justify-between">
-          <span className="text-lg font-semibold text-primary">{priceRange}</span>
-          <Button 
-            onClick={(e) => {
-              e.stopPropagation();
-              navigate(`/restaurant/${id}?tab=booking`);
-            }}
-            className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-full"
-          >
-            Prenota Ora
-          </Button>
+          <span className="text-base font-semibold text-primary">{priceRange}</span>
+          {rating > 0 && (
+            <div className="flex items-center gap-1">
+              {[...Array(totalDots)].map((_, i) => (
+                <div
+                  key={i}
+                  className={`w-2 h-2 rounded-full transition-colors ${
+                    i < filledDots ? 'bg-primary' : 'bg-muted'
+                  }`}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </Card>
