@@ -1,10 +1,10 @@
 import { useRef, useState, useEffect } from "react";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Star, ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
+import { Star, ChevronLeft, ChevronRight, Sparkles, Heart } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { useFavorites } from "@/hooks/useFavorites";
+import { motion } from "framer-motion";
 
 interface SponsoredRestaurant {
   id: string;
@@ -15,6 +15,7 @@ interface SponsoredRestaurant {
   logo_url: string | null;
   price_range: string | null;
   avg_rating?: number;
+  total_reviews?: number;
   cuisine_types?: string[];
 }
 
@@ -24,13 +25,13 @@ const SponsoredCarousel = () => {
   const [restaurants, setRestaurants] = useState<SponsoredRestaurant[]>([]);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
+  const { toggleFavorite, isFavorite } = useFavorites();
 
   useEffect(() => {
     fetchSponsoredRestaurants();
   }, []);
 
   const fetchSponsoredRestaurants = async () => {
-    // Fetch sponsored restaurants, or all if none are sponsored (for demo)
     const { data: sponsored } = await supabase
       .from('restaurants')
       .select('id, name, cuisine_type, city, cover_image_url, logo_url, price_range, cuisine_types, is_sponsored')
@@ -39,16 +40,18 @@ const SponsoredCarousel = () => {
       .limit(10);
 
     if (sponsored && sponsored.length > 0) {
-      // Fetch ratings
       const withRatings = await Promise.all(
         sponsored.map(async (r) => {
           const { data } = await supabase.rpc('get_restaurant_rating', { restaurant_id_param: r.id });
-          return { ...r, avg_rating: data?.[0]?.avg_rating || 0 };
+          return { 
+            ...r, 
+            avg_rating: data?.[0]?.avg_rating || 0,
+            total_reviews: data?.[0]?.total_reviews || 0
+          };
         })
       );
       setRestaurants(withRatings);
     } else {
-      // Fallback: show top rated restaurants as "suggestions"
       const { data: topRated } = await supabase
         .from('restaurants')
         .select('id, name, cuisine_type, city, cover_image_url, logo_url, price_range, cuisine_types')
@@ -59,10 +62,13 @@ const SponsoredCarousel = () => {
         const withRatings = await Promise.all(
           topRated.map(async (r) => {
             const { data } = await supabase.rpc('get_restaurant_rating', { restaurant_id_param: r.id });
-            return { ...r, avg_rating: data?.[0]?.avg_rating || 0 };
+            return { 
+              ...r, 
+              avg_rating: data?.[0]?.avg_rating || 0,
+              total_reviews: data?.[0]?.total_reviews || 0
+            };
           })
         );
-        // Sort by rating
         withRatings.sort((a, b) => (b.avg_rating || 0) - (a.avg_rating || 0));
         setRestaurants(withRatings);
       }
@@ -79,7 +85,7 @@ const SponsoredCarousel = () => {
 
   const scroll = (direction: 'left' | 'right') => {
     if (scrollRef.current) {
-      const scrollAmount = 320;
+      const scrollAmount = 280;
       scrollRef.current.scrollBy({
         left: direction === 'left' ? -scrollAmount : scrollAmount,
         behavior: 'smooth'
@@ -96,93 +102,126 @@ const SponsoredCarousel = () => {
     }
   }, [restaurants]);
 
+  const handleFavoriteClick = (e: React.MouseEvent, restaurantId: string) => {
+    e.stopPropagation();
+    toggleFavorite(restaurantId);
+  };
+
   if (restaurants.length === 0) return null;
 
   return (
     <div className="mb-10">
-      <div className="flex items-center justify-between mb-4">
-        <div>
-          <h3 className="text-xl font-bold text-foreground flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-primary" />
-            Consigliati per te
-          </h3>
-          <p className="text-sm text-muted-foreground">Ristoranti selezionati in base alle tue preferenze</p>
-        </div>
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => scroll('left')}
-            disabled={!canScrollLeft}
-            className="rounded-full"
-          >
-            <ChevronLeft className="w-4 h-4" />
-          </Button>
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => scroll('right')}
-            disabled={!canScrollRight}
-            className="rounded-full"
-          >
-            <ChevronRight className="w-4 h-4" />
-          </Button>
-        </div>
+      <div className="mb-4">
+        <h3 className="text-xl font-bold text-foreground flex items-center gap-2">
+          <Sparkles className="w-5 h-5 text-primary" />
+          Consigliati per te
+        </h3>
+        <p className="text-sm text-muted-foreground">Esperienze selezionate per te</p>
       </div>
 
-      <div 
-        ref={scrollRef}
-        className="flex gap-4 overflow-x-auto scrollbar-hide pb-4 -mx-4 px-4"
-        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-      >
-        {restaurants.map((restaurant) => (
-          <Card
-            key={restaurant.id}
-            className="flex-shrink-0 w-72 overflow-hidden cursor-pointer hover:shadow-elegant transition-all duration-300 hover:-translate-y-1 bg-gradient-card border-border/50"
-            onClick={() => navigate(`/restaurant/${restaurant.id}`)}
-          >
-            <div className="relative h-40 overflow-hidden">
-              <img
-                src={restaurant.cover_image_url || 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&q=80'}
-                alt={restaurant.name}
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3">
-                <div className="flex items-center gap-2">
-                  {restaurant.logo_url && (
-                    <img
-                      src={restaurant.logo_url}
-                      alt=""
-                      className="w-8 h-8 rounded-full object-cover border border-white/30"
+      <div className="relative group">
+        {/* Navigation Arrows */}
+        <Button
+          variant="secondary"
+          size="icon"
+          onClick={() => scroll('left')}
+          disabled={!canScrollLeft}
+          className={`absolute left-0 top-1/2 -translate-y-1/2 z-10 rounded-full shadow-lg bg-background/95 backdrop-blur-sm border border-border/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${!canScrollLeft ? 'hidden' : ''}`}
+        >
+          <ChevronLeft className="w-5 h-5" />
+        </Button>
+        
+        <Button
+          variant="secondary"
+          size="icon"
+          onClick={() => scroll('right')}
+          disabled={!canScrollRight}
+          className={`absolute right-0 top-1/2 -translate-y-1/2 z-10 rounded-full shadow-lg bg-background/95 backdrop-blur-sm border border-border/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${!canScrollRight ? 'hidden' : ''}`}
+        >
+          <ChevronRight className="w-5 h-5" />
+        </Button>
+
+        <div 
+          ref={scrollRef}
+          className="flex gap-4 overflow-x-auto scrollbar-hide pb-4 scroll-smooth"
+          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+        >
+          {restaurants.map((restaurant, index) => (
+            <motion.div
+              key={restaurant.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: index * 0.1 }}
+              className="flex-shrink-0 w-[220px] cursor-pointer group/card"
+              onClick={() => navigate(`/restaurant/${restaurant.id}`)}
+            >
+              {/* Card verticale stile TripAdvisor */}
+              <div className="relative rounded-xl overflow-hidden bg-card border border-border/30 shadow-sm hover:shadow-elegant transition-all duration-300 hover:-translate-y-1">
+                {/* Immagine */}
+                <div className="relative h-56 overflow-hidden">
+                  <img
+                    src={restaurant.cover_image_url || 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&q=80'}
+                    alt={restaurant.name}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover/card:scale-105"
+                  />
+                  
+                  {/* Heart button */}
+                  <button
+                    onClick={(e) => handleFavoriteClick(e, restaurant.id)}
+                    className="absolute top-3 right-3 p-2 rounded-full bg-white/90 backdrop-blur-sm shadow-md hover:bg-white transition-all duration-200 hover:scale-110"
+                  >
+                    <Heart 
+                      className={`w-5 h-5 transition-colors duration-200 ${
+                        isFavorite(restaurant.id) 
+                          ? 'fill-red-500 text-red-500' 
+                          : 'text-gray-600 hover:text-red-500'
+                      }`}
                     />
+                  </button>
+                </div>
+
+                {/* Content area - sfondo bianco */}
+                <div className="p-4 bg-card">
+                  {/* City badge */}
+                  <span className="inline-block px-2 py-0.5 text-xs font-medium bg-muted rounded-sm text-muted-foreground mb-2">
+                    {restaurant.city}
+                  </span>
+
+                  {/* Restaurant name */}
+                  <h4 className="font-semibold text-foreground text-sm leading-tight line-clamp-2 mb-2 min-h-[2.5rem]">
+                    {restaurant.name}
+                  </h4>
+
+                  {/* Rating */}
+                  {(restaurant.avg_rating ?? 0) > 0 && (
+                    <div className="flex items-center gap-1.5">
+                      <span className="font-semibold text-sm text-foreground">
+                        {restaurant.avg_rating?.toFixed(1)}
+                      </span>
+                      <div className="flex">
+                        {[...Array(5)].map((_, i) => (
+                          <div
+                            key={i}
+                            className={`w-3 h-3 rounded-full ${
+                              i < Math.round(restaurant.avg_rating || 0)
+                                ? 'bg-primary'
+                                : 'bg-muted'
+                            }`}
+                          />
+                        ))}
+                      </div>
+                      {(restaurant.total_reviews ?? 0) > 0 && (
+                        <span className="text-xs text-muted-foreground">
+                          ({restaurant.total_reviews})
+                        </span>
+                      )}
+                    </div>
                   )}
-                  <h4 className="text-white font-semibold truncate">{restaurant.name}</h4>
                 </div>
               </div>
-              <Badge className="absolute top-2 right-2 bg-primary/90 text-primary-foreground text-xs">
-                Consigliato
-              </Badge>
-            </div>
-            <div className="p-3">
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex gap-1.5">
-                  {restaurant.cuisine_types?.slice(0, 2).map((type, i) => (
-                    <Badge key={i} variant="secondary" className="text-xs px-1.5 py-0">
-                      {type}
-                    </Badge>
-                  ))}
-                </div>
-                {(restaurant.avg_rating ?? 0) > 0 && (
-                  <div className="flex items-center gap-1 text-sm">
-                    <Star className="w-3.5 h-3.5 text-primary" fill="currentColor" />
-                    <span className="font-medium">{restaurant.avg_rating?.toFixed(1)}</span>
-                  </div>
-                )}
-              </div>
-              <p className="text-xs text-muted-foreground">{restaurant.city}</p>
-            </div>
-          </Card>
-        ))}
+            </motion.div>
+          ))}
+        </div>
       </div>
     </div>
   );
