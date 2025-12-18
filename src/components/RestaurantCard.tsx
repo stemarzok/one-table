@@ -10,7 +10,7 @@ interface RestaurantCardProps {
   cuisine: string;
   location: string;
   city: string;
-  rating: number;
+  rating: number; reviewCount?: number;
   priceRange: string;
   image: string;
   logoUrl?: string | null;
@@ -28,7 +28,7 @@ const RestaurantCard = ({
   name, 
   cuisine, 
   location, 
-  rating, 
+  rating, reviewCount = 0,
   priceRange, 
   image,
   logoUrl,
@@ -127,21 +127,23 @@ const RestaurantCard = ({
           <span className="truncate">{location}</span>
         </div>
         
-        {/* Rating with dots, number and review count - bottom left */}
+        {/* Rating - stile promo TripAdvisor */}
         {rating > 0 && (
-          <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1.5">
+            <span className="font-semibold text-sm text-foreground">{rating.toFixed(1)}</span>
+            <div className="flex">
               {[...Array(totalDots)].map((_, i) => (
                 <div
                   key={i}
-                  className={`w-2 h-2 rounded-full transition-colors ${
+                  className={`w-3 h-3 rounded-full transition-colors ${
                     i < filledDots ? 'bg-primary' : 'bg-muted'
                   }`}
                 />
               ))}
             </div>
-            <span className="text-sm font-medium text-foreground">{rating.toFixed(1)}</span>
-            <span className="text-xs text-muted-foreground">recensioni</span>
+            {reviewCount > 0 && (
+              <span className="text-xs text-muted-foreground">({reviewCount})</span>
+            )}
           </div>
         )}
       </div>
