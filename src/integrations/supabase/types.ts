@@ -561,18 +561,22 @@ export type Database = {
           cover_image_url: string | null
           created_at: string
           cuisine_type: string | null
+          cuisine_types: string[] | null
           description: string | null
           email: string
+          extra_features: string[] | null
           id: string
           is_active: boolean
           is_verified: boolean | null
           legal_representative: string | null
           logo_url: string | null
           name: string
+          occasions: string[] | null
           opening_hours: Json | null
           owner_id: string
           phone: string
           price_range: string | null
+          specializations: string[] | null
           updated_at: string
           verification_status:
             | Database["public"]["Enums"]["application_status"]
@@ -586,18 +590,22 @@ export type Database = {
           cover_image_url?: string | null
           created_at?: string
           cuisine_type?: string | null
+          cuisine_types?: string[] | null
           description?: string | null
           email: string
+          extra_features?: string[] | null
           id?: string
           is_active?: boolean
           is_verified?: boolean | null
           legal_representative?: string | null
           logo_url?: string | null
           name: string
+          occasions?: string[] | null
           opening_hours?: Json | null
           owner_id: string
           phone: string
           price_range?: string | null
+          specializations?: string[] | null
           updated_at?: string
           verification_status?:
             | Database["public"]["Enums"]["application_status"]
@@ -611,18 +619,22 @@ export type Database = {
           cover_image_url?: string | null
           created_at?: string
           cuisine_type?: string | null
+          cuisine_types?: string[] | null
           description?: string | null
           email?: string
+          extra_features?: string[] | null
           id?: string
           is_active?: boolean
           is_verified?: boolean | null
           legal_representative?: string | null
           logo_url?: string | null
           name?: string
+          occasions?: string[] | null
           opening_hours?: Json | null
           owner_id?: string
           phone?: string
           price_range?: string | null
+          specializations?: string[] | null
           updated_at?: string
           verification_status?:
             | Database["public"]["Enums"]["application_status"]

@@ -4,10 +4,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Upload, Image as ImageIcon, Save } from "lucide-react";
+import { Upload, Image as ImageIcon, Save, ChefHat, Utensils, Calendar, Sparkles } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { CUISINE_TYPES, SPECIALIZATIONS, OCCASIONS, EXTRA_FEATURES } from "@/lib/restaurantCategories";
 
 interface RestaurantInfoProps {
   restaurant: any;
@@ -25,8 +27,26 @@ export const RestaurantInfo = ({ restaurant, onUpdate }: RestaurantInfoProps) =>
   const [phone, setPhone] = useState(restaurant?.phone || "");
   const [email, setEmail] = useState(restaurant?.email || "");
   
+  // Nuovi stati per le categorie
+  const [cuisineTypes, setCuisineTypes] = useState<string[]>(restaurant?.cuisine_types || []);
+  const [specializations, setSpecializations] = useState<string[]>(restaurant?.specializations || []);
+  const [occasions, setOccasions] = useState<string[]>(restaurant?.occasions || []);
+  const [extraFeatures, setExtraFeatures] = useState<string[]>(restaurant?.extra_features || []);
+  
   const coverInputRef = useRef<HTMLInputElement>(null);
   const logoInputRef = useRef<HTMLInputElement>(null);
+
+  const toggleCategory = (
+    category: string, 
+    current: string[], 
+    setter: React.Dispatch<React.SetStateAction<string[]>>
+  ) => {
+    if (current.includes(category)) {
+      setter(current.filter(c => c !== category));
+    } else {
+      setter([...current, category]);
+    }
+  };
 
   const handleImageUpload = async (file: File, type: 'cover' | 'logo') => {
     if (!restaurant?.id) return;
@@ -78,6 +98,10 @@ export const RestaurantInfo = ({ restaurant, onUpdate }: RestaurantInfoProps) =>
           city,
           phone,
           email,
+          cuisine_types: cuisineTypes,
+          specializations: specializations,
+          occasions: occasions,
+          extra_features: extraFeatures,
         })
         .eq('id', restaurant.id);
 
@@ -165,7 +189,7 @@ export const RestaurantInfo = ({ restaurant, onUpdate }: RestaurantInfoProps) =>
           Informazioni Ristorante
         </h3>
         
-        <form onSubmit={handleInfoUpdate} className="space-y-4">
+        <form onSubmit={handleInfoUpdate} className="space-y-6">
           <div className="grid md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="name">Nome Ristorante *</Label>
@@ -178,12 +202,12 @@ export const RestaurantInfo = ({ restaurant, onUpdate }: RestaurantInfoProps) =>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="cuisineType">Tipo di Cucina</Label>
+              <Label htmlFor="cuisineType">Tipo di Cucina (descrizione breve)</Label>
               <Input
                 id="cuisineType"
                 value={cuisineType}
                 onChange={(e) => setCuisineType(e.target.value)}
-                placeholder="Es: Italiana, Giapponese, Mediterranea"
+                placeholder="Es: Cucina Italiana Contemporanea"
               />
             </div>
 
@@ -254,6 +278,94 @@ export const RestaurantInfo = ({ restaurant, onUpdate }: RestaurantInfoProps) =>
               rows={4}
               placeholder="Racconta la storia del tuo ristorante..."
             />
+          </div>
+
+          {/* Categorie Selezionabili */}
+          <div className="space-y-6 pt-4 border-t border-border">
+            <h4 className="text-lg font-semibold">Categorie e Tag</h4>
+            <p className="text-sm text-muted-foreground">
+              Seleziona le categorie che descrivono meglio il tuo ristorante. Questi tag aiuteranno i clienti a trovarti.
+            </p>
+
+            {/* Tipo di Cucina */}
+            <div className="space-y-3">
+              <Label className="flex items-center gap-2">
+                <ChefHat className="w-4 h-4" />
+                Tipo di Cucina
+              </Label>
+              <div className="flex flex-wrap gap-2">
+                {CUISINE_TYPES.map((type) => (
+                  <Badge
+                    key={type}
+                    variant={cuisineTypes.includes(type) ? "default" : "outline"}
+                    className="cursor-pointer hover:bg-primary/80 transition-colors"
+                    onClick={() => toggleCategory(type, cuisineTypes, setCuisineTypes)}
+                  >
+                    {type}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+
+            {/* Specializzazione */}
+            <div className="space-y-3">
+              <Label className="flex items-center gap-2">
+                <Utensils className="w-4 h-4" />
+                Specializzazione / Format
+              </Label>
+              <div className="flex flex-wrap gap-2">
+                {SPECIALIZATIONS.map((spec) => (
+                  <Badge
+                    key={spec}
+                    variant={specializations.includes(spec) ? "default" : "outline"}
+                    className="cursor-pointer hover:bg-primary/80 transition-colors"
+                    onClick={() => toggleCategory(spec, specializations, setSpecializations)}
+                  >
+                    {spec}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+
+            {/* Occasioni */}
+            <div className="space-y-3">
+              <Label className="flex items-center gap-2">
+                <Calendar className="w-4 h-4" />
+                Occasione e Contesto
+              </Label>
+              <div className="flex flex-wrap gap-2">
+                {OCCASIONS.map((occasion) => (
+                  <Badge
+                    key={occasion}
+                    variant={occasions.includes(occasion) ? "default" : "outline"}
+                    className="cursor-pointer hover:bg-primary/80 transition-colors"
+                    onClick={() => toggleCategory(occasion, occasions, setOccasions)}
+                  >
+                    {occasion}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+
+            {/* Extra Features */}
+            <div className="space-y-3">
+              <Label className="flex items-center gap-2">
+                <Sparkles className="w-4 h-4" />
+                Extra e Servizi
+              </Label>
+              <div className="flex flex-wrap gap-2">
+                {EXTRA_FEATURES.map((feature) => (
+                  <Badge
+                    key={feature}
+                    variant={extraFeatures.includes(feature) ? "default" : "outline"}
+                    className="cursor-pointer hover:bg-primary/80 transition-colors"
+                    onClick={() => toggleCategory(feature, extraFeatures, setExtraFeatures)}
+                  >
+                    {feature}
+                  </Badge>
+                ))}
+              </div>
+            </div>
           </div>
 
           <Button type="submit" className="w-full">
