@@ -19,7 +19,7 @@ interface Restaurant {
   cover_image_url: string | null;
   logo_url: string | null;
   is_active: boolean;
-  avg_rating?: number;
+  avg_rating?: number; total_reviews?: number;
   cuisine_types?: string[];
   specializations?: string[];
   occasions?: string[];
@@ -67,7 +67,7 @@ const RestaurantList = () => {
           
           return {
             ...restaurant,
-            avg_rating: ratingData?.[0]?.avg_rating || 0,
+            avg_rating: ratingData?.[0]?.avg_rating || 0, total_reviews: Number(ratingData?.[0]?.total_reviews ?? 0),
             cuisine_types: restaurant.cuisine_types || [],
             specializations: restaurant.specializations || [],
             occasions: restaurant.occasions || [],
@@ -193,6 +193,7 @@ const RestaurantList = () => {
                   location={restaurant.address}
                   city={restaurant.city}
                   rating={restaurant.avg_rating || 0}
+                  reviewCount={restaurant.total_reviews || 0}
                   priceRange={restaurant.price_range || '€€'}
                   image={restaurant.cover_image_url || 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&q=80'}
                   logoUrl={restaurant.logo_url}
