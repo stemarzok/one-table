@@ -1,7 +1,6 @@
 import { useRef, useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, Utensils } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 
 interface CuisineCategory {
@@ -24,8 +23,11 @@ const CUISINE_CATEGORIES: CuisineCategory[] = [
   { name: "Fine Dining", image: "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&q=80" },
 ];
 
-const CuisineCarousel = () => {
-  const navigate = useNavigate();
+interface CuisineCarouselProps {
+  onCategorySelect?: (category: string) => void;
+}
+
+const CuisineCarousel = ({ onCategorySelect }: CuisineCarouselProps) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
@@ -58,8 +60,9 @@ const CuisineCarousel = () => {
   }, []);
 
   const handleCategoryClick = (categoryName: string) => {
-    // Navigate to restaurants page with category filter
-    navigate(`/restaurants?cuisine=${encodeURIComponent(categoryName)}`);
+    if (onCategorySelect) {
+      onCategorySelect(categoryName);
+    }
   };
 
   return (
