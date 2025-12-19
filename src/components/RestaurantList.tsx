@@ -190,7 +190,7 @@ const RestaurantList = () => {
 
   if (loading) {
     return (
-      <section className="py-24 bg-muted/30 relative z-10">
+      <section className="py-24 bg-muted/30 relative">
         <div className="container mx-auto px-4 flex items-center justify-center min-h-[400px]">
           <Loader2 className="w-12 h-12 animate-spin text-primary" />
         </div>
@@ -199,7 +199,7 @@ const RestaurantList = () => {
   }
 
   return (
-    <section className="py-16 bg-muted/30 relative z-10">
+    <section className="py-16 bg-muted/30 relative">
       <div className="container mx-auto px-4">
         <div className="text-center mb-10">
           <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">Cosa ti va di mangiare?</h2>
