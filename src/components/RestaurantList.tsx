@@ -201,9 +201,9 @@ const RestaurantList = () => {
     <section className="py-16 bg-muted/30">
       <div className="container mx-auto px-4">
         <div className="text-center mb-10">
-          <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">Ristoranti Partner</h2>
+          <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">Cosa ti va di mangiare?</h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
-            Scopri i migliori ristoranti e prenota il tuo tavolo con un click
+            Trova il ristorante perfetto per ogni occasione
           </p>
           
           <UnifiedSearchBar 
