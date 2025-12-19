@@ -68,13 +68,13 @@ const SearchBar = ({ onSearch, showFilters, onToggleFilters, variant = 'default'
   
   return (
     <form onSubmit={handleSubmit} className="w-full max-w-3xl mx-auto relative">
-      <div className={`flex gap-2 rounded-full p-2 ${
+      <div className={`flex gap-1 sm:gap-2 rounded-full p-1.5 sm:p-2 ${
         isHero 
           ? 'bg-[hsl(0,0%,15%)/90] backdrop-blur-md border border-white/30 shadow-lg' 
           : 'bg-background/95 backdrop-blur-sm shadow-2xl border-2 border-primary/20'
       }`}>
-        <div className="flex-1 relative">
-          <Search className={`absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 ${
+        <div className="flex-1 min-w-0 relative">
+          <Search className={`absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 w-4 sm:w-5 h-4 sm:h-5 ${
             isHero ? 'text-white/70' : 'text-muted-foreground'
           }`} />
           <Input
@@ -82,7 +82,7 @@ const SearchBar = ({ onSearch, showFilters, onToggleFilters, variant = 'default'
             value={query}
             onChange={(e) => handleInputChange(e.target.value)}
             placeholder={t('hero.search')}
-            className={`pl-12 border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 text-lg font-medium ${
+            className={`pl-9 sm:pl-12 border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 text-sm sm:text-lg font-medium truncate ${
               isHero ? 'text-white placeholder:text-white/50' : 'text-foreground'
             }`}
           />
@@ -91,17 +91,17 @@ const SearchBar = ({ onSearch, showFilters, onToggleFilters, variant = 'default'
           <Button 
             type="button"
             onClick={onToggleFilters}
-            size="lg" 
+            size="sm"
             variant={isHero ? "ghost" : "outline"}
-            className={`rounded-full ${isHero ? 'text-white hover:bg-white/20' : ''}`}
+            className={`rounded-full shrink-0 px-2 sm:px-3 ${isHero ? 'text-white hover:bg-white/20' : ''}`}
           >
-            <SlidersHorizontal className="w-5 h-5" />
+            <SlidersHorizontal className="w-4 sm:w-5 h-4 sm:h-5" />
           </Button>
         )}
         <Button 
           type="submit" 
-          size="lg" 
-          className={`rounded-full px-8 font-semibold ${
+          size="sm"
+          className={`rounded-full px-3 sm:px-8 font-semibold text-sm sm:text-base shrink-0 ${
             isHero 
               ? 'bg-primary hover:bg-primary/90 text-background' 
               : 'bg-primary hover:bg-primary/90'
@@ -118,7 +118,7 @@ const SearchBar = ({ onSearch, showFilters, onToggleFilters, variant = 'default'
               key={restaurant.id}
               type="button"
               onClick={() => handleSuggestionClick(restaurant)}
-              className="w-full px-6 py-3 text-left hover:bg-muted transition-colors"
+              className="w-full px-4 sm:px-6 py-3 text-left hover:bg-muted transition-colors"
             >
               <div className="font-semibold text-foreground">{restaurant.name}</div>
               <div className="text-sm text-muted-foreground">

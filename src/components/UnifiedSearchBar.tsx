@@ -1,4 +1,4 @@
-import { Search, SlidersHorizontal, MapPin, ChevronDown, X, History } from "lucide-react";
+import { Search, SlidersHorizontal, MapPin, X, History } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -125,10 +125,10 @@ const UnifiedSearchBar = ({ onSearch, onFilterChange, onNearMe, filters }: Unifi
   return (
     <div className="w-full max-w-4xl mx-auto relative">
       <form onSubmit={handleSubmit}>
-        <div className="flex items-center gap-2 bg-background/95 backdrop-blur-sm rounded-full p-2 shadow-2xl border-2 border-primary/20">
+        <div className="flex items-center gap-1 sm:gap-2 bg-background/95 backdrop-blur-sm rounded-full p-1.5 sm:p-2 shadow-2xl border-2 border-primary/20">
           {/* Search Input */}
-          <div className="flex-1 relative">
-            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+          <div className="flex-1 min-w-0 relative">
+            <Search className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 w-4 sm:w-5 h-4 sm:h-5 text-muted-foreground" />
             <Input
               type="text"
               value={query}
@@ -138,7 +138,7 @@ const UnifiedSearchBar = ({ onSearch, onFilterChange, onNearMe, filters }: Unifi
               }}
               onFocus={() => setShowSuggestions(true)}
               placeholder={t('hero.search')}
-              className="pl-12 border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 text-lg font-medium"
+              className="pl-9 sm:pl-12 border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 text-sm sm:text-lg font-medium truncate"
             />
           </div>
 
@@ -148,19 +148,19 @@ const UnifiedSearchBar = ({ onSearch, onFilterChange, onNearMe, filters }: Unifi
               <Button 
                 type="button"
                 variant="ghost"
-                className="rounded-full gap-2 text-muted-foreground hover:text-foreground"
+                size="sm"
+                className="rounded-full gap-1 sm:gap-2 text-muted-foreground hover:text-foreground px-2 sm:px-3 shrink-0"
               >
                 <SlidersHorizontal className="w-4 h-4" />
-                <span className="hidden sm:inline">Filtri</span>
+                <span className="hidden md:inline text-sm">Filtri</span>
                 {activeFiltersCount > 0 && (
-                  <Badge variant="secondary" className="h-5 w-5 p-0 flex items-center justify-center text-xs">
+                  <Badge variant="secondary" className="h-4 w-4 sm:h-5 sm:w-5 p-0 flex items-center justify-center text-xs">
                     {activeFiltersCount}
                   </Badge>
                 )}
-                <ChevronDown className={`w-3 h-3 transition-transform ${filtersOpen ? 'rotate-180' : ''}`} />
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-[600px] max-h-[70vh] overflow-y-auto p-0" align="end">
+            <PopoverContent className="w-[90vw] sm:w-[600px] max-h-[70vh] overflow-y-auto p-0" align="end">
               <RestaurantFiltersContent 
                 filters={filters} 
                 onFilterChange={onFilterChange!}
@@ -169,22 +169,23 @@ const UnifiedSearchBar = ({ onSearch, onFilterChange, onNearMe, filters }: Unifi
             </PopoverContent>
           </Popover>
 
-          {/* Near Me Button */}
+          {/* Near Me Button - Location icon */}
           <Button 
             type="button"
             variant="ghost"
+            size="sm"
             onClick={onNearMe}
-            className="rounded-full gap-2 text-muted-foreground hover:text-foreground"
+            className="rounded-full text-muted-foreground hover:text-foreground px-2 sm:px-3 shrink-0"
+            title="Trova ristoranti vicino a te"
           >
             <MapPin className="w-4 h-4" />
-            <span className="hidden sm:inline">Vicino a me</span>
           </Button>
 
           {/* Search Button */}
           <Button 
             type="submit" 
-            size="lg" 
-            className="rounded-full px-6 font-semibold bg-primary hover:bg-primary/90"
+            size="sm"
+            className="rounded-full px-3 sm:px-6 font-semibold bg-primary hover:bg-primary/90 text-sm sm:text-base shrink-0"
           >
             {t('hero.searchButton')}
           </Button>
