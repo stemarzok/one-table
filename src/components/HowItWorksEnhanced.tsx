@@ -1,132 +1,148 @@
-import { Card } from "@/components/ui/card";
-import { UserPlus, Search, Award, Sparkles } from "lucide-react";
+import { useRef, useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
+import { motion } from "framer-motion";
 import { useLanguage } from "@/contexts/LanguageContext";
 import earnPointsImage from "@/assets/earn-points.jpg";
 import vipBenefitsImage from "@/assets/vip-benefits.jpg";
-import { motion } from "framer-motion";
-import { useInView } from "framer-motion";
-import { useRef } from "react";
 
 const HowItWorksEnhanced = () => {
   const { t } = useLanguage();
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: "-100px" });
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(true);
   
   const steps = [
     {
-      icon: UserPlus,
+      number: "1",
       title: t('howItWorks.step1.title'),
       description: t('howItWorks.step1.desc'),
-      image: "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=400&q=80"
+      image: "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=800&q=80"
     },
     {
-      icon: Search,
+      number: "2",
       title: t('howItWorks.step2.title'),
       description: t('howItWorks.step2.desc'),
-      image: "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=400&q=80"
+      image: "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&q=80"
     },
     {
-      icon: Award,
+      number: "3",
       title: t('howItWorks.step3.title'),
       description: t('howItWorks.step3.desc'),
       image: earnPointsImage
     },
     {
-      icon: Sparkles,
+      number: "4",
       title: t('howItWorks.step4.title'),
       description: t('howItWorks.step4.desc'),
       image: vipBenefitsImage
     }
   ];
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.15,
-        delayChildren: 0.2
-      }
+  const checkScroll = () => {
+    if (scrollRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
+      setCanScrollLeft(scrollLeft > 0);
+      setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 10);
     }
   };
 
-  const cardVariants = {
-    hidden: { opacity: 0, y: 40 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.6,
-        ease: [0.25, 0.46, 0.45, 0.94]
-      }
+  const scroll = (direction: 'left' | 'right') => {
+    if (scrollRef.current) {
+      const scrollAmount = 220;
+      scrollRef.current.scrollBy({
+        left: direction === 'left' ? -scrollAmount : scrollAmount,
+        behavior: 'smooth'
+      });
     }
   };
+
+  useEffect(() => {
+    checkScroll();
+    const ref = scrollRef.current;
+    if (ref) {
+      ref.addEventListener('scroll', checkScroll);
+      return () => ref.removeEventListener('scroll', checkScroll);
+    }
+  }, []);
 
   return (
-    <section ref={ref} className="py-24 bg-muted/30 mesh-gradient relative overflow-hidden">
-      {/* Background decoration */}
-      <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
-      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
-      
-      <div className="container mx-auto px-4 relative z-10">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-16"
-        >
-          <h2 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-foreground mb-4 tracking-tight">
+    <section className="py-16 bg-muted/30 relative z-10">
+      <div className="container mx-auto px-4">
+        <div className="mb-6">
+          <h3 className="text-xl font-bold text-foreground flex items-center gap-2">
+            <Sparkles className="w-5 h-5 text-primary" />
             {t('howItWorks.title')}
-          </h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Quattro semplici passaggi per iniziare a guadagnare vantaggi esclusivi
-          </p>
-        </motion.div>
-        
-        <motion.div 
-          className="grid md:grid-cols-2 lg:grid-cols-4 gap-6"
-          variants={containerVariants}
-          initial="hidden"
-          animate={isInView ? "visible" : "hidden"}
-        >
-          {steps.map((step, index) => {
-            const Icon = step.icon;
-            return (
-              <motion.div key={index} variants={cardVariants}>
-                <Card 
-                  className="overflow-hidden group cursor-pointer h-full bg-card border-border/50 hover:border-primary/30 transition-all duration-300 hover-lift"
-                >
-                  <div className="relative h-48 overflow-hidden">
-                    <img 
-                      src={step.image} 
-                      alt={step.title}
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-foreground/90 via-foreground/40 to-transparent" />
-                    <div className="absolute bottom-4 left-4">
-                      <div className="w-14 h-14 rounded-xl bg-primary flex items-center justify-center shadow-elegant transition-transform duration-300 group-hover:scale-110">
-                        <Icon className="w-7 h-7 text-primary-foreground" />
-                      </div>
-                    </div>
-                    <div className="absolute top-4 right-4">
-                      <div className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                        <span className="text-white font-bold text-sm">{index + 1}</span>
-                      </div>
-                    </div>
+          </h3>
+          <p className="text-sm text-muted-foreground">Quattro semplici passaggi per iniziare a guadagnare vantaggi esclusivi</p>
+        </div>
+
+        <div className="relative group">
+          {/* Navigation Arrows */}
+          <Button
+            variant="secondary"
+            size="icon"
+            onClick={() => scroll('left')}
+            disabled={!canScrollLeft}
+            className={`absolute left-0 top-1/2 -translate-y-1/2 z-10 rounded-full shadow-lg bg-background/95 backdrop-blur-sm border border-border/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${!canScrollLeft ? 'hidden' : ''}`}
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </Button>
+          
+          <Button
+            variant="secondary"
+            size="icon"
+            onClick={() => scroll('right')}
+            disabled={!canScrollRight}
+            className={`absolute right-0 top-1/2 -translate-y-1/2 z-10 rounded-full shadow-lg bg-background/95 backdrop-blur-sm border border-border/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${!canScrollRight ? 'hidden' : ''}`}
+          >
+            <ChevronRight className="w-5 h-5" />
+          </Button>
+
+          <div 
+            ref={scrollRef}
+            className="flex gap-4 overflow-x-auto scrollbar-hide pb-4 scroll-smooth"
+            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+          >
+            {steps.map((step, index) => (
+              <motion.div
+                key={step.number}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: index * 0.1 }}
+                className="flex-shrink-0 w-[200px] group/card"
+              >
+                {/* Card verticale stile pulito come CuisineCarousel */}
+                <div className="relative rounded-xl overflow-hidden shadow-sm hover:shadow-elegant transition-all duration-300 hover:-translate-y-1 h-64">
+                  {/* Immagine */}
+                  <img
+                    src={step.image}
+                    alt={step.title}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover/card:scale-105"
+                  />
+                  
+                  {/* Gradiente nero dal basso */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+                  
+                  {/* Badge numero */}
+                  <div className="absolute top-3 left-3 w-8 h-8 rounded-full bg-primary flex items-center justify-center">
+                    <span className="text-primary-foreground font-bold text-sm">{step.number}</span>
                   </div>
-                  <div className="p-6">
-                    <h3 className="text-xl font-bold text-foreground mb-3 group-hover:text-primary transition-colors">
+                  
+                  {/* Content area */}
+                  <div className="absolute bottom-0 left-0 right-0 p-4">
+                    <h4 className="font-bold text-white text-sm leading-tight mb-1">
                       {step.title}
-                    </h3>
-                    <p className="text-muted-foreground leading-relaxed">
+                    </h4>
+                    <p className="text-white/80 text-xs leading-relaxed line-clamp-2">
                       {step.description}
                     </p>
                   </div>
-                </Card>
+                </div>
               </motion.div>
-            );
-          })}
-        </motion.div>
+            ))}
+          </div>
+        </div>
       </div>
     </section>
   );
