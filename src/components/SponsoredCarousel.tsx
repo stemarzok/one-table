@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useFavorites } from "@/hooks/useFavorites";
 import { motion } from "framer-motion";
+import { RestaurantCardCarousel } from "./RestaurantCardCarousel";
 
 interface SponsoredRestaurant {
   id: string;
@@ -13,6 +14,7 @@ interface SponsoredRestaurant {
   city: string;
   cover_image_url: string | null;
   logo_url: string | null;
+  gallery_images: string[] | null;
   price_range: string | null;
   avg_rating?: number;
   total_reviews?: number;
@@ -34,7 +36,7 @@ const SponsoredCarousel = () => {
   const fetchSponsoredRestaurants = async () => {
     const { data: sponsored } = await supabase
       .from('restaurants')
-      .select('id, name, cuisine_type, city, cover_image_url, logo_url, price_range, cuisine_types, is_sponsored')
+      .select('id, name, cuisine_type, city, cover_image_url, logo_url, gallery_images, price_range, cuisine_types, is_sponsored')
       .eq('is_active', true)
       .eq('is_sponsored', true)
       .limit(10);
@@ -54,7 +56,7 @@ const SponsoredCarousel = () => {
     } else {
       const { data: topRated } = await supabase
         .from('restaurants')
-        .select('id, name, cuisine_type, city, cover_image_url, logo_url, price_range, cuisine_types')
+        .select('id, name, cuisine_type, city, cover_image_url, logo_url, gallery_images, price_range, cuisine_types')
         .eq('is_active', true)
         .limit(10);
 
@@ -159,11 +161,18 @@ const SponsoredCarousel = () => {
               <div className="relative rounded-xl overflow-hidden bg-card border border-border/30 shadow-sm hover:shadow-elegant transition-all duration-300 hover:-translate-y-1">
                 {/* Immagine */}
                 <div className="relative h-56 overflow-hidden">
-                  <img
-                    src={restaurant.cover_image_url || 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&q=80'}
-                    alt={restaurant.name}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover/card:scale-105"
-                  />
+                  {(restaurant.gallery_images?.length ?? 0) > 0 ? (
+                    <RestaurantCardCarousel 
+                      images={restaurant.gallery_images!} 
+                      alt={restaurant.name} 
+                    />
+                  ) : (
+                    <img
+                      src={restaurant.cover_image_url || 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&q=80'}
+                      alt={restaurant.name}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover/card:scale-105"
+                    />
+                  )}
                   
                   {/* Heart button */}
                   <button
