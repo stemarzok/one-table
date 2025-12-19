@@ -1,7 +1,8 @@
-import { Heart } from "lucide-react";
+import { Heart, MapPin } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useFavorites } from "@/hooks/useFavorites";
 import { motion } from "framer-motion";
+import { Badge } from "@/components/ui/badge";
 
 interface RestaurantCardProps {
   id: string;
@@ -27,10 +28,16 @@ const RestaurantCard = ({
   id,
   name, 
   city,
+  location,
   rating,
   reviewCount = 0,
   priceRange, 
   image,
+  logoUrl,
+  sponsored,
+  cuisineTypes = [],
+  specializations = [],
+  occasions = [],
 }: RestaurantCardProps) => {
   const navigate = useNavigate();
   const { toggleFavorite, isFavorite } = useFavorites();
@@ -43,6 +50,13 @@ const RestaurantCard = ({
     e.stopPropagation();
     toggleFavorite(String(id));
   };
+
+  // Combina i primi tag per mostrare (max 3)
+  const displayTags = [
+    ...(cuisineTypes?.slice(0, 1) || []),
+    ...(specializations?.slice(0, 1) || []),
+    ...(occasions?.slice(0, 1) || [])
+  ].slice(0, 3);
 
   // Convert rating to filled dots (out of 5)
   const filledDots = Math.round(rating);
@@ -59,12 +73,19 @@ const RestaurantCard = ({
       {/* Card verticale stile TripAdvisor */}
       <div className="relative rounded-xl overflow-hidden bg-card border border-border/30 shadow-sm hover:shadow-elegant transition-all duration-300 hover:-translate-y-1">
         {/* Immagine - più alta per aspetto verticale */}
-        <div className="relative h-64 overflow-hidden">
+        <div className="relative h-56 overflow-hidden">
           <img
             src={image}
             alt={name}
             className="w-full h-full object-cover transition-transform duration-500 group-hover/card:scale-105"
           />
+          
+          {/* Badge Sponsorizzato */}
+          {sponsored && (
+            <Badge className="absolute top-3 left-3 bg-primary text-primary-foreground text-xs">
+              Sponsorizzato
+            </Badge>
+          )}
           
           {/* Heart button - stile TripAdvisor */}
           <button
@@ -89,11 +110,43 @@ const RestaurantCard = ({
           </span>
 
           {/* Restaurant name and price */}
-          <div className="flex items-start justify-between gap-2 mb-2">
-            <h4 className="font-semibold text-foreground text-sm leading-tight line-clamp-2 min-h-[2.5rem]">
+          <div className="flex items-center gap-3 mb-2">
+            {logoUrl && (
+              <img 
+                src={logoUrl} 
+                alt={`${name} logo`}
+                className="w-10 h-10 rounded-full object-cover border border-border"
+              />
+            )}
+            <h4 className="font-semibold text-foreground text-sm leading-tight line-clamp-2 flex-1">
               {name}
             </h4>
             <span className="text-sm font-semibold text-primary flex-shrink-0">{priceRange}</span>
+          </div>
+
+          {/* Tags */}
+          <div className="flex flex-wrap gap-1.5 mb-2">
+            {displayTags.length > 0 ? (
+              displayTags.map((tag, index) => (
+                <Badge 
+                  key={index} 
+                  variant="secondary" 
+                  className="text-xs px-2 py-0.5"
+                >
+                  {tag}
+                </Badge>
+              ))
+            ) : (
+              <Badge variant="secondary" className="text-xs px-2 py-0.5">
+                Ristorante
+              </Badge>
+            )}
+          </div>
+
+          {/* Location */}
+          <div className="flex items-center gap-2 text-sm text-muted-foreground mb-3">
+            <MapPin className="w-4 h-4 flex-shrink-0" />
+            <span className="truncate">{location}</span>
           </div>
 
           {/* Rating - stile TripAdvisor */}

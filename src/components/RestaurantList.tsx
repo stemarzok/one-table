@@ -7,9 +7,9 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useState, useMemo, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, MapPin } from "lucide-react";
+import { Loader2, MapPin, X } from "lucide-react";
 import Map from "@/components/Map";
-import { useSearchParams } from "react-router-dom";
+import { Badge } from "@/components/ui/badge";
 
 interface Restaurant {
   id: string;
@@ -31,22 +31,20 @@ interface Restaurant {
 }
 
 const RestaurantList = () => {
-  const [searchParams] = useSearchParams();
-  const cuisineFromUrl = searchParams.get('cuisine');
-  
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [loading, setLoading] = useState(true);
   const [showMap, setShowMap] = useState(false);
   const [userLocation, setUserLocation] = useState<{lat: number; lng: number} | null>(null);
+  const [selectedCuisine, setSelectedCuisine] = useState<string | null>(null);
   const itemsPerPage = 9;
   const [filters, setFilters] = useState<FilterState>({
     city: "all",
     radius: 5,
     priceRange: "all",
     sortBy: "rating-desc",
-    cuisineTypes: cuisineFromUrl ? [cuisineFromUrl] : [],
+    cuisineTypes: [],
     specializations: [],
     occasions: [],
     extraFeatures: []
@@ -54,19 +52,19 @@ const RestaurantList = () => {
 
   const mapboxToken = import.meta.env.VITE_MAPBOX_TOKEN || "";
 
-  // Update filters when URL param changes
-  useEffect(() => {
-    if (cuisineFromUrl) {
-      setFilters(prev => ({
-        ...prev,
-        cuisineTypes: [cuisineFromUrl]
-      }));
-    }
-  }, [cuisineFromUrl]);
-
   useEffect(() => {
     fetchRestaurants();
   }, []);
+
+  // Update filters when cuisine is selected from carousel
+  useEffect(() => {
+    if (selectedCuisine) {
+      setFilters(prev => ({
+        ...prev,
+        cuisineTypes: [selectedCuisine]
+      }));
+    }
+  }, [selectedCuisine]);
 
   const fetchRestaurants = async () => {
     try {
@@ -112,6 +110,20 @@ const RestaurantList = () => {
         () => alert("Non è stato possibile ottenere la tua posizione.")
       );
     }
+  };
+
+  const handleCategorySelect = (category: string) => {
+    setSelectedCuisine(category);
+    // Scroll to restaurant list
+    document.getElementById('restaurant-list')?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const clearCuisineFilter = () => {
+    setSelectedCuisine(null);
+    setFilters(prev => ({
+      ...prev,
+      cuisineTypes: []
+    }));
   };
 
   const filteredRestaurants = useMemo(() => {
@@ -203,23 +215,39 @@ const RestaurantList = () => {
         </div>
 
         {/* Categorie di cucina */}
-        <CuisineCarousel />
+        <CuisineCarousel onCategorySelect={handleCategorySelect} />
 
         {/* Consigliati per te */}
         <SponsoredCarousel />
         
         {/* Lista ristoranti */}
-        <div className="mb-6">
+        <div id="restaurant-list" className="mb-6">
           <h3 className="text-xl font-bold text-foreground">Tutti i ristoranti</h3>
-          <p className="text-sm text-muted-foreground">
-            {filteredRestaurants.length} ristoranti trovati
-            {cuisineFromUrl && ` per "${cuisineFromUrl}"`}
-          </p>
+          <div className="flex items-center gap-2 mt-2">
+            <p className="text-sm text-muted-foreground">
+              {filteredRestaurants.length} ristoranti trovati
+            </p>
+            {selectedCuisine && (
+              <Badge 
+                variant="secondary" 
+                className="flex items-center gap-1 cursor-pointer hover:bg-destructive/10"
+                onClick={clearCuisineFilter}
+              >
+                {selectedCuisine}
+                <X className="w-3 h-3" />
+              </Badge>
+            )}
+          </div>
         </div>
 
         {paginatedRestaurants.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-xl text-muted-foreground">Nessun ristorante trovato</p>
+            {selectedCuisine && (
+              <Button variant="outline" className="mt-4" onClick={clearCuisineFilter}>
+                Rimuovi filtro categoria
+              </Button>
+            )}
           </div>
         ) : (
           <>
