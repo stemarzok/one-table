@@ -20,6 +20,7 @@ interface Restaurant {
   price_range: string | null;
   cover_image_url: string | null;
   logo_url: string | null;
+  gallery_images: string[] | null;
   is_active: boolean;
   is_sponsored: boolean | null;
   avg_rating?: number;
@@ -70,7 +71,7 @@ const RestaurantList = () => {
     try {
       const { data, error } = await supabase
         .from('restaurants')
-        .select('id, name, cuisine_type, address, city, price_range, cover_image_url, logo_url, is_active, is_sponsored, cuisine_types, specializations, occasions, extra_features')
+        .select('id, name, cuisine_type, address, city, price_range, cover_image_url, logo_url, gallery_images, is_active, is_sponsored, cuisine_types, specializations, occasions, extra_features')
         .eq('is_active', true);
 
       if (error) throw error;
@@ -265,6 +266,7 @@ const RestaurantList = () => {
                   priceRange={restaurant.price_range || '€€'}
                   image={restaurant.cover_image_url || 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&q=80'}
                   logoUrl={restaurant.logo_url}
+                  galleryImages={restaurant.gallery_images || []}
                   available={true}
                   sponsored={restaurant.is_sponsored || false}
                   coordinates={{ lat: 0, lng: 0 }}

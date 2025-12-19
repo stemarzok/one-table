@@ -21,6 +21,7 @@ interface Restaurant {
   city: string;
   cover_image_url: string | null;
   logo_url: string | null;
+  gallery_images: string[] | null;
   avg_rating?: number;
   total_reviews?: number;
 }
@@ -148,6 +149,7 @@ const Favorites = () => {
                   priceRange={restaurant.price_range || '€€'}
                   image={restaurant.cover_image_url || 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&q=80'}
                   logoUrl={restaurant.logo_url}
+                  galleryImages={restaurant.gallery_images || []}
                   available={true}
                   sponsored={false}
                   coordinates={{ lat: 0, lng: 0 }}

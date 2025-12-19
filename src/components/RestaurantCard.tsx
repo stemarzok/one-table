@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useFavorites } from "@/hooks/useFavorites";
 import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
+import { RestaurantCardCarousel } from "./RestaurantCardCarousel";
 
 interface RestaurantCardProps {
   id: string;
@@ -15,6 +16,7 @@ interface RestaurantCardProps {
   priceRange: string;
   image: string;
   logoUrl?: string | null;
+  galleryImages?: string[];
   available: boolean;
   sponsored: boolean;
   coordinates: { lat: number; lng: number };
@@ -34,6 +36,7 @@ const RestaurantCard = ({
   priceRange, 
   image,
   logoUrl,
+  galleryImages = [],
   sponsored,
   cuisineTypes = [],
   specializations = [],
@@ -74,11 +77,18 @@ const RestaurantCard = ({
       <div className="relative rounded-xl overflow-hidden bg-card border border-border/30 shadow-sm hover:shadow-elegant transition-all duration-300 hover:-translate-y-1">
         {/* Immagine - più alta per aspetto verticale */}
         <div className="relative h-56 overflow-hidden">
-          <img
-            src={image}
-            alt={name}
-            className="w-full h-full object-cover transition-transform duration-500 group-hover/card:scale-105"
-          />
+          {galleryImages.length > 0 ? (
+            <RestaurantCardCarousel 
+              images={galleryImages} 
+              alt={name} 
+            />
+          ) : (
+            <img
+              src={image}
+              alt={name}
+              className="w-full h-full object-cover transition-transform duration-500 group-hover/card:scale-105"
+            />
+          )}
           
           {/* Badge Sponsorizzato */}
           {sponsored && (

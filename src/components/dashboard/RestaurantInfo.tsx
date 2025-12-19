@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Upload, Image as ImageIcon, Save, ChefHat, Utensils, Calendar, Sparkles } from "lucide-react";
+import { Upload, Image as ImageIcon, Save, ChefHat, Utensils, Calendar, Sparkles, X, Images } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CUISINE_TYPES, SPECIALIZATIONS, OCCASIONS, EXTRA_FEATURES } from "@/lib/restaurantCategories";
 
@@ -18,6 +18,7 @@ interface RestaurantInfoProps {
 
 export const RestaurantInfo = ({ restaurant, onUpdate }: RestaurantInfoProps) => {
   const [uploading, setUploading] = useState(false);
+  const [uploadingGallery, setUploadingGallery] = useState(false);
   const [name, setName] = useState(restaurant?.name || "");
   const [description, setDescription] = useState(restaurant?.description || "");
   const [priceRange, setPriceRange] = useState(restaurant?.price_range || "");
@@ -25,6 +26,7 @@ export const RestaurantInfo = ({ restaurant, onUpdate }: RestaurantInfoProps) =>
   const [city, setCity] = useState(restaurant?.city || "");
   const [phone, setPhone] = useState(restaurant?.phone || "");
   const [email, setEmail] = useState(restaurant?.email || "");
+  const [galleryImages, setGalleryImages] = useState<string[]>(restaurant?.gallery_images || []);
   
   // Stati per le categorie
   const [cuisineTypes, setCuisineTypes] = useState<string[]>(restaurant?.cuisine_types || []);
@@ -34,6 +36,7 @@ export const RestaurantInfo = ({ restaurant, onUpdate }: RestaurantInfoProps) =>
   
   const coverInputRef = useRef<HTMLInputElement>(null);
   const logoInputRef = useRef<HTMLInputElement>(null);
+  const galleryInputRef = useRef<HTMLInputElement>(null);
 
   const toggleCategory = (
     category: string, 
@@ -79,6 +82,78 @@ export const RestaurantInfo = ({ restaurant, onUpdate }: RestaurantInfoProps) =>
       toast.error(error.message);
     } finally {
       setUploading(false);
+    }
+  };
+
+  const handleGalleryUpload = async (files: FileList) => {
+    if (!restaurant?.id) return;
+    
+    const currentCount = galleryImages.length;
+    const remainingSlots = 10 - currentCount;
+    
+    if (remainingSlots <= 0) {
+      toast.error("Hai raggiunto il limite massimo di 10 immagini");
+      return;
+    }
+
+    const filesToUpload = Array.from(files).slice(0, remainingSlots);
+    
+    setUploadingGallery(true);
+    try {
+      const uploadedUrls: string[] = [];
+      
+      for (const file of filesToUpload) {
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${restaurant.id}/gallery-${Date.now()}-${Math.random()}.${fileExt}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('restaurant-images')
+          .upload(fileName, file);
+
+        if (uploadError) throw uploadError;
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('restaurant-images')
+          .getPublicUrl(fileName);
+          
+        uploadedUrls.push(publicUrl);
+      }
+
+      const newGallery = [...galleryImages, ...uploadedUrls];
+      
+      const { error: updateError } = await supabase
+        .from('restaurants')
+        .update({ gallery_images: newGallery })
+        .eq('id', restaurant.id);
+
+      if (updateError) throw updateError;
+
+      setGalleryImages(newGallery);
+      toast.success(`${uploadedUrls.length} immagini caricate con successo`);
+      onUpdate();
+    } catch (error: any) {
+      toast.error(error.message);
+    } finally {
+      setUploadingGallery(false);
+    }
+  };
+
+  const removeGalleryImage = async (indexToRemove: number) => {
+    const newGallery = galleryImages.filter((_, i) => i !== indexToRemove);
+    
+    try {
+      const { error } = await supabase
+        .from('restaurants')
+        .update({ gallery_images: newGallery })
+        .eq('id', restaurant.id);
+
+      if (error) throw error;
+
+      setGalleryImages(newGallery);
+      toast.success("Immagine rimossa");
+      onUpdate();
+    } catch (error: any) {
+      toast.error(error.message);
     }
   };
 
@@ -185,6 +260,76 @@ export const RestaurantInfo = ({ restaurant, onUpdate }: RestaurantInfoProps) =>
               {uploading ? "Caricamento..." : "Carica Logo"}
             </Button>
           </div>
+        </div>
+      </Card>
+
+      {/* Gallery Images Card */}
+      <Card className="p-6">
+        <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
+          <Images className="w-5 h-5" />
+          Galleria Immagini (Carosello)
+        </h3>
+        <p className="text-sm text-muted-foreground mb-4">
+          Carica fino a 10 immagini che verranno mostrate come carosello sulla card del ristorante. Se caricate, sostituiranno l'immagine di copertina sulla card.
+        </p>
+        
+        {/* Gallery Grid */}
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-4">
+          {galleryImages.map((img, index) => (
+            <div key={index} className="relative group">
+              <img 
+                src={img} 
+                alt={`Gallery ${index + 1}`}
+                className="w-full h-24 object-cover rounded-lg border border-border"
+              />
+              <button
+                type="button"
+                onClick={() => removeGalleryImage(index)}
+                className="absolute -top-2 -right-2 p-1 rounded-full bg-destructive text-destructive-foreground opacity-0 group-hover:opacity-100 transition-opacity"
+              >
+                <X className="w-3 h-3" />
+              </button>
+              <span className="absolute bottom-1 left-1 text-xs bg-black/60 text-white px-1.5 py-0.5 rounded">
+                {index + 1}
+              </span>
+            </div>
+          ))}
+          
+          {galleryImages.length < 10 && (
+            <button
+              type="button"
+              onClick={() => galleryInputRef.current?.click()}
+              disabled={uploadingGallery}
+              className="w-full h-24 border-2 border-dashed border-border rounded-lg flex flex-col items-center justify-center text-muted-foreground hover:border-primary hover:text-primary transition-colors"
+            >
+              <Upload className="w-5 h-5 mb-1" />
+              <span className="text-xs">Aggiungi</span>
+            </button>
+          )}
+        </div>
+        
+        <input
+          type="file"
+          ref={galleryInputRef}
+          onChange={(e) => e.target.files && handleGalleryUpload(e.target.files)}
+          accept="image/*"
+          multiple
+          className="hidden"
+        />
+        
+        <div className="flex items-center justify-between">
+          <span className="text-sm text-muted-foreground">
+            {galleryImages.length}/10 immagini
+          </span>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => galleryInputRef.current?.click()}
+            disabled={uploadingGallery || galleryImages.length >= 10}
+          >
+            <Upload className="w-4 h-4 mr-2" />
+            {uploadingGallery ? "Caricamento..." : "Carica Immagini"}
+          </Button>
         </div>
       </Card>
 
