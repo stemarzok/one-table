@@ -160,7 +160,7 @@ const Business = () => {
       </section>
 
       {/* Benefits Section */}
-      <section ref={benefitsRef} id="benefits" className="py-24 bg-background mesh-gradient relative overflow-hidden z-10">
+      <section ref={benefitsRef} id="benefits" className="py-24 bg-background mesh-gradient relative overflow-hidden">
         <div className="absolute top-0 right-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
         
         <div className="container mx-auto px-4 relative z-10">
@@ -252,7 +252,7 @@ const Business = () => {
       </section>
 
       {/* CTA Section with Background Image */}
-      <section ref={ctaRef} className="relative py-32 overflow-hidden z-10">
+      <section ref={ctaRef} className="relative py-32 overflow-hidden">
         <div className="absolute inset-0 z-0">
           <img 
             src={heroRestaurant} 
