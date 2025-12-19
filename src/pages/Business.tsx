@@ -70,7 +70,7 @@ const Business = () => {
       <Header />
       
       {/* Hero Section */}
-      <section ref={heroRef} className="relative min-h-screen flex items-center overflow-hidden z-0">
+      <section ref={heroRef} className="relative min-h-screen flex items-center overflow-hidden pb-32 z-0">
         <motion.div 
           className="absolute inset-0 z-0"
           style={{ y: backgroundY }}
