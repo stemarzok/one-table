@@ -4,11 +4,12 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Heart, MapPin, Star, Euro } from 'lucide-react';
+import { Heart } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useFavorites } from '@/hooks/useFavorites';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import RestaurantCard from '@/components/RestaurantCard';
 
 interface Restaurant {
   id: string;
@@ -20,11 +21,13 @@ interface Restaurant {
   city: string;
   cover_image_url: string | null;
   logo_url: string | null;
+  avg_rating?: number;
+  total_reviews?: number;
 }
 
 const Favorites = () => {
   const { isLoggedIn, isBusinessMode } = useAuth();
-  const { favorites, toggleFavorite, loading: favoritesLoading } = useFavorites();
+  const { favorites, loading: favoritesLoading } = useFavorites();
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
@@ -58,7 +61,21 @@ const Favorites = () => {
 
       if (error) throw error;
 
-      setRestaurants(data || []);
+      // Fetch ratings for each restaurant
+      const restaurantsWithRatings = await Promise.all(
+        (data || []).map(async (restaurant) => {
+          const { data: ratingData } = await supabase
+            .rpc('get_restaurant_rating', { restaurant_id_param: restaurant.id });
+          
+          return {
+            ...restaurant,
+            avg_rating: ratingData?.[0]?.avg_rating || 0,
+            total_reviews: Number(ratingData?.[0]?.total_reviews ?? 0),
+          };
+        })
+      );
+
+      setRestaurants(restaurantsWithRatings);
     } catch (error: any) {
       console.error('Error fetching favorite restaurants:', error);
       toast({
@@ -119,81 +136,22 @@ const Favorites = () => {
           ) : (
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {restaurants.map((restaurant) => (
-                <Card 
+                <RestaurantCard 
                   key={restaurant.id}
-                  className="overflow-hidden hover:shadow-lg transition-all cursor-pointer group"
-                >
-                  <div 
-                    className="relative h-48 bg-muted"
-                    onClick={() => navigate(`/restaurant/${restaurant.id}`)}
-                  >
-                    {restaurant.cover_image_url ? (
-                      <img 
-                        src={restaurant.cover_image_url} 
-                        alt={restaurant.name}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <p className="text-muted-foreground">Nessuna immagine</p>
-                      </div>
-                    )}
-                    
-                    {/* Dark gradient overlay at bottom with logo and name */}
-                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent p-4">
-                      <div className="flex items-center gap-3">
-                        {restaurant.logo_url && (
-                          <img 
-                            src={restaurant.logo_url} 
-                            alt={`${restaurant.name} logo`}
-                            className="w-10 h-10 rounded-full object-cover border-2 border-white/30"
-                          />
-                        )}
-                        <h3 className="text-lg font-bold text-white truncate">{restaurant.name}</h3>
-                      </div>
-                    </div>
-                    
-                    <Button
-                      size="icon"
-                      variant="secondary"
-                      className="absolute top-4 right-4 bg-background/90 hover:bg-background"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        toggleFavorite(restaurant.id);
-                      }}
-                    >
-                      <Heart className="w-5 h-5 fill-primary text-primary" />
-                    </Button>
-                  </div>
-
-                  <div 
-                    className="p-6"
-                    onClick={() => navigate(`/restaurant/${restaurant.id}`)}
-                  >
-                    <div className="flex items-start justify-between mb-2">
-                      {restaurant.price_range && (
-                        <div className="flex items-center text-muted-foreground">
-                          <span className="text-sm">{restaurant.price_range}</span>
-                        </div>
-                      )}
-                    </div>
-
-                    {restaurant.cuisine_type && (
-                      <p className="text-sm text-primary mb-2">{restaurant.cuisine_type}</p>
-                    )}
-
-                    {restaurant.description && (
-                      <p className="text-sm text-muted-foreground line-clamp-2 mb-4">
-                        {restaurant.description}
-                      </p>
-                    )}
-
-                    <div className="flex items-center text-sm text-muted-foreground">
-                      <MapPin className="w-4 h-4 mr-1" />
-                      <span className="truncate">{restaurant.address}, {restaurant.city}</span>
-                    </div>
-                  </div>
-                </Card>
+                  id={restaurant.id}
+                  name={restaurant.name}
+                  cuisine={restaurant.cuisine_type || 'Cucina Italiana'}
+                  location={restaurant.address}
+                  city={restaurant.city}
+                  rating={restaurant.avg_rating || 0}
+                  reviewCount={restaurant.total_reviews || 0}
+                  priceRange={restaurant.price_range || '€€'}
+                  image={restaurant.cover_image_url || 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&q=80'}
+                  logoUrl={restaurant.logo_url}
+                  available={true}
+                  sponsored={false}
+                  coordinates={{ lat: 0, lng: 0 }}
+                />
               ))}
             </div>
           )}
