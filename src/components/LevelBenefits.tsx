@@ -128,7 +128,7 @@ const LevelBenefits = () => {
   };
 
   return (
-    <section ref={ref} className="py-24 bg-[hsl(0,0%,6%)] relative overflow-hidden">
+    <section ref={ref} className="py-24 bg-[hsl(0,0%,6%)] relative overflow-hidden z-10">
       {/* Background decoration */}
       <div className="absolute top-1/2 left-0 w-96 h-96 bg-primary/10 rounded-full blur-[120px] -translate-y-1/2" />
       <div className="absolute top-1/2 right-0 w-96 h-96 bg-primary/10 rounded-full blur-[120px] -translate-y-1/2" />

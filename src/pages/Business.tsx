@@ -70,7 +70,7 @@ const Business = () => {
       <Header />
       
       {/* Hero Section */}
-      <section ref={heroRef} className="relative min-h-screen flex items-center overflow-hidden">
+      <section ref={heroRef} className="relative min-h-screen flex items-center overflow-hidden z-0">
         <motion.div 
           className="absolute inset-0 z-0"
           style={{ y: backgroundY }}
@@ -160,7 +160,7 @@ const Business = () => {
       </section>
 
       {/* Benefits Section */}
-      <section ref={benefitsRef} id="benefits" className="py-24 bg-background mesh-gradient relative overflow-hidden">
+      <section ref={benefitsRef} id="benefits" className="py-24 bg-background mesh-gradient relative overflow-hidden z-10">
         <div className="absolute top-0 right-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
         
         <div className="container mx-auto px-4 relative z-10">
@@ -204,7 +204,7 @@ const Business = () => {
       </section>
 
       {/* How It Works Section */}
-      <section ref={howItWorksRef} className="py-24 bg-muted/30 relative overflow-hidden">
+      <section ref={howItWorksRef} className="py-24 bg-muted/30 relative overflow-hidden z-10">
         <div className="absolute bottom-0 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
         
         <div className="container mx-auto px-4 relative z-10">
@@ -252,7 +252,7 @@ const Business = () => {
       </section>
 
       {/* CTA Section with Background Image */}
-      <section ref={ctaRef} className="relative py-32 overflow-hidden">
+      <section ref={ctaRef} className="relative py-32 overflow-hidden z-10">
         <div className="absolute inset-0 z-0">
           <img 
             src={heroRestaurant} 
