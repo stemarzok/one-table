@@ -2,12 +2,14 @@ import RestaurantCard from "./RestaurantCard";
 import { FilterState } from "./RestaurantFilters";
 import UnifiedSearchBar from "./UnifiedSearchBar";
 import SponsoredCarousel from "./SponsoredCarousel";
+import CuisineCarousel from "./CuisineCarousel";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useState, useMemo, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, MapPin } from "lucide-react";
 import Map from "@/components/Map";
+import { useSearchParams } from "react-router-dom";
 
 interface Restaurant {
   id: string;
@@ -19,7 +21,9 @@ interface Restaurant {
   cover_image_url: string | null;
   logo_url: string | null;
   is_active: boolean;
-  avg_rating?: number; total_reviews?: number;
+  is_sponsored: boolean | null;
+  avg_rating?: number;
+  total_reviews?: number;
   cuisine_types?: string[];
   specializations?: string[];
   occasions?: string[];
@@ -27,6 +31,9 @@ interface Restaurant {
 }
 
 const RestaurantList = () => {
+  const [searchParams] = useSearchParams();
+  const cuisineFromUrl = searchParams.get('cuisine');
+  
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
@@ -39,13 +46,23 @@ const RestaurantList = () => {
     radius: 5,
     priceRange: "all",
     sortBy: "rating-desc",
-    cuisineTypes: [],
+    cuisineTypes: cuisineFromUrl ? [cuisineFromUrl] : [],
     specializations: [],
     occasions: [],
     extraFeatures: []
   });
 
   const mapboxToken = import.meta.env.VITE_MAPBOX_TOKEN || "";
+
+  // Update filters when URL param changes
+  useEffect(() => {
+    if (cuisineFromUrl) {
+      setFilters(prev => ({
+        ...prev,
+        cuisineTypes: [cuisineFromUrl]
+      }));
+    }
+  }, [cuisineFromUrl]);
 
   useEffect(() => {
     fetchRestaurants();
@@ -55,7 +72,7 @@ const RestaurantList = () => {
     try {
       const { data, error } = await supabase
         .from('restaurants')
-        .select('id, name, cuisine_type, address, city, price_range, cover_image_url, logo_url, is_active, cuisine_types, specializations, occasions, extra_features')
+        .select('id, name, cuisine_type, address, city, price_range, cover_image_url, logo_url, is_active, is_sponsored, cuisine_types, specializations, occasions, extra_features')
         .eq('is_active', true);
 
       if (error) throw error;
@@ -67,7 +84,8 @@ const RestaurantList = () => {
           
           return {
             ...restaurant,
-            avg_rating: ratingData?.[0]?.avg_rating || 0, total_reviews: Number(ratingData?.[0]?.total_reviews ?? 0),
+            avg_rating: ratingData?.[0]?.avg_rating || 0,
+            total_reviews: Number(ratingData?.[0]?.total_reviews ?? 0),
             cuisine_types: restaurant.cuisine_types || [],
             specializations: restaurant.specializations || [],
             occasions: restaurant.occasions || [],
@@ -130,12 +148,21 @@ const RestaurantList = () => {
       filtered = filtered.filter(r => r.extra_features?.some(feat => filters.extraFeatures.includes(feat)));
     }
 
-    // Sort
+    // Sort - Prima sponsorizzati, poi per criterio selezionato
     const priceOrder = { "€": 1, "€€": 2, "€€€": 3, "€€€€": 4 };
+    
+    // Prima ordina per criterio
     if (filters.sortBy === "rating-desc") filtered.sort((a, b) => (b.avg_rating || 0) - (a.avg_rating || 0));
     else if (filters.sortBy === "rating-asc") filtered.sort((a, b) => (a.avg_rating || 0) - (b.avg_rating || 0));
     else if (filters.sortBy === "price-asc") filtered.sort((a, b) => (priceOrder[a.price_range as keyof typeof priceOrder] || 2) - (priceOrder[b.price_range as keyof typeof priceOrder] || 2));
     else if (filters.sortBy === "price-desc") filtered.sort((a, b) => (priceOrder[b.price_range as keyof typeof priceOrder] || 2) - (priceOrder[a.price_range as keyof typeof priceOrder] || 2));
+
+    // Poi metti sponsorizzati prima
+    filtered.sort((a, b) => {
+      const aSponsored = a.is_sponsored ? 1 : 0;
+      const bSponsored = b.is_sponsored ? 1 : 0;
+      return bSponsored - aSponsored;
+    });
 
     return filtered;
   }, [searchQuery, filters, restaurants]);
@@ -175,8 +202,21 @@ const RestaurantList = () => {
           />
         </div>
 
+        {/* Categorie di cucina */}
+        <CuisineCarousel />
+
+        {/* Consigliati per te */}
         <SponsoredCarousel />
         
+        {/* Lista ristoranti */}
+        <div className="mb-6">
+          <h3 className="text-xl font-bold text-foreground">Tutti i ristoranti</h3>
+          <p className="text-sm text-muted-foreground">
+            {filteredRestaurants.length} ristoranti trovati
+            {cuisineFromUrl && ` per "${cuisineFromUrl}"`}
+          </p>
+        </div>
+
         {paginatedRestaurants.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-xl text-muted-foreground">Nessun ristorante trovato</p>
@@ -198,7 +238,7 @@ const RestaurantList = () => {
                   image={restaurant.cover_image_url || 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&q=80'}
                   logoUrl={restaurant.logo_url}
                   available={true}
-                  sponsored={false}
+                  sponsored={restaurant.is_sponsored || false}
                   coordinates={{ lat: 0, lng: 0 }}
                   cuisineTypes={restaurant.cuisine_types}
                   specializations={restaurant.specializations}
