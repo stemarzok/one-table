@@ -10,7 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Settings, LogOut, Shield, CreditCard, LayoutDashboard, Store, Image as ImageIcon } from "lucide-react";
+import { Settings, LogOut, Shield, CreditCard, LayoutDashboard, Store, Image as ImageIcon, BarChart3, Megaphone } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -101,6 +101,15 @@ export const BusinessUserMenu = () => {
             Dashboard
           </DropdownMenuItem>
           
+          <DropdownMenuItem onClick={() => navigate("/analytics")}>
+            <BarChart3 className="w-4 h-4 mr-2" />
+            Analytics
+          </DropdownMenuItem>
+          
+          <DropdownMenuItem onClick={() => navigate("/promo")}>
+            <Megaphone className="w-4 h-4 mr-2" />
+            Promozione
+          </DropdownMenuItem>
           
           <DropdownMenuItem onClick={() => navigate("/billing")}>
             <CreditCard className="w-4 h-4 mr-2" />
