@@ -10,7 +10,7 @@ import { useAdminRole } from "@/hooks/useAdminRole";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
-import { LayoutDashboard, Store, Table2, UtensilsCrossed, Calendar, AlertCircle, CheckCircle, Clock, XCircle, Lock, ArrowRight, TrendingUp, Users, HelpCircle } from "lucide-react";
+import { LayoutDashboard, Store, Table2, UtensilsCrossed, Calendar, AlertCircle, CheckCircle, Clock, XCircle, Lock, ArrowRight, TrendingUp, Users, HelpCircle, CreditCard, Crown, Star, Sparkles, ExternalLink } from "lucide-react";
 import { TablesManagement } from "@/components/dashboard/TablesManagement";
 import { MenuManagement } from "@/components/dashboard/MenuManagement";
 import { BookingsManagement } from "@/components/dashboard/BookingsManagement";
@@ -294,122 +294,263 @@ const Dashboard = () => {
             </TabsList>
             
             <TabsContent value="overview">
-              <div className="space-y-6">
-                {/* Stats Grid */}
+              <div className="space-y-8">
+                {/* Hero Section con Abbonamento */}
+                <div className="grid gap-6 lg:grid-cols-3">
+                  {/* Welcome Card con Stats Hero */}
+                  <div className="lg:col-span-2">
+                    <Card className="relative overflow-hidden bg-gradient-to-br from-primary/10 via-primary/5 to-background border-primary/20">
+                      <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+                      <div className="relative p-8">
+                        <div className="flex items-start justify-between mb-6">
+                          <div>
+                            <h2 className="text-2xl font-bold mb-1">Bentornato! 👋</h2>
+                            <p className="text-muted-foreground">
+                              Ecco un riepilogo delle attività del tuo ristorante
+                            </p>
+                          </div>
+                          {restaurant?.logo_url && (
+                            <img 
+                              src={restaurant.logo_url} 
+                              alt="Logo" 
+                              className="w-16 h-16 rounded-xl object-cover border-2 border-primary/20"
+                            />
+                          )}
+                        </div>
+                        
+                        {/* Mini Stats Row */}
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                          <div className="bg-background/60 backdrop-blur rounded-xl p-4 border border-border/50">
+                            <div className="flex items-center gap-2 mb-2">
+                              <div className="p-2 rounded-lg bg-yellow-500/10">
+                                <Clock className="w-4 h-4 text-yellow-500" />
+                              </div>
+                            </div>
+                            <p className="text-2xl font-bold">{stats.pendingBookings}</p>
+                            <p className="text-xs text-muted-foreground">In attesa</p>
+                          </div>
+                          <div className="bg-background/60 backdrop-blur rounded-xl p-4 border border-border/50">
+                            <div className="flex items-center gap-2 mb-2">
+                              <div className="p-2 rounded-lg bg-green-500/10">
+                                <CheckCircle className="w-4 h-4 text-green-500" />
+                              </div>
+                            </div>
+                            <p className="text-2xl font-bold">{stats.confirmedBookings}</p>
+                            <p className="text-xs text-muted-foreground">Confermate</p>
+                          </div>
+                          <div className="bg-background/60 backdrop-blur rounded-xl p-4 border border-border/50">
+                            <div className="flex items-center gap-2 mb-2">
+                              <div className="p-2 rounded-lg bg-primary/10">
+                                <Star className="w-4 h-4 text-primary" />
+                              </div>
+                            </div>
+                            <p className="text-2xl font-bold">{stats.avgRating > 0 ? stats.avgRating : '-'}</p>
+                            <p className="text-xs text-muted-foreground">Valutazione</p>
+                          </div>
+                          <div className="bg-background/60 backdrop-blur rounded-xl p-4 border border-border/50">
+                            <div className="flex items-center gap-2 mb-2">
+                              <div className="p-2 rounded-lg bg-primary/10">
+                                <TrendingUp className="w-4 h-4 text-primary" />
+                              </div>
+                            </div>
+                            <p className="text-2xl font-bold">{stats.totalReviews}</p>
+                            <p className="text-xs text-muted-foreground">Recensioni</p>
+                          </div>
+                        </div>
+                      </div>
+                    </Card>
+                  </div>
+
+                  {/* Subscription Status Card */}
+                  <Card className={`relative overflow-hidden ${
+                    subscription.subscribed 
+                      ? 'bg-gradient-to-br from-emerald-500/10 via-emerald-500/5 to-background border-emerald-500/30' 
+                      : subscription.inTrial 
+                        ? 'bg-gradient-to-br from-amber-500/10 via-amber-500/5 to-background border-amber-500/30'
+                        : 'bg-gradient-to-br from-red-500/10 via-red-500/5 to-background border-red-500/30'
+                  }`}>
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-primary/20 to-transparent rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
+                    <div className="relative p-6 h-full flex flex-col">
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className={`p-3 rounded-xl ${
+                          subscription.subscribed 
+                            ? 'bg-emerald-500/20' 
+                            : subscription.inTrial 
+                              ? 'bg-amber-500/20'
+                              : 'bg-red-500/20'
+                        }`}>
+                          <Crown className={`w-6 h-6 ${
+                            subscription.subscribed 
+                              ? 'text-emerald-500' 
+                              : subscription.inTrial 
+                                ? 'text-amber-500'
+                                : 'text-red-500'
+                          }`} />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold">Abbonamento</h3>
+                          <p className="text-sm text-muted-foreground">
+                            {subscription.planType === 'promo_speciale' ? 'Promo Speciale' : 
+                             subscription.planType === 'pro' ? 'Piano Pro' : 
+                             subscription.planType === 'base' ? 'Piano Base' : 'Nessun piano'}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex-1">
+                        {subscription.subscribed ? (
+                          <div className="space-y-3">
+                            <div className="flex items-center gap-2">
+                              <Badge className="bg-emerald-500/20 text-emerald-600 border-emerald-500/30">
+                                <Sparkles className="w-3 h-3 mr-1" />
+                                Attivo
+                              </Badge>
+                            </div>
+                            {subscription.currentPeriodEnd && (
+                              <p className="text-sm text-muted-foreground">
+                                {subscription.cancelAtPeriodEnd ? 'Scade il' : 'Rinnovo il'}{' '}
+                                <span className="font-medium text-foreground">
+                                  {new Date(subscription.currentPeriodEnd).toLocaleDateString('it-IT', {
+                                    day: 'numeric',
+                                    month: 'long',
+                                    year: 'numeric'
+                                  })}
+                                </span>
+                              </p>
+                            )}
+                            {subscription.cancelAtPeriodEnd && (
+                              <p className="text-xs text-amber-600">
+                                ⚠️ L'abbonamento non verrà rinnovato
+                              </p>
+                            )}
+                          </div>
+                        ) : subscription.inTrial ? (
+                          <div className="space-y-3">
+                            <div className="flex items-center gap-2">
+                              <Badge className="bg-amber-500/20 text-amber-600 border-amber-500/30">
+                                <Clock className="w-3 h-3 mr-1" />
+                                Trial
+                              </Badge>
+                            </div>
+                            <p className="text-sm">
+                              <span className="text-2xl font-bold text-amber-500">{subscription.trialDaysRemaining}</span>
+                              <span className="text-muted-foreground"> giorni rimasti</span>
+                            </p>
+                          </div>
+                        ) : (
+                          <div className="space-y-3">
+                            <Badge variant="destructive" className="bg-red-500/20 text-red-500 border-red-500/30">
+                              Non attivo
+                            </Badge>
+                            <p className="text-sm text-muted-foreground">
+                              Attiva un abbonamento per sbloccare tutte le funzionalità
+                            </p>
+                          </div>
+                        )}
+                      </div>
+
+                      <Button 
+                        className="w-full mt-4 gap-2" 
+                        variant={subscription.subscribed ? "outline" : "default"}
+                        onClick={() => navigate('/billing')}
+                      >
+                        <CreditCard className="w-4 h-4" />
+                        {subscription.subscribed ? 'Gestisci' : 'Attiva Abbonamento'}
+                        <ExternalLink className="w-3 h-3" />
+                      </Button>
+                    </div>
+                  </Card>
+                </div>
+
+                {/* Stats Cards Grid */}
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                   <Card 
-                    className={`p-6 cursor-pointer transition-all hover:shadow-md ${!hasProAccess ? 'opacity-75' : ''}`}
+                    className={`group p-6 cursor-pointer transition-all hover:shadow-lg hover:border-primary/50 hover:-translate-y-1 ${!hasProAccess ? 'opacity-75' : ''}`}
                     onClick={() => handleStatClick('bookings')}
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-4">
-                        <Calendar className="w-10 h-10 text-primary" />
+                        <div className="p-3 rounded-xl bg-primary/10 group-hover:bg-primary/20 transition-colors">
+                          <Calendar className="w-6 h-6 text-primary" />
+                        </div>
                         <div>
                           <p className="text-sm text-muted-foreground">Totale Prenotazioni</p>
                           <p className="text-3xl font-bold">{stats.totalBookings}</p>
                         </div>
                       </div>
-                      {!hasProAccess ? <Lock className="w-4 h-4 text-muted-foreground" /> : <ArrowRight className="w-4 h-4 text-muted-foreground" />}
+                      {!hasProAccess ? <Lock className="w-4 h-4 text-muted-foreground" /> : <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:translate-x-1 transition-transform" />}
                     </div>
                   </Card>
                   
                   <Card 
-                    className={`p-6 cursor-pointer transition-all hover:shadow-md ${!hasProAccess ? 'opacity-75' : ''}`}
-                    onClick={() => handleStatClick('bookings')}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-4">
-                        <Clock className="w-10 h-10 text-yellow-500" />
-                        <div>
-                          <p className="text-sm text-muted-foreground">In Attesa</p>
-                          <p className="text-3xl font-bold">{stats.pendingBookings}</p>
-                        </div>
-                      </div>
-                      {!hasProAccess ? <Lock className="w-4 h-4 text-muted-foreground" /> : <ArrowRight className="w-4 h-4 text-muted-foreground" />}
-                    </div>
-                  </Card>
-                  
-                  <Card 
-                    className={`p-6 cursor-pointer transition-all hover:shadow-md ${!hasProAccess ? 'opacity-75' : ''}`}
+                    className={`group p-6 cursor-pointer transition-all hover:shadow-lg hover:border-primary/50 hover:-translate-y-1 ${!hasProAccess ? 'opacity-75' : ''}`}
                     onClick={() => handleStatClick('tables')}
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-4">
-                        <Table2 className="w-10 h-10 text-primary" />
+                        <div className="p-3 rounded-xl bg-primary/10 group-hover:bg-primary/20 transition-colors">
+                          <Table2 className="w-6 h-6 text-primary" />
+                        </div>
                         <div>
                           <p className="text-sm text-muted-foreground">Tavoli</p>
                           <p className="text-3xl font-bold">{stats.tables}</p>
                         </div>
                       </div>
-                      {!hasProAccess ? <Lock className="w-4 h-4 text-muted-foreground" /> : <ArrowRight className="w-4 h-4 text-muted-foreground" />}
+                      {!hasProAccess ? <Lock className="w-4 h-4 text-muted-foreground" /> : <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:translate-x-1 transition-transform" />}
                     </div>
                   </Card>
                   
                   <Card 
-                    className={`p-6 cursor-pointer transition-all hover:shadow-md ${!hasProAccess ? 'opacity-75' : ''}`}
+                    className={`group p-6 cursor-pointer transition-all hover:shadow-lg hover:border-primary/50 hover:-translate-y-1 ${!hasProAccess ? 'opacity-75' : ''}`}
                     onClick={() => handleStatClick('menu')}
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-4">
-                        <UtensilsCrossed className="w-10 h-10 text-primary" />
+                        <div className="p-3 rounded-xl bg-primary/10 group-hover:bg-primary/20 transition-colors">
+                          <UtensilsCrossed className="w-6 h-6 text-primary" />
+                        </div>
                         <div>
                           <p className="text-sm text-muted-foreground">Piatti</p>
                           <p className="text-3xl font-bold">{stats.menuItems}</p>
                         </div>
                       </div>
-                      {!hasProAccess ? <Lock className="w-4 h-4 text-muted-foreground" /> : <ArrowRight className="w-4 h-4 text-muted-foreground" />}
+                      {!hasProAccess ? <Lock className="w-4 h-4 text-muted-foreground" /> : <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:translate-x-1 transition-transform" />}
                     </div>
                   </Card>
-                </div>
 
-                {/* Secondary Stats */}
-                <div className="grid gap-4 md:grid-cols-3">
-                  <Card className="p-6">
-                    <div className="flex items-center gap-4">
-                      <CheckCircle className="w-10 h-10 text-green-500" />
-                      <div>
-                        <p className="text-sm text-muted-foreground">Confermate</p>
-                        <p className="text-3xl font-bold">{stats.confirmedBookings}</p>
-                      </div>
-                    </div>
-                  </Card>
-                  <Card className="p-6">
-                    <div className="flex items-center gap-4">
-                      <XCircle className="w-10 h-10 text-red-500" />
-                      <div>
-                        <p className="text-sm text-muted-foreground">Cancellate</p>
-                        <p className="text-3xl font-bold">{stats.cancelledBookings}</p>
-                      </div>
-                    </div>
-                  </Card>
                   <Card 
-                    className={`p-6 cursor-pointer transition-all hover:shadow-md ${!hasProAccess ? 'opacity-75' : ''}`}
-                    onClick={() => handleStatClick('reviews')}
+                    className="group p-6 cursor-pointer transition-all hover:shadow-lg hover:border-primary/50 hover:-translate-y-1"
+                    onClick={() => navigate('/reviews')}
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-4">
-                        <TrendingUp className="w-10 h-10 text-primary" />
+                        <div className="p-3 rounded-xl bg-primary/10 group-hover:bg-primary/20 transition-colors">
+                          <Star className="w-6 h-6 text-primary" />
+                        </div>
                         <div>
                           <p className="text-sm text-muted-foreground">Recensioni</p>
                           <div className="flex items-center gap-2">
                             <p className="text-3xl font-bold">{stats.totalReviews}</p>
                             {stats.avgRating > 0 && (
-                              <Badge variant="secondary">⭐ {stats.avgRating}</Badge>
+                              <Badge variant="secondary" className="text-xs">⭐ {stats.avgRating}</Badge>
                             )}
                           </div>
                         </div>
                       </div>
-                      {!hasProAccess ? <Lock className="w-4 h-4 text-muted-foreground" /> : <ArrowRight className="w-4 h-4 text-muted-foreground" />}
+                      <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:translate-x-1 transition-transform" />
                     </div>
                   </Card>
                 </div>
 
-                {/* Quick Actions & Previews */}
+                {/* Quick Actions & Preview */}
                 <div className="grid gap-6 lg:grid-cols-2">
-                  {/* Recent Menu Items */}
+                  {/* Recent Menu Items con preview visiva */}
                   <Card className="p-6">
                     <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-lg font-semibold">Anteprima Menu</h3>
+                      <h3 className="text-lg font-semibold flex items-center gap-2">
+                        <UtensilsCrossed className="w-5 h-5 text-primary" />
+                        Anteprima Menu
+                      </h3>
                       <Button 
                         variant="ghost" 
                         size="sm" 
@@ -421,61 +562,85 @@ const Dashboard = () => {
                       </Button>
                     </div>
                     {recentMenuItems.length === 0 ? (
-                      <p className="text-muted-foreground text-center py-8">Nessun piatto nel menu</p>
+                      <div className="text-center py-12 text-muted-foreground">
+                        <UtensilsCrossed className="w-12 h-12 mx-auto mb-3 opacity-30" />
+                        <p>Nessun piatto nel menu</p>
+                        <Button variant="outline" size="sm" className="mt-3" onClick={() => handleStatClick('menu')}>
+                          Aggiungi piatto
+                        </Button>
+                      </div>
                     ) : (
                       <div className="space-y-3">
                         {recentMenuItems.map((item) => (
-                          <div key={item.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                            <div>
-                              <p className="font-medium">{item.name}</p>
-                              <p className="text-sm text-muted-foreground">{item.category}</p>
+                          <div key={item.id} className="flex items-center justify-between p-3 bg-muted/30 rounded-xl hover:bg-muted/50 transition-colors">
+                            <div className="flex items-center gap-3">
+                              {item.image_url ? (
+                                <img src={item.image_url} alt={item.name} className="w-12 h-12 rounded-lg object-cover" />
+                              ) : (
+                                <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                                  <UtensilsCrossed className="w-5 h-5 text-primary/50" />
+                                </div>
+                              )}
+                              <div>
+                                <p className="font-medium">{item.name}</p>
+                                <p className="text-sm text-muted-foreground">{item.category}</p>
+                              </div>
                             </div>
-                            <Badge variant="secondary">€{item.price}</Badge>
+                            <Badge variant="secondary" className="font-semibold">€{item.price}</Badge>
                           </div>
                         ))}
                       </div>
                     )}
                   </Card>
 
-                  {/* Quick Links */}
+                  {/* Quick Links con icone e descrizioni */}
                   <Card className="p-6">
-                    <h3 className="text-lg font-semibold mb-4">Azioni Rapide</h3>
+                    <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                      <Sparkles className="w-5 h-5 text-primary" />
+                      Azioni Rapide
+                    </h3>
                     <div className="grid gap-3">
                       <Button 
                         variant="outline" 
-                        className="justify-start h-auto py-3"
+                        className="justify-start h-auto py-4 hover:bg-primary/5 hover:border-primary/30"
                         onClick={() => handleStatClick('bookings')}
                       >
-                        <Calendar className="w-5 h-5 mr-3" />
-                        <div className="text-left">
+                        <div className="p-2 rounded-lg bg-yellow-500/10 mr-3">
+                          <Clock className="w-5 h-5 text-yellow-500" />
+                        </div>
+                        <div className="text-left flex-1">
                           <p className="font-medium">Gestisci Prenotazioni</p>
                           <p className="text-xs text-muted-foreground">{stats.pendingBookings} in attesa di conferma</p>
                         </div>
-                        {!hasProAccess && <Lock className="w-4 h-4 ml-auto" />}
+                        {!hasProAccess ? <Lock className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
                       </Button>
                       <Button 
                         variant="outline" 
-                        className="justify-start h-auto py-3"
+                        className="justify-start h-auto py-4 hover:bg-primary/5 hover:border-primary/30"
                         onClick={() => handleStatClick('tables')}
                       >
-                        <Table2 className="w-5 h-5 mr-3" />
-                        <div className="text-left">
+                        <div className="p-2 rounded-lg bg-primary/10 mr-3">
+                          <Table2 className="w-5 h-5 text-primary" />
+                        </div>
+                        <div className="text-left flex-1">
                           <p className="font-medium">Gestisci Tavoli</p>
                           <p className="text-xs text-muted-foreground">{stats.tables} tavoli configurati</p>
                         </div>
-                        {!hasProAccess && <Lock className="w-4 h-4 ml-auto" />}
+                        {!hasProAccess ? <Lock className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
                       </Button>
                       <Button 
                         variant="outline" 
-                        className="justify-start h-auto py-3"
-                        onClick={() => handleStatClick('menu')}
+                        className="justify-start h-auto py-4 hover:bg-primary/5 hover:border-primary/30"
+                        onClick={() => navigate('/analytics')}
                       >
-                        <UtensilsCrossed className="w-5 h-5 mr-3" />
-                        <div className="text-left">
-                          <p className="font-medium">Modifica Menu</p>
-                          <p className="text-xs text-muted-foreground">{stats.menuItems} piatti</p>
+                        <div className="p-2 rounded-lg bg-emerald-500/10 mr-3">
+                          <TrendingUp className="w-5 h-5 text-emerald-500" />
                         </div>
-                        {!hasProAccess && <Lock className="w-4 h-4 ml-auto" />}
+                        <div className="text-left flex-1">
+                          <p className="font-medium">Visualizza Analytics</p>
+                          <p className="text-xs text-muted-foreground">Statistiche avanzate</p>
+                        </div>
+                        <ArrowRight className="w-4 h-4" />
                       </Button>
                     </div>
                   </Card>
