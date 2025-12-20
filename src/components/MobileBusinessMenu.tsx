@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Settings, LogOut, Globe, Moon, Sun, Shield, CreditCard, LayoutDashboard, Store, Image as ImageIcon, BarChart3, Megaphone } from "lucide-react";
+import { Settings, LogOut, Globe, Moon, Sun, Shield, CreditCard, LayoutDashboard, Store, Image as ImageIcon, BarChart3, Megaphone, MessageSquare } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useNavigate } from "react-router-dom";
@@ -70,6 +70,7 @@ export const MobileBusinessMenu = () => {
   const menuItems = [
     { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },
     { icon: BarChart3, label: "Analytics", path: "/analytics" },
+    { icon: MessageSquare, label: "Recensioni", path: "/reviews" },
     { icon: Megaphone, label: "Promozione", path: "/promo" },
     { icon: CreditCard, label: "Gestione Abbonamento", path: "/billing" },
     { icon: Settings, label: "Impostazioni", path: "/settings" },

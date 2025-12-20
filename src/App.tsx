@@ -20,6 +20,7 @@ import RestaurantRegistration from "./pages/RestaurantRegistration";
 import BusinessRegistration from "./pages/BusinessRegistration";
 import Dashboard from "./pages/Dashboard";
 import Analytics from "./pages/Analytics";
+import Reviews from "./pages/Reviews";
 import Promo from "./pages/Promo";
 import Onboarding from "./pages/Onboarding";
 import AdminPanel from "./pages/AdminPanel";
@@ -65,6 +66,7 @@ const App = () => (
                 <Route path="/business-registration" element={<BusinessRegistration />} />
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/analytics" element={<Analytics />} />
+                <Route path="/reviews" element={<Reviews />} />
                 <Route path="/promo" element={<Promo />} />
                 <Route path="/onboarding" element={<Onboarding />} />
                 <Route path="/admin" element={<AdminPanel />} />

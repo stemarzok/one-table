@@ -10,11 +10,10 @@ import { useAdminRole } from "@/hooks/useAdminRole";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
-import { LayoutDashboard, Store, Table2, UtensilsCrossed, Calendar, AlertCircle, CheckCircle, Clock, XCircle, MessageSquare, Lock, ArrowRight, TrendingUp, Users, HelpCircle } from "lucide-react";
+import { LayoutDashboard, Store, Table2, UtensilsCrossed, Calendar, AlertCircle, CheckCircle, Clock, XCircle, Lock, ArrowRight, TrendingUp, Users, HelpCircle } from "lucide-react";
 import { TablesManagement } from "@/components/dashboard/TablesManagement";
 import { MenuManagement } from "@/components/dashboard/MenuManagement";
 import { BookingsManagement } from "@/components/dashboard/BookingsManagement";
-import { ReviewsManagement } from "@/components/dashboard/ReviewsManagement";
 import { PaywallModal } from "@/components/PaywallModal";
 import { DashboardTutorial } from "@/components/dashboard/DashboardTutorial";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -52,7 +51,7 @@ const Dashboard = () => {
   const loading = businessLoading || adminLoading;
   
   // Tabs that require Pro subscription
-  const proTabs = ['reviews', 'bookings', 'tables', 'menu'];
+  const proTabs = ['bookings', 'tables', 'menu'];
   const hasProAccess = isAdmin || subscription.hasAccess;
 
   // Handle URL tab parameter
@@ -272,15 +271,10 @@ const Dashboard = () => {
             </div>
           )}
           <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-8">
-            <TabsList className="grid w-full grid-cols-3 lg:grid-cols-5 gap-1">
+            <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4 gap-1">
               <TabsTrigger value="overview">
                 <LayoutDashboard className="w-4 h-4 mr-2" />
                 <span className="hidden sm:inline">{t('dashboard.overview')}</span>
-              </TabsTrigger>
-              <TabsTrigger value="reviews" className="relative">
-                <MessageSquare className="w-4 h-4 mr-2" />
-                <span className="hidden sm:inline">Recensioni</span>
-                {!hasProAccess && <Lock className="w-3 h-3 absolute -top-1 -right-1 text-muted-foreground" />}
               </TabsTrigger>
               <TabsTrigger value="bookings" className="relative">
                 <Calendar className="w-4 h-4 mr-2" />
@@ -489,9 +483,6 @@ const Dashboard = () => {
               </div>
             </TabsContent>
             
-            <TabsContent value="reviews">
-              {hasProAccess && selectedRestaurantId && <ReviewsManagement restaurantId={selectedRestaurantId} />}
-            </TabsContent>
             <TabsContent value="bookings">
               {hasProAccess && selectedRestaurantId && <BookingsManagement restaurantId={selectedRestaurantId} />}
             </TabsContent>
