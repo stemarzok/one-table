@@ -77,8 +77,46 @@ const HowItWorksEnhanced = () => {
           <p className="text-sm text-muted-foreground">Quattro semplici passaggi per iniziare a guadagnare vantaggi esclusivi</p>
         </div>
 
-        <div className="relative group">
-          {/* Navigation Arrows */}
+        {/* Desktop: grid 4 columns centered, Mobile: scroll */}
+        <div className="hidden lg:grid lg:grid-cols-4 lg:gap-6 lg:max-w-5xl lg:mx-auto">
+          {steps.map((step, index) => (
+            <motion.div
+              key={step.number}
+              initial={{ opacity: 0, y: 40, scale: 0.95 }}
+              whileInView={{ opacity: 1, y: 0, scale: 1 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ 
+                duration: 0.5, 
+                delay: index * 0.1,
+                ease: [0.25, 0.46, 0.45, 0.94]
+              }}
+              className="group/card"
+            >
+              <div className="relative rounded-xl overflow-hidden shadow-sm hover:shadow-elegant transition-all duration-300 hover:-translate-y-1 h-64">
+                <img
+                  src={step.image}
+                  alt={step.title}
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover/card:scale-105"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+                <div className="absolute top-3 left-3 w-8 h-8 rounded-full bg-primary flex items-center justify-center">
+                  <span className="text-primary-foreground font-bold text-sm">{step.number}</span>
+                </div>
+                <div className="absolute bottom-0 left-0 right-0 p-4">
+                  <h4 className="font-bold text-white text-sm leading-tight mb-1">
+                    {step.title}
+                  </h4>
+                  <p className="text-white/80 text-xs leading-relaxed line-clamp-2">
+                    {step.description}
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+
+        {/* Mobile: horizontal scroll */}
+        <div className="relative group lg:hidden">
           <Button
             variant="secondary"
             size="icon"
@@ -117,24 +155,16 @@ const HowItWorksEnhanced = () => {
                 }}
                 className="flex-shrink-0 w-[200px] group/card"
               >
-                {/* Card verticale stile pulito come CuisineCarousel */}
                 <div className="relative rounded-xl overflow-hidden shadow-sm hover:shadow-elegant transition-all duration-300 hover:-translate-y-1 h-64">
-                  {/* Immagine */}
                   <img
                     src={step.image}
                     alt={step.title}
                     className="w-full h-full object-cover transition-transform duration-500 group-hover/card:scale-105"
                   />
-                  
-                  {/* Gradiente nero dal basso */}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
-                  
-                  {/* Badge numero */}
                   <div className="absolute top-3 left-3 w-8 h-8 rounded-full bg-primary flex items-center justify-center">
                     <span className="text-primary-foreground font-bold text-sm">{step.number}</span>
                   </div>
-                  
-                  {/* Content area */}
                   <div className="absolute bottom-0 left-0 right-0 p-4">
                     <h4 className="font-bold text-white text-sm leading-tight mb-1">
                       {step.title}
