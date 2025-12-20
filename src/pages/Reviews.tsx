@@ -24,7 +24,7 @@ const Reviews = () => {
   const [selectedRestaurantId, setSelectedRestaurantId] = useState<string>("");
   const [showPaywall, setShowPaywall] = useState(false);
   
-  const loading = businessLoading || adminLoading;
+  const loading = businessLoading || adminLoading || subscription.loading;
   const hasProAccess = isAdmin || subscription.hasAccess;
 
   useEffect(() => {
