@@ -276,7 +276,13 @@ export const RestaurantAnalyticsAdvanced = ({ restaurantId }: AnalyticsProps) =>
     ], 'analytics_completi');
   };
 
-  const COLORS = ['hsl(var(--primary))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))', 'hsl(var(--chart-5))'];
+  // Colori coerenti con il design system - variazioni del primary (verde)
+  const COLORS = [
+    'hsl(85, 100%, 50%)',   // Primary verde
+    'hsl(85, 80%, 40%)',    // Verde più scuro
+    'hsl(85, 60%, 60%)',    // Verde più chiaro
+    'hsl(0, 0%, 45%)',      // Grigio neutro
+  ];
 
   if (loading) {
     return (
@@ -446,30 +452,27 @@ export const RestaurantAnalyticsAdvanced = ({ restaurantId }: AnalyticsProps) =>
                 <AreaChart data={bookingTrends}>
                   <defs>
                     <linearGradient id="colorBookings" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3}/>
-                      <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
-                    </linearGradient>
-                    <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="hsl(var(--chart-2))" stopOpacity={0.3}/>
-                      <stop offset="95%" stopColor="hsl(var(--chart-2))" stopOpacity={0}/>
+                      <stop offset="5%" stopColor="hsl(85, 100%, 50%)" stopOpacity={0.3}/>
+                      <stop offset="95%" stopColor="hsl(85, 100%, 50%)" stopOpacity={0}/>
                     </linearGradient>
                   </defs>
-                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                  <XAxis dataKey="date" className="text-xs" />
-                  <YAxis yAxisId="left" className="text-xs" />
-                  <YAxis yAxisId="right" orientation="right" className="text-xs" />
+                  <CartesianGrid strokeDasharray="3 3" className="stroke-border" opacity={0.5} />
+                  <XAxis dataKey="date" className="text-xs" tick={{ fill: 'hsl(var(--muted-foreground))' }} />
+                  <YAxis yAxisId="left" className="text-xs" tick={{ fill: 'hsl(var(--muted-foreground))' }} />
+                  <YAxis yAxisId="right" orientation="right" className="text-xs" tick={{ fill: 'hsl(var(--muted-foreground))' }} />
                   <Tooltip 
                     contentStyle={{ 
-                      backgroundColor: 'hsl(var(--background))', 
+                      backgroundColor: 'hsl(var(--card))', 
                       border: '1px solid hsl(var(--border))',
-                      borderRadius: '8px'
+                      borderRadius: '8px',
+                      color: 'hsl(var(--card-foreground))'
                     }} 
                   />
                   <Legend />
-                  <Area yAxisId="left" type="monotone" dataKey="bookings" stroke="hsl(var(--primary))" fillOpacity={1} fill="url(#colorBookings)" name="Prenotazioni" />
-                  <Line yAxisId="left" type="monotone" dataKey="confirmed" stroke="hsl(var(--chart-2))" strokeWidth={2} name="Confermate" />
-                  <Line yAxisId="left" type="monotone" dataKey="cancelled" stroke="hsl(var(--destructive))" strokeWidth={2} name="Cancellate" />
-                  <Line yAxisId="right" type="monotone" dataKey="revenue" stroke="hsl(var(--chart-5))" strokeWidth={2} strokeDasharray="5 5" name="Revenue (€)" />
+                  <Area yAxisId="left" type="monotone" dataKey="bookings" stroke="hsl(85, 100%, 50%)" fillOpacity={1} fill="url(#colorBookings)" name="Prenotazioni" strokeWidth={2} />
+                  <Line yAxisId="left" type="monotone" dataKey="confirmed" stroke="hsl(85, 80%, 40%)" strokeWidth={2} name="Confermate" />
+                  <Line yAxisId="left" type="monotone" dataKey="cancelled" stroke="hsl(var(--muted-foreground))" strokeWidth={2} name="Cancellate" strokeDasharray="4 4" />
+                  <Line yAxisId="right" type="monotone" dataKey="revenue" stroke="hsl(85, 60%, 60%)" strokeWidth={2} strokeDasharray="5 5" name="Revenue (€)" />
                 </AreaChart>
               </ResponsiveContainer>
             </CardContent>
@@ -501,19 +504,20 @@ export const RestaurantAnalyticsAdvanced = ({ restaurantId }: AnalyticsProps) =>
               <CardContent>
                 <ResponsiveContainer width="100%" height={300}>
                   <BarChart data={timeSlotData}>
-                    <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                    <XAxis dataKey="time" className="text-xs" />
-                    <YAxis className="text-xs" />
+                    <CartesianGrid strokeDasharray="3 3" className="stroke-border" opacity={0.5} />
+                    <XAxis dataKey="time" className="text-xs" tick={{ fill: 'hsl(var(--muted-foreground))' }} />
+                    <YAxis className="text-xs" tick={{ fill: 'hsl(var(--muted-foreground))' }} />
                     <Tooltip 
                       contentStyle={{ 
-                        backgroundColor: 'hsl(var(--background))', 
+                        backgroundColor: 'hsl(var(--card))', 
                         border: '1px solid hsl(var(--border))',
-                        borderRadius: '8px'
+                        borderRadius: '8px',
+                        color: 'hsl(var(--card-foreground))'
                       }} 
                     />
                     <Legend />
-                    <Bar dataKey="count" fill="hsl(var(--primary))" name="Prenotazioni" radius={[4, 4, 0, 0]} />
-                    <Bar dataKey="guests" fill="hsl(var(--chart-2))" name="Ospiti" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="count" fill="hsl(85, 100%, 50%)" name="Prenotazioni" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="guests" fill="hsl(85, 80%, 40%)" name="Ospiti" radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </CardContent>
@@ -544,19 +548,20 @@ export const RestaurantAnalyticsAdvanced = ({ restaurantId }: AnalyticsProps) =>
               <CardContent>
                 <ResponsiveContainer width="100%" height={300}>
                   <BarChart data={weekdayStats}>
-                    <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                    <XAxis dataKey="day" className="text-xs" />
-                    <YAxis className="text-xs" />
+                    <CartesianGrid strokeDasharray="3 3" className="stroke-border" opacity={0.5} />
+                    <XAxis dataKey="day" className="text-xs" tick={{ fill: 'hsl(var(--muted-foreground))' }} />
+                    <YAxis className="text-xs" tick={{ fill: 'hsl(var(--muted-foreground))' }} />
                     <Tooltip 
                       contentStyle={{ 
-                        backgroundColor: 'hsl(var(--background))', 
+                        backgroundColor: 'hsl(var(--card))', 
                         border: '1px solid hsl(var(--border))',
-                        borderRadius: '8px'
+                        borderRadius: '8px',
+                        color: 'hsl(var(--card-foreground))'
                       }} 
                     />
                     <Legend />
-                    <Bar dataKey="bookings" fill="hsl(var(--chart-3))" name="Prenotazioni" radius={[4, 4, 0, 0]} />
-                    <Bar dataKey="avgGuests" fill="hsl(var(--chart-4))" name="Media Ospiti" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="bookings" fill="hsl(85, 100%, 50%)" name="Prenotazioni" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="avgGuests" fill="hsl(85, 60%, 60%)" name="Media Ospiti" radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </CardContent>
@@ -584,21 +589,22 @@ export const RestaurantAnalyticsAdvanced = ({ restaurantId }: AnalyticsProps) =>
               <div className="grid lg:grid-cols-2 gap-6">
                 <ResponsiveContainer width="100%" height={300}>
                   <BarChart data={bookingTrends}>
-                    <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                    <XAxis dataKey="date" className="text-xs" />
-                    <YAxis className="text-xs" />
+                    <CartesianGrid strokeDasharray="3 3" className="stroke-border" opacity={0.5} />
+                    <XAxis dataKey="date" className="text-xs" tick={{ fill: 'hsl(var(--muted-foreground))' }} />
+                    <YAxis className="text-xs" tick={{ fill: 'hsl(var(--muted-foreground))' }} />
                     <Tooltip 
                       contentStyle={{ 
-                        backgroundColor: 'hsl(var(--background))', 
+                        backgroundColor: 'hsl(var(--card))', 
                         border: '1px solid hsl(var(--border))',
-                        borderRadius: '8px'
+                        borderRadius: '8px',
+                        color: 'hsl(var(--card-foreground))'
                       }} 
                     />
                     <Legend />
-                    <Bar dataKey="confirmed" stackId="a" fill="hsl(var(--chart-2))" name="Confermate" />
-                    <Bar dataKey="completed" stackId="a" fill="hsl(var(--primary))" name="Completate" />
-                    <Bar dataKey="pending" stackId="a" fill="hsl(var(--chart-4))" name="In Attesa" />
-                    <Bar dataKey="cancelled" stackId="a" fill="hsl(var(--destructive))" name="Cancellate" />
+                    <Bar dataKey="confirmed" stackId="a" fill="hsl(85, 100%, 50%)" name="Confermate" />
+                    <Bar dataKey="completed" stackId="a" fill="hsl(85, 80%, 40%)" name="Completate" />
+                    <Bar dataKey="pending" stackId="a" fill="hsl(85, 60%, 60%)" name="In Attesa" />
+                    <Bar dataKey="cancelled" stackId="a" fill="hsl(0, 0%, 60%)" name="Cancellate" />
                   </BarChart>
                 </ResponsiveContainer>
 
