@@ -1,6 +1,6 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { AlertTriangle, Clock, Image, UtensilsCrossed, Table2, Calendar, Crown, CheckCircle2 } from "lucide-react";
+import { Clock, Image, UtensilsCrossed, Table2, Crown, CheckCircle2 } from "lucide-react";
 
 interface ContextualAlertsProps {
   pendingBookings: number;
@@ -14,6 +14,7 @@ interface ContextualAlertsProps {
   subscribed: boolean;
   onNavigate: (tab: string) => void;
   onNavigateTo: (path: string) => void;
+  onOpenInfoModal?: () => void;
 }
 
 interface Alert {
@@ -40,6 +41,7 @@ export const ContextualAlerts = ({
   subscribed,
   onNavigate,
   onNavigateTo,
+  onOpenInfoModal,
 }: ContextualAlertsProps) => {
   const alerts: Alert[] = [];
 
@@ -104,7 +106,7 @@ export const ContextualAlerts = ({
   }
 
   // Alert logo mancante
-  if (!hasLogo) {
+  if (!hasLogo && onOpenInfoModal) {
     alerts.push({
       id: "no-logo",
       type: "info",
@@ -113,7 +115,7 @@ export const ContextualAlerts = ({
       description: "Carica un logo per rendere il tuo ristorante più riconoscibile",
       action: {
         label: "Carica logo",
-        onClick: () => onNavigateTo("/settings"),
+        onClick: onOpenInfoModal,
       },
     });
   }
