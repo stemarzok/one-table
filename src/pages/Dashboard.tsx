@@ -10,7 +10,7 @@ import { useAdminRole } from "@/hooks/useAdminRole";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
-import { LayoutDashboard, Store, Table2, UtensilsCrossed, Calendar, AlertCircle, CheckCircle, Clock, XCircle, Lock, ArrowRight, TrendingUp, Users, HelpCircle, CreditCard, Crown, Star, Sparkles, ExternalLink, Bell } from "lucide-react";
+import { LayoutDashboard, Store, Table2, UtensilsCrossed, Calendar, AlertCircle, Lock, ArrowRight, Users, HelpCircle, CreditCard, Crown, Star, Bell, Settings, Pencil } from "lucide-react";
 import { TablesManagement } from "@/components/dashboard/TablesManagement";
 import { MenuManagement } from "@/components/dashboard/MenuManagement";
 import { BookingsManagement } from "@/components/dashboard/BookingsManagement";
@@ -18,11 +18,11 @@ import { PaywallModal } from "@/components/PaywallModal";
 import { DashboardTutorial } from "@/components/dashboard/DashboardTutorial";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { BookingsSparkline } from "@/components/dashboard/BookingsSparkline";
 import { RecentActivity } from "@/components/dashboard/RecentActivity";
 import { ContextualAlerts } from "@/components/dashboard/ContextualAlerts";
 import { ProfileCompletionProgress } from "@/components/dashboard/ProfileCompletionProgress";
+import { RestaurantInfoModal } from "@/components/dashboard/RestaurantInfoModal";
 
 const Dashboard = () => {
   const { isLoggedIn, isBusinessMode, user } = useAuth();
@@ -37,6 +37,8 @@ const Dashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
   const [showTutorial, setShowTutorial] = useState(false);
   const [tutorialCompleted, setTutorialCompleted] = useState(true);
+  const [showInfoModal, setShowInfoModal] = useState(false);
+  const [infoModalTab, setInfoModalTab] = useState("info");
   const [stats, setStats] = useState({
     tables: 0, 
     menuItems: 0,
@@ -301,62 +303,98 @@ const Dashboard = () => {
               <div className="space-y-8">
                 {/* Header del Ristorante */}
                 {restaurant && (
-                  <section className="relative overflow-hidden rounded-2xl border bg-card">
-                    <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent" />
+                  <section className="relative overflow-hidden rounded-2xl border-0 bg-gradient-to-br from-card via-card to-primary/5 shadow-lg">
+                    {/* Cover image background */}
+                    {restaurant.cover_image_url && (
+                      <div className="absolute inset-0 opacity-10">
+                        <img 
+                          src={restaurant.cover_image_url} 
+                          alt="" 
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-card via-card/80 to-transparent" />
+                      </div>
+                    )}
+                    
                     <div className="relative p-6 md:p-8">
-                      <div className="flex flex-col md:flex-row gap-6 items-start md:items-center">
+                      <div className="flex flex-col md:flex-row gap-6 items-start">
                         {/* Logo */}
-                        <div className="flex-shrink-0">
+                        <div 
+                          className="flex-shrink-0 cursor-pointer group relative"
+                          onClick={() => {
+                            setInfoModalTab("info");
+                            setShowInfoModal(true);
+                          }}
+                        >
                           {restaurant.logo_url ? (
                             <img 
                               src={restaurant.logo_url} 
                               alt={restaurant.name}
-                              className="w-20 h-20 md:w-24 md:h-24 rounded-xl object-cover border-2 border-border shadow-sm"
+                              className="w-24 h-24 md:w-28 md:h-28 rounded-2xl object-cover border-4 border-background shadow-xl group-hover:scale-105 transition-transform"
                             />
                           ) : (
-                            <div className="w-20 h-20 md:w-24 md:h-24 rounded-xl bg-primary/10 flex items-center justify-center border-2 border-border">
-                              <Store className="w-10 h-10 text-primary" />
+                            <div className="w-24 h-24 md:w-28 md:h-28 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center border-4 border-background shadow-xl group-hover:scale-105 transition-transform">
+                              <Store className="w-12 h-12 text-primary" />
                             </div>
                           )}
+                          <div className="absolute -bottom-2 -right-2 p-2 rounded-full bg-primary text-primary-foreground shadow-lg opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Pencil className="w-3 h-3" />
+                          </div>
                         </div>
                         
                         {/* Info */}
                         <div className="flex-1 min-w-0">
-                          <h2 className="text-2xl md:text-3xl font-bold mb-2">{restaurant.name}</h2>
-                          {restaurant.description ? (
-                            <p className="text-muted-foreground line-clamp-2 max-w-2xl">{restaurant.description}</p>
-                          ) : (
-                            <p className="text-muted-foreground italic">Aggiungi una descrizione nelle impostazioni del ristorante</p>
-                          )}
-                          <div className="flex flex-wrap items-center gap-3 mt-3">
-                            {restaurant.cuisine_type && (
-                              <Badge variant="secondary" className="text-xs">
-                                {restaurant.cuisine_type}
-                              </Badge>
-                            )}
-                            {restaurant.price_range && (
-                              <Badge variant="outline" className="text-xs">
-                                {restaurant.price_range}
-                              </Badge>
-                            )}
-                            {restaurant.city && (
-                              <span className="text-sm text-muted-foreground">
-                                📍 {restaurant.city}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-
-                        {/* Rating */}
-                        {stats.totalReviews > 0 && (
-                          <div className="flex-shrink-0 text-center p-4 rounded-xl bg-muted/50">
-                            <div className="flex items-center justify-center gap-1 mb-1">
-                              <Star className="w-5 h-5 fill-primary text-primary" />
-                              <span className="text-2xl font-bold">{stats.avgRating}</span>
+                          <div className="flex items-start justify-between gap-4">
+                            <div>
+                              <h2 className="text-2xl md:text-3xl font-bold mb-1">{restaurant.name}</h2>
+                              <div className="flex flex-wrap items-center gap-2 mb-3">
+                                {restaurant.cuisine_type && (
+                                  <Badge className="bg-primary/10 text-primary border-0 font-medium">
+                                    {restaurant.cuisine_type}
+                                  </Badge>
+                                )}
+                                {restaurant.price_range && (
+                                  <Badge variant="secondary" className="font-medium">
+                                    {restaurant.price_range}
+                                  </Badge>
+                                )}
+                                {restaurant.city && (
+                                  <span className="text-sm text-muted-foreground flex items-center gap-1">
+                                    📍 {restaurant.city}
+                                  </span>
+                                )}
+                              </div>
                             </div>
-                            <p className="text-xs text-muted-foreground">{stats.totalReviews} recensioni</p>
+                            
+                            {/* Rating badge */}
+                            {stats.totalReviews > 0 && (
+                              <div className="flex-shrink-0 flex items-center gap-2 px-4 py-2 rounded-xl bg-primary/10 border border-primary/20">
+                                <Star className="w-5 h-5 fill-primary text-primary" />
+                                <span className="text-xl font-bold">{stats.avgRating}</span>
+                                <span className="text-xs text-muted-foreground">({stats.totalReviews})</span>
+                              </div>
+                            )}
                           </div>
-                        )}
+                          
+                          {restaurant.description ? (
+                            <p className="text-muted-foreground line-clamp-2 max-w-2xl mb-4">{restaurant.description}</p>
+                          ) : (
+                            <p className="text-muted-foreground/60 italic mb-4">Nessuna descrizione aggiunta</p>
+                          )}
+                          
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => {
+                              setInfoModalTab("info");
+                              setShowInfoModal(true);
+                            }}
+                            className="gap-2"
+                          >
+                            <Settings className="w-4 h-4" />
+                            Gestisci Info e Orari
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   </section>
@@ -382,6 +420,10 @@ const Dashboard = () => {
                     subscribed={subscription.subscribed || false}
                     onNavigate={handleTabChange}
                     onNavigateTo={navigate}
+                    onOpenInfoModal={() => {
+                      setInfoModalTab("info");
+                      setShowInfoModal(true);
+                    }}
                   />
                 </section>
 
@@ -394,6 +436,11 @@ const Dashboard = () => {
                     hasOpeningHours={!!restaurant.opening_hours}
                     tablesCount={stats.tables}
                     menuItemsCount={stats.menuItems}
+                    onNavigateToTab={handleTabChange}
+                    onOpenInfoModal={() => {
+                      setInfoModalTab("info");
+                      setShowInfoModal(true);
+                    }}
                   />
                 )}
 
@@ -643,6 +690,21 @@ const Dashboard = () => {
         open={showPaywall} 
         onOpenChange={setShowPaywall}
         onClose={handlePaywallClose}
+      />
+      
+      <RestaurantInfoModal
+        open={showInfoModal}
+        onOpenChange={setShowInfoModal}
+        restaurant={restaurant}
+        onUpdate={() => {
+          // Refresh restaurant data
+          if (selectedRestaurantId) {
+            supabase.from('restaurants').select('*').eq('id', selectedRestaurantId).maybeSingle().then(({ data }) => {
+              if (data) setRestaurant(data);
+            });
+          }
+        }}
+        defaultTab={infoModalTab}
       />
     </div>
   );
