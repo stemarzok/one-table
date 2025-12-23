@@ -10,7 +10,7 @@ import { useAdminRole } from "@/hooks/useAdminRole";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
-import { LayoutDashboard, Store, Table2, UtensilsCrossed, Calendar, AlertCircle, CheckCircle, Clock, XCircle, Lock, ArrowRight, TrendingUp, Users, HelpCircle, CreditCard, Crown, Star, Sparkles, ExternalLink } from "lucide-react";
+import { LayoutDashboard, Store, Table2, UtensilsCrossed, Calendar, AlertCircle, CheckCircle, Clock, XCircle, Lock, ArrowRight, TrendingUp, Users, HelpCircle, CreditCard, Crown, Star, Sparkles, ExternalLink, Bell } from "lucide-react";
 import { TablesManagement } from "@/components/dashboard/TablesManagement";
 import { MenuManagement } from "@/components/dashboard/MenuManagement";
 import { BookingsManagement } from "@/components/dashboard/BookingsManagement";
@@ -19,6 +19,10 @@ import { DashboardTutorial } from "@/components/dashboard/DashboardTutorial";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { BookingsSparkline } from "@/components/dashboard/BookingsSparkline";
+import { RecentActivity } from "@/components/dashboard/RecentActivity";
+import { ContextualAlerts } from "@/components/dashboard/ContextualAlerts";
+import { ProfileCompletionProgress } from "@/components/dashboard/ProfileCompletionProgress";
 
 const Dashboard = () => {
   const { isLoggedIn, isBusinessMode, user } = useAuth();
@@ -358,7 +362,42 @@ const Dashboard = () => {
                   </section>
                 )}
 
-                {/* Sezione Prenotazioni */}
+                {/* Alert Contestuali */}
+                <section>
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="p-2 rounded-lg bg-primary/10">
+                      <Bell className="w-5 h-5 text-primary" />
+                    </div>
+                    <h2 className="text-xl font-semibold">Notifiche</h2>
+                  </div>
+                  <ContextualAlerts
+                    pendingBookings={stats.pendingBookings}
+                    tables={stats.tables}
+                    menuItems={stats.menuItems}
+                    hasLogo={!!restaurant?.logo_url}
+                    hasDescription={!!restaurant?.description}
+                    hasOpeningHours={!!restaurant?.opening_hours}
+                    inTrial={subscription.inTrial || false}
+                    trialDaysRemaining={subscription.trialDaysRemaining}
+                    subscribed={subscription.subscribed || false}
+                    onNavigate={handleTabChange}
+                    onNavigateTo={navigate}
+                  />
+                </section>
+
+                {/* Progress Completamento Profilo */}
+                {restaurant && (
+                  <ProfileCompletionProgress
+                    hasLogo={!!restaurant.logo_url}
+                    hasCoverImage={!!restaurant.cover_image_url}
+                    hasDescription={!!restaurant.description}
+                    hasOpeningHours={!!restaurant.opening_hours}
+                    tablesCount={stats.tables}
+                    menuItemsCount={stats.menuItems}
+                  />
+                )}
+
+                {/* Sezione Prenotazioni con Sparkline */}
                 <section>
                   <div className="flex items-center gap-3 mb-4">
                     <div className="p-2 rounded-lg bg-primary/10">
@@ -376,7 +415,10 @@ const Dashboard = () => {
                           <span className="text-sm text-muted-foreground">In attesa</span>
                           {!hasProAccess ? <Lock className="w-4 h-4 text-muted-foreground" /> : <ArrowRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />}
                         </div>
-                        <p className="text-4xl font-bold">{stats.pendingBookings}</p>
+                        <p className="text-4xl font-bold mb-3">{stats.pendingBookings}</p>
+                        {selectedRestaurantId && (
+                          <BookingsSparkline restaurantId={selectedRestaurantId} status="pending" />
+                        )}
                       </div>
                     </Card>
                     <Card 
@@ -388,7 +430,10 @@ const Dashboard = () => {
                           <span className="text-sm text-muted-foreground">Confermate</span>
                           {!hasProAccess ? <Lock className="w-4 h-4 text-muted-foreground" /> : <ArrowRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />}
                         </div>
-                        <p className="text-4xl font-bold">{stats.confirmedBookings}</p>
+                        <p className="text-4xl font-bold mb-3">{stats.confirmedBookings}</p>
+                        {selectedRestaurantId && (
+                          <BookingsSparkline restaurantId={selectedRestaurantId} status="confirmed" />
+                        )}
                       </div>
                     </Card>
                     <Card 
@@ -397,14 +442,28 @@ const Dashboard = () => {
                     >
                       <div className="p-6">
                         <div className="flex items-center justify-between mb-3">
-                          <span className="text-sm text-muted-foreground">Totali</span>
+                          <span className="text-sm text-muted-foreground">Totali (7gg)</span>
                           {!hasProAccess ? <Lock className="w-4 h-4 text-muted-foreground" /> : <ArrowRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />}
                         </div>
-                        <p className="text-4xl font-bold">{stats.totalBookings}</p>
+                        <p className="text-4xl font-bold mb-3">{stats.totalBookings}</p>
+                        {selectedRestaurantId && (
+                          <BookingsSparkline restaurantId={selectedRestaurantId} status="all" />
+                        )}
                       </div>
                     </Card>
                   </div>
                 </section>
+
+                {/* Attività Recenti */}
+                {selectedRestaurantId && (
+                  <section>
+                    <RecentActivity
+                      restaurantId={selectedRestaurantId}
+                      hasProAccess={hasProAccess}
+                      onViewAll={() => handleTabChange('bookings')}
+                    />
+                  </section>
+                )}
 
                 {/* Sezione Struttura (Tavoli + Menu) */}
                 <section>
