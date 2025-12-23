@@ -295,249 +295,207 @@ const Dashboard = () => {
             
             <TabsContent value="overview">
               <div className="space-y-8">
-                {/* Hero Section con Abbonamento */}
-                <div className="grid gap-6 lg:grid-cols-3">
-                  {/* Welcome Card con Stats Hero */}
-                  <div className="lg:col-span-2">
-                    <Card className="relative overflow-hidden bg-gradient-to-br from-primary/10 via-primary/5 to-background border-primary/20">
-                      <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-                      <div className="relative p-8">
-                        <div className="flex items-start justify-between mb-6">
-                          <div>
-                            <h2 className="text-2xl font-bold mb-1">Bentornato! 👋</h2>
-                            <p className="text-muted-foreground">
-                              Ecco un riepilogo delle attività del tuo ristorante
-                            </p>
-                          </div>
-                          {restaurant?.logo_url && (
-                            <img 
-                              src={restaurant.logo_url} 
-                              alt="Logo" 
-                              className="w-16 h-16 rounded-xl object-cover border-2 border-primary/20"
-                            />
-                          )}
+                {/* Stats Cards con gradenti colorati */}
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                  {/* Prenotazioni In Attesa */}
+                  <Card 
+                    className="group relative overflow-hidden cursor-pointer transition-all hover:shadow-xl hover:-translate-y-1"
+                    onClick={() => handleStatClick('bookings')}
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-br from-amber-500/20 via-amber-500/10 to-transparent" />
+                    <div className="absolute top-0 right-0 w-24 h-24 bg-amber-500/20 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
+                    <div className="relative p-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="p-3 rounded-xl bg-amber-500/20 group-hover:scale-110 transition-transform">
+                          <Clock className="w-6 h-6 text-amber-500" />
                         </div>
-                        
-                        {/* Mini Stats Row */}
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                          <div className="bg-background/60 backdrop-blur rounded-xl p-4 border border-border/50">
-                            <div className="flex items-center gap-2 mb-2">
-                              <div className="p-2 rounded-lg bg-yellow-500/10">
-                                <Clock className="w-4 h-4 text-yellow-500" />
-                              </div>
-                            </div>
-                            <p className="text-2xl font-bold">{stats.pendingBookings}</p>
-                            <p className="text-xs text-muted-foreground">In attesa</p>
-                          </div>
-                          <div className="bg-background/60 backdrop-blur rounded-xl p-4 border border-border/50">
-                            <div className="flex items-center gap-2 mb-2">
-                              <div className="p-2 rounded-lg bg-green-500/10">
-                                <CheckCircle className="w-4 h-4 text-green-500" />
-                              </div>
-                            </div>
-                            <p className="text-2xl font-bold">{stats.confirmedBookings}</p>
-                            <p className="text-xs text-muted-foreground">Confermate</p>
-                          </div>
-                          <div className="bg-background/60 backdrop-blur rounded-xl p-4 border border-border/50">
-                            <div className="flex items-center gap-2 mb-2">
-                              <div className="p-2 rounded-lg bg-primary/10">
-                                <Star className="w-4 h-4 text-primary" />
-                              </div>
-                            </div>
-                            <p className="text-2xl font-bold">{stats.avgRating > 0 ? stats.avgRating : '-'}</p>
-                            <p className="text-xs text-muted-foreground">Valutazione</p>
-                          </div>
-                          <div className="bg-background/60 backdrop-blur rounded-xl p-4 border border-border/50">
-                            <div className="flex items-center gap-2 mb-2">
-                              <div className="p-2 rounded-lg bg-primary/10">
-                                <TrendingUp className="w-4 h-4 text-primary" />
-                              </div>
-                            </div>
-                            <p className="text-2xl font-bold">{stats.totalReviews}</p>
-                            <p className="text-xs text-muted-foreground">Recensioni</p>
-                          </div>
-                        </div>
+                        {!hasProAccess ? <Lock className="w-4 h-4 text-muted-foreground" /> : <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:translate-x-1 transition-transform" />}
                       </div>
-                    </Card>
-                  </div>
+                      <p className="text-4xl font-bold text-amber-600 dark:text-amber-400">{stats.pendingBookings}</p>
+                      <p className="text-sm text-muted-foreground font-medium">In attesa</p>
+                    </div>
+                  </Card>
 
-                  {/* Subscription Status Card */}
-                  <Card className={`relative overflow-hidden ${
-                    subscription.subscribed 
-                      ? 'bg-gradient-to-br from-emerald-500/10 via-emerald-500/5 to-background border-emerald-500/30' 
-                      : subscription.inTrial 
-                        ? 'bg-gradient-to-br from-amber-500/10 via-amber-500/5 to-background border-amber-500/30'
-                        : 'bg-gradient-to-br from-red-500/10 via-red-500/5 to-background border-red-500/30'
-                  }`}>
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-primary/20 to-transparent rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
-                    <div className="relative p-6 h-full flex flex-col">
-                      <div className="flex items-center gap-3 mb-4">
-                        <div className={`p-3 rounded-xl ${
-                          subscription.subscribed 
-                            ? 'bg-emerald-500/20' 
-                            : subscription.inTrial 
-                              ? 'bg-amber-500/20'
-                              : 'bg-red-500/20'
-                        }`}>
-                          <Crown className={`w-6 h-6 ${
-                            subscription.subscribed 
-                              ? 'text-emerald-500' 
-                              : subscription.inTrial 
-                                ? 'text-amber-500'
-                                : 'text-red-500'
-                          }`} />
+                  {/* Prenotazioni Confermate */}
+                  <Card 
+                    className="group relative overflow-hidden cursor-pointer transition-all hover:shadow-xl hover:-translate-y-1"
+                    onClick={() => handleStatClick('bookings')}
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/20 via-emerald-500/10 to-transparent" />
+                    <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/20 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
+                    <div className="relative p-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="p-3 rounded-xl bg-emerald-500/20 group-hover:scale-110 transition-transform">
+                          <CheckCircle className="w-6 h-6 text-emerald-500" />
                         </div>
-                        <div>
-                          <h3 className="font-semibold">Abbonamento</h3>
-                          <p className="text-sm text-muted-foreground">
-                            {subscription.planType === 'promo_speciale' ? 'Promo Speciale' : 
-                             subscription.planType === 'pro' ? 'Piano Pro' : 
-                             subscription.planType === 'base' ? 'Piano Base' : 'Nessun piano'}
-                          </p>
+                        {!hasProAccess ? <Lock className="w-4 h-4 text-muted-foreground" /> : <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:translate-x-1 transition-transform" />}
+                      </div>
+                      <p className="text-4xl font-bold text-emerald-600 dark:text-emerald-400">{stats.confirmedBookings}</p>
+                      <p className="text-sm text-muted-foreground font-medium">Confermate</p>
+                    </div>
+                  </Card>
+
+                  {/* Valutazione Media */}
+                  <Card 
+                    className="group relative overflow-hidden cursor-pointer transition-all hover:shadow-xl hover:-translate-y-1"
+                    onClick={() => navigate('/reviews')}
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/20 via-yellow-500/10 to-transparent" />
+                    <div className="absolute top-0 right-0 w-24 h-24 bg-yellow-500/20 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
+                    <div className="relative p-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="p-3 rounded-xl bg-yellow-500/20 group-hover:scale-110 transition-transform">
+                          <Star className="w-6 h-6 text-yellow-500" />
                         </div>
+                        <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:translate-x-1 transition-transform" />
                       </div>
-
-                      <div className="flex-1">
-                        {subscription.subscribed ? (
-                          <div className="space-y-3">
-                            <div className="flex items-center gap-2">
-                              <Badge className="bg-emerald-500/20 text-emerald-600 border-emerald-500/30">
-                                <Sparkles className="w-3 h-3 mr-1" />
-                                Attivo
-                              </Badge>
-                            </div>
-                            {subscription.currentPeriodEnd && (
-                              <p className="text-sm text-muted-foreground">
-                                {subscription.cancelAtPeriodEnd ? 'Scade il' : 'Rinnovo il'}{' '}
-                                <span className="font-medium text-foreground">
-                                  {new Date(subscription.currentPeriodEnd).toLocaleDateString('it-IT', {
-                                    day: 'numeric',
-                                    month: 'long',
-                                    year: 'numeric'
-                                  })}
-                                </span>
-                              </p>
-                            )}
-                            {subscription.cancelAtPeriodEnd && (
-                              <p className="text-xs text-amber-600">
-                                ⚠️ L'abbonamento non verrà rinnovato
-                              </p>
-                            )}
-                          </div>
-                        ) : subscription.inTrial ? (
-                          <div className="space-y-3">
-                            <div className="flex items-center gap-2">
-                              <Badge className="bg-amber-500/20 text-amber-600 border-amber-500/30">
-                                <Clock className="w-3 h-3 mr-1" />
-                                Trial
-                              </Badge>
-                            </div>
-                            <p className="text-sm">
-                              <span className="text-2xl font-bold text-amber-500">{subscription.trialDaysRemaining}</span>
-                              <span className="text-muted-foreground"> giorni rimasti</span>
-                            </p>
-                          </div>
-                        ) : (
-                          <div className="space-y-3">
-                            <Badge variant="destructive" className="bg-red-500/20 text-red-500 border-red-500/30">
-                              Non attivo
-                            </Badge>
-                            <p className="text-sm text-muted-foreground">
-                              Attiva un abbonamento per sbloccare tutte le funzionalità
-                            </p>
-                          </div>
-                        )}
+                      <div className="flex items-baseline gap-1">
+                        <p className="text-4xl font-bold text-yellow-600 dark:text-yellow-400">{stats.avgRating > 0 ? stats.avgRating : '-'}</p>
+                        {stats.avgRating > 0 && <span className="text-yellow-500 text-lg">★</span>}
                       </div>
+                      <p className="text-sm text-muted-foreground font-medium">Valutazione media</p>
+                    </div>
+                  </Card>
 
-                      <Button 
-                        className="w-full mt-4 gap-2" 
-                        variant={subscription.subscribed ? "outline" : "default"}
-                        onClick={() => navigate('/billing')}
-                      >
-                        <CreditCard className="w-4 h-4" />
-                        {subscription.subscribed ? 'Gestisci' : 'Attiva Abbonamento'}
-                        <ExternalLink className="w-3 h-3" />
-                      </Button>
+                  {/* Recensioni Totali */}
+                  <Card 
+                    className="group relative overflow-hidden cursor-pointer transition-all hover:shadow-xl hover:-translate-y-1"
+                    onClick={() => navigate('/reviews')}
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-primary/10 to-transparent" />
+                    <div className="absolute top-0 right-0 w-24 h-24 bg-primary/20 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
+                    <div className="relative p-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="p-3 rounded-xl bg-primary/20 group-hover:scale-110 transition-transform">
+                          <Users className="w-6 h-6 text-primary" />
+                        </div>
+                        <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:translate-x-1 transition-transform" />
+                      </div>
+                      <p className="text-4xl font-bold text-primary">{stats.totalReviews}</p>
+                      <p className="text-sm text-muted-foreground font-medium">Recensioni</p>
                     </div>
                   </Card>
                 </div>
 
-                {/* Stats Cards Grid */}
+                {/* Seconda riga: Abbonamento + Stats secondarie */}
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                  <Card 
-                    className={`group p-6 cursor-pointer transition-all hover:shadow-lg hover:border-primary/50 hover:-translate-y-1 ${!hasProAccess ? 'opacity-75' : ''}`}
-                    onClick={() => handleStatClick('bookings')}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-4">
-                        <div className="p-3 rounded-xl bg-primary/10 group-hover:bg-primary/20 transition-colors">
-                          <Calendar className="w-6 h-6 text-primary" />
+                  {/* Subscription Status - occupa 2 colonne */}
+                  <Card className={`lg:col-span-2 relative overflow-hidden ${
+                    subscription.subscribed 
+                      ? 'bg-gradient-to-br from-emerald-500/15 via-emerald-500/5 to-background border-emerald-500/30' 
+                      : subscription.inTrial 
+                        ? 'bg-gradient-to-br from-amber-500/15 via-amber-500/5 to-background border-amber-500/30'
+                        : 'bg-gradient-to-br from-red-500/15 via-red-500/5 to-background border-red-500/30'
+                  }`}>
+                    <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-primary/10 to-transparent rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+                    <div className="relative p-6">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                          <div className={`p-4 rounded-2xl ${
+                            subscription.subscribed 
+                              ? 'bg-emerald-500/20' 
+                              : subscription.inTrial 
+                                ? 'bg-amber-500/20'
+                                : 'bg-red-500/20'
+                          }`}>
+                            <Crown className={`w-8 h-8 ${
+                              subscription.subscribed 
+                                ? 'text-emerald-500' 
+                                : subscription.inTrial 
+                                  ? 'text-amber-500'
+                                  : 'text-red-500'
+                            }`} />
+                          </div>
+                          <div>
+                            <h3 className="text-xl font-bold">Abbonamento</h3>
+                            <p className="text-muted-foreground">
+                              {subscription.planType === 'promo_speciale' ? 'Promo Speciale' : 
+                               subscription.planType === 'pro' ? 'Piano Pro' : 
+                               subscription.planType === 'base' ? 'Piano Base' : 'Nessun piano attivo'}
+                            </p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="text-sm text-muted-foreground">Totale Prenotazioni</p>
-                          <p className="text-3xl font-bold">{stats.totalBookings}</p>
+                        <div className="text-right">
+                          {subscription.subscribed ? (
+                            <Badge className="bg-emerald-500/20 text-emerald-600 border-emerald-500/30 text-sm px-3 py-1">
+                              <Sparkles className="w-3 h-3 mr-1" />
+                              Attivo
+                            </Badge>
+                          ) : subscription.inTrial ? (
+                            <Badge className="bg-amber-500/20 text-amber-600 border-amber-500/30 text-sm px-3 py-1">
+                              <Clock className="w-3 h-3 mr-1" />
+                              {subscription.trialDaysRemaining} giorni trial
+                            </Badge>
+                          ) : (
+                            <Badge variant="destructive" className="bg-red-500/20 text-red-500 border-red-500/30 text-sm px-3 py-1">
+                              Non attivo
+                            </Badge>
+                          )}
                         </div>
                       </div>
-                      {!hasProAccess ? <Lock className="w-4 h-4 text-muted-foreground" /> : <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:translate-x-1 transition-transform" />}
-                    </div>
-                  </Card>
-                  
-                  <Card 
-                    className={`group p-6 cursor-pointer transition-all hover:shadow-lg hover:border-primary/50 hover:-translate-y-1 ${!hasProAccess ? 'opacity-75' : ''}`}
-                    onClick={() => handleStatClick('tables')}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-4">
-                        <div className="p-3 rounded-xl bg-primary/10 group-hover:bg-primary/20 transition-colors">
-                          <Table2 className="w-6 h-6 text-primary" />
+                      
+                      <div className="mt-4 flex items-center justify-between">
+                        <div className="text-sm text-muted-foreground">
+                          {subscription.subscribed && subscription.currentPeriodEnd && (
+                            <span>
+                              {subscription.cancelAtPeriodEnd ? '⚠️ Scade il' : 'Rinnovo il'}{' '}
+                              <span className="font-medium text-foreground">
+                                {new Date(subscription.currentPeriodEnd).toLocaleDateString('it-IT', {
+                                  day: 'numeric',
+                                  month: 'long'
+                                })}
+                              </span>
+                            </span>
+                          )}
                         </div>
-                        <div>
-                          <p className="text-sm text-muted-foreground">Tavoli</p>
-                          <p className="text-3xl font-bold">{stats.tables}</p>
-                        </div>
+                        <Button 
+                          size="sm"
+                          variant={subscription.subscribed ? "outline" : "default"}
+                          onClick={() => navigate('/billing')}
+                          className="gap-2"
+                        >
+                          <CreditCard className="w-4 h-4" />
+                          {subscription.subscribed ? 'Gestisci' : 'Attiva ora'}
+                        </Button>
                       </div>
-                      {!hasProAccess ? <Lock className="w-4 h-4 text-muted-foreground" /> : <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:translate-x-1 transition-transform" />}
-                    </div>
-                  </Card>
-                  
-                  <Card 
-                    className={`group p-6 cursor-pointer transition-all hover:shadow-lg hover:border-primary/50 hover:-translate-y-1 ${!hasProAccess ? 'opacity-75' : ''}`}
-                    onClick={() => handleStatClick('menu')}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-4">
-                        <div className="p-3 rounded-xl bg-primary/10 group-hover:bg-primary/20 transition-colors">
-                          <UtensilsCrossed className="w-6 h-6 text-primary" />
-                        </div>
-                        <div>
-                          <p className="text-sm text-muted-foreground">Piatti</p>
-                          <p className="text-3xl font-bold">{stats.menuItems}</p>
-                        </div>
-                      </div>
-                      {!hasProAccess ? <Lock className="w-4 h-4 text-muted-foreground" /> : <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:translate-x-1 transition-transform" />}
                     </div>
                   </Card>
 
+                  {/* Tavoli */}
                   <Card 
-                    className="group p-6 cursor-pointer transition-all hover:shadow-lg hover:border-primary/50 hover:-translate-y-1"
-                    onClick={() => navigate('/reviews')}
+                    className="group relative overflow-hidden cursor-pointer transition-all hover:shadow-xl hover:-translate-y-1"
+                    onClick={() => handleStatClick('tables')}
                   >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-4">
-                        <div className="p-3 rounded-xl bg-primary/10 group-hover:bg-primary/20 transition-colors">
-                          <Star className="w-6 h-6 text-primary" />
+                    <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 via-blue-500/10 to-transparent" />
+                    <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/20 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
+                    <div className="relative p-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="p-3 rounded-xl bg-blue-500/20 group-hover:scale-110 transition-transform">
+                          <Table2 className="w-6 h-6 text-blue-500" />
                         </div>
-                        <div>
-                          <p className="text-sm text-muted-foreground">Recensioni</p>
-                          <div className="flex items-center gap-2">
-                            <p className="text-3xl font-bold">{stats.totalReviews}</p>
-                            {stats.avgRating > 0 && (
-                              <Badge variant="secondary" className="text-xs">⭐ {stats.avgRating}</Badge>
-                            )}
-                          </div>
-                        </div>
+                        {!hasProAccess ? <Lock className="w-4 h-4 text-muted-foreground" /> : <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:translate-x-1 transition-transform" />}
                       </div>
-                      <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:translate-x-1 transition-transform" />
+                      <p className="text-4xl font-bold text-blue-600 dark:text-blue-400">{stats.tables}</p>
+                      <p className="text-sm text-muted-foreground font-medium">Tavoli</p>
+                    </div>
+                  </Card>
+
+                  {/* Piatti Menu */}
+                  <Card 
+                    className="group relative overflow-hidden cursor-pointer transition-all hover:shadow-xl hover:-translate-y-1"
+                    onClick={() => handleStatClick('menu')}
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-br from-purple-500/20 via-purple-500/10 to-transparent" />
+                    <div className="absolute top-0 right-0 w-24 h-24 bg-purple-500/20 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
+                    <div className="relative p-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="p-3 rounded-xl bg-purple-500/20 group-hover:scale-110 transition-transform">
+                          <UtensilsCrossed className="w-6 h-6 text-purple-500" />
+                        </div>
+                        {!hasProAccess ? <Lock className="w-4 h-4 text-muted-foreground" /> : <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:translate-x-1 transition-transform" />}
+                      </div>
+                      <p className="text-4xl font-bold text-purple-600 dark:text-purple-400">{stats.menuItems}</p>
+                      <p className="text-sm text-muted-foreground font-medium">Piatti nel menu</p>
                     </div>
                   </Card>
                 </div>
