@@ -295,6 +295,69 @@ const Dashboard = () => {
             
             <TabsContent value="overview">
               <div className="space-y-8">
+                {/* Header del Ristorante */}
+                {restaurant && (
+                  <section className="relative overflow-hidden rounded-2xl border bg-card">
+                    <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent" />
+                    <div className="relative p-6 md:p-8">
+                      <div className="flex flex-col md:flex-row gap-6 items-start md:items-center">
+                        {/* Logo */}
+                        <div className="flex-shrink-0">
+                          {restaurant.logo_url ? (
+                            <img 
+                              src={restaurant.logo_url} 
+                              alt={restaurant.name}
+                              className="w-20 h-20 md:w-24 md:h-24 rounded-xl object-cover border-2 border-border shadow-sm"
+                            />
+                          ) : (
+                            <div className="w-20 h-20 md:w-24 md:h-24 rounded-xl bg-primary/10 flex items-center justify-center border-2 border-border">
+                              <Store className="w-10 h-10 text-primary" />
+                            </div>
+                          )}
+                        </div>
+                        
+                        {/* Info */}
+                        <div className="flex-1 min-w-0">
+                          <h2 className="text-2xl md:text-3xl font-bold mb-2">{restaurant.name}</h2>
+                          {restaurant.description ? (
+                            <p className="text-muted-foreground line-clamp-2 max-w-2xl">{restaurant.description}</p>
+                          ) : (
+                            <p className="text-muted-foreground italic">Aggiungi una descrizione nelle impostazioni del ristorante</p>
+                          )}
+                          <div className="flex flex-wrap items-center gap-3 mt-3">
+                            {restaurant.cuisine_type && (
+                              <Badge variant="secondary" className="text-xs">
+                                {restaurant.cuisine_type}
+                              </Badge>
+                            )}
+                            {restaurant.price_range && (
+                              <Badge variant="outline" className="text-xs">
+                                {restaurant.price_range}
+                              </Badge>
+                            )}
+                            {restaurant.city && (
+                              <span className="text-sm text-muted-foreground">
+                                📍 {restaurant.city}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Rating */}
+                        {stats.totalReviews > 0 && (
+                          <div className="flex-shrink-0 text-center p-4 rounded-xl bg-muted/50">
+                            <div className="flex items-center justify-center gap-1 mb-1">
+                              <Star className="w-5 h-5 fill-primary text-primary" />
+                              <span className="text-2xl font-bold">{stats.avgRating}</span>
+                            </div>
+                            <p className="text-xs text-muted-foreground">{stats.totalReviews} recensioni</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </section>
+                )}
+
                 {/* Sezione Prenotazioni */}
                 <section>
                   <div className="flex items-center gap-3 mb-4">
