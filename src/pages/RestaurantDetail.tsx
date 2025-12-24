@@ -1,17 +1,22 @@
 import { useParams } from "react-router-dom";
+import { useRef, useState, useEffect, useMemo } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { MapPin, Phone, Mail, Star, Utensils, CreditCard, Check, Users } from "lucide-react";
-import { useEffect, useState, useMemo } from "react";
+import { MapPin, Star, Utensils, Check, Heart } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { ReviewDialog } from "@/components/ReviewDialog";
 import { ReviewsList } from "@/components/ReviewsList";
 import { HeroCarousel } from "@/components/restaurant/HeroCarousel";
 import { BookingWidget } from "@/components/restaurant/BookingWidget";
 import { OpeningHoursDisplay } from "@/components/restaurant/OpeningHoursDisplay";
+import { SectionNav } from "@/components/restaurant/SectionNav";
+import { RatingBreakdown } from "@/components/restaurant/RatingBreakdown";
+import { QuickLinks } from "@/components/restaurant/QuickLinks";
+import { Button } from "@/components/ui/button";
+import { useFavorites } from "@/hooks/useFavorites";
 
 const RestaurantDetail = () => {
   const { id } = useParams();
@@ -20,6 +25,17 @@ const RestaurantDetail = () => {
   const [loading, setLoading] = useState(true);
   const [rating, setRating] = useState<any>(null);
   const [showAllDescription, setShowAllDescription] = useState(false);
+  const [activeSection, setActiveSection] = useState("panoramica");
+  const { favorites, toggleFavorite } = useFavorites();
+
+  // Section refs
+  const panoramicaRef = useRef<HTMLDivElement>(null);
+  const orariRef = useRef<HTMLDivElement>(null);
+  const posizioneRef = useRef<HTMLDivElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const recensioniRef = useRef<HTMLDivElement>(null);
+
+  const isFavorite = id ? favorites.includes(id) : false;
 
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' as ScrollBehavior });
@@ -47,7 +63,6 @@ const RestaurantDetail = () => {
 
       setMenuItems(menuData || []);
 
-      // Fetch rating
       const { data: ratingData } = await supabase.rpc('get_restaurant_rating', {
         restaurant_id_param: id
       });
@@ -60,6 +75,19 @@ const RestaurantDetail = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const scrollToSection = (section: string) => {
+    setActiveSection(section);
+    const refs: Record<string, React.RefObject<HTMLDivElement>> = {
+      panoramica: panoramicaRef,
+      orari: orariRef,
+      posizione: posizioneRef,
+      menu: menuRef,
+      recensioni: recensioniRef,
+    };
+    
+    refs[section]?.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
   const groupedMenu = useMemo(() => {
@@ -112,10 +140,84 @@ const RestaurantDetail = () => {
     <div className="min-h-screen bg-background">
       <Header />
       
-      <main className="pt-20 pb-16">
-        <div className="container mx-auto px-4">
+      <main className="pt-16">
+        {/* Restaurant Name Header */}
+        <div className="bg-background border-b border-border">
+          <div className="container mx-auto px-4 py-4">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <div className="flex items-center gap-4">
+                {restaurant.logo_url && (
+                  <img 
+                    src={restaurant.logo_url} 
+                    alt={`${restaurant.name} logo`}
+                    className="w-14 h-14 rounded-xl object-cover border border-border shadow-sm"
+                  />
+                )}
+                <div>
+                  <h1 className="text-2xl md:text-3xl font-bold text-foreground">
+                    {restaurant.name}
+                  </h1>
+                  <div className="flex flex-wrap items-center gap-2 mt-1">
+                    {rating?.avg_rating && (
+                      <div className="flex items-center gap-1">
+                        <div className="flex gap-0.5">
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <div
+                              key={star}
+                              className={`w-3 h-3 rounded-full ${
+                                star <= Math.round(rating.avg_rating) 
+                                  ? 'bg-green-500' 
+                                  : 'bg-muted'
+                              }`}
+                            />
+                          ))}
+                        </div>
+                        <span className="text-sm text-primary font-medium ml-1">
+                          ({rating.total_reviews} recensioni)
+                        </span>
+                      </div>
+                    )}
+                    {restaurant.cuisine_type && (
+                      <span className="text-sm text-muted-foreground">
+                        • {restaurant.cuisine_type}
+                      </span>
+                    )}
+                    {restaurant.price_range && (
+                      <span className="text-sm text-muted-foreground">
+                        • {restaurant.price_range}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-2">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => id && toggleFavorite(id)}
+                  className="gap-2"
+                >
+                  <Heart className={`w-4 h-4 ${isFavorite ? 'fill-red-500 text-red-500' : ''}`} />
+                  {isFavorite ? 'Salvato' : 'Salva'}
+                </Button>
+                <ReviewDialog restaurantId={id!} onReviewSubmitted={fetchRestaurant}>
+                  <Button size="sm" className="gap-2 bg-green-600 hover:bg-green-700">
+                    <Star className="w-4 h-4" />
+                    Scrivi una recensione
+                  </Button>
+                </ReviewDialog>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Section Navigation */}
+        <SectionNav activeSection={activeSection} onSectionClick={scrollToSection} />
+
+        <div className="container mx-auto px-4 py-6">
           {/* Hero Carousel */}
-          <div className="mb-6">
+          <div className="mb-8">
             <HeroCarousel 
               coverImage={restaurant.cover_image_url}
               galleryImages={restaurant.gallery_images}
@@ -126,185 +228,167 @@ const RestaurantDetail = () => {
           {/* Main content grid */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Left column - Main info */}
-            <div className="lg:col-span-2 space-y-6">
-              {/* Restaurant Header */}
-              <div className="flex flex-col md:flex-row md:items-start gap-4">
-                {restaurant.logo_url && (
-                  <img 
-                    src={restaurant.logo_url} 
-                    alt={`${restaurant.name} logo`}
-                    className="w-20 h-20 rounded-xl object-cover border-2 border-border shadow-sm"
-                  />
-                )}
-                <div className="flex-1">
-                  <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">
-                    {restaurant.name}
-                  </h1>
-                  <div className="flex flex-wrap items-center gap-3 mb-3">
-                    {rating?.avg_rating && (
-                      <div className="flex items-center gap-1.5 bg-primary/10 px-3 py-1.5 rounded-full">
-                        <Star className="w-5 h-5 fill-primary text-primary" />
-                        <span className="font-semibold text-primary">{rating.avg_rating}</span>
-                        <span className="text-muted-foreground text-sm">
-                          ({rating.total_reviews} recensioni)
-                        </span>
-                      </div>
-                    )}
-                    {restaurant.price_range && (
-                      <Badge variant="outline" className="text-sm">
-                        {restaurant.price_range}
-                      </Badge>
-                    )}
-                    {restaurant.cuisine_type && (
-                      <Badge variant="secondary">{restaurant.cuisine_type}</Badge>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <MapPin className="w-4 h-4" />
-                    <span>{restaurant.address}, {restaurant.city}</span>
-                  </div>
-                </div>
-              </div>
-
-              <Separator />
-
-              {/* Quick Info - In breve */}
-              <div>
+            <div className="lg:col-span-2 space-y-8">
+              
+              {/* Panoramica Section */}
+              <section ref={panoramicaRef} id="panoramica" className="scroll-mt-32">
                 <h2 className="text-xl font-semibold mb-4">In breve</h2>
-                <div className="flex flex-wrap gap-4 text-sm">
-                  <a href={`tel:${restaurant.phone}`} className="flex items-center gap-2 hover:text-primary transition-colors">
-                    <Phone className="w-4 h-4" />
-                    <span className="underline">{restaurant.phone}</span>
-                  </a>
-                  <a href={`mailto:${restaurant.email}`} className="flex items-center gap-2 hover:text-primary transition-colors">
-                    <Mail className="w-4 h-4" />
-                    <span className="underline">{restaurant.email}</span>
-                  </a>
-                </div>
-              </div>
+                
+                {/* Quick Links */}
+                <QuickLinks 
+                  phone={restaurant.phone}
+                  email={restaurant.email}
+                  address={`${restaurant.address}, ${restaurant.city}`}
+                  onScrollToMenu={() => scrollToSection('menu')}
+                />
 
-              {/* Description - Info */}
-              {description && (
-                <Card>
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-lg">Info</CardTitle>
-                  </CardHeader>
-                  <CardContent>
+                {/* Description */}
+                {description && (
+                  <div className="mt-6 p-5 bg-muted/30 rounded-xl">
+                    <h3 className="font-semibold mb-2">Info</h3>
                     <p className="text-muted-foreground leading-relaxed">
                       {showAllDescription ? description : truncatedDescription}
                     </p>
                     {description.length > 300 && (
                       <button 
                         onClick={() => setShowAllDescription(!showAllDescription)}
-                        className="text-primary font-medium mt-2 hover:underline"
+                        className="text-primary font-medium mt-2 hover:underline text-sm"
                       >
                         {showAllDescription ? "Mostra meno" : "Scopri di più"} ▾
                       </button>
                     )}
-                  </CardContent>
-                </Card>
-              )}
+                  </div>
+                )}
 
-              {/* Features - Caratteristiche */}
-              {(restaurant.extra_features?.length > 0 || restaurant.specializations?.length > 0 || restaurant.occasions?.length > 0) && (
-                <Card>
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-lg">Caratteristiche</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    {restaurant.extra_features?.length > 0 && (
-                      <div className="flex flex-wrap gap-2">
-                        {restaurant.extra_features.map((feature: string) => (
-                          <div key={feature} className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                            <Check className="w-4 h-4 text-green-600" />
-                            <span>{feature}</span>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                    {restaurant.occasions?.length > 0 && (
-                      <div className="flex flex-wrap gap-2">
-                        {restaurant.occasions.map((occasion: string) => (
-                          <Badge key={occasion} variant="outline">{occasion}</Badge>
-                        ))}
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              )}
-
-              {/* Menu Section */}
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <Utensils className="w-5 h-5 text-primary" />
-                    Menu
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {Object.keys(groupedMenu).length === 0 ? (
-                    <p className="text-muted-foreground text-center py-8">
-                      Nessun piatto disponibile al momento
-                    </p>
-                  ) : (
-                    <div className="space-y-6">
-                      {Object.entries(groupedMenu).map(([category, items]: [string, any[]]) => (
-                        <div key={category}>
-                          <h3 className="font-semibold text-lg mb-3 text-primary">{category}</h3>
-                          <div className="space-y-3">
-                            {items.map((item: any) => (
-                              <div 
-                                key={item.id} 
-                                className="flex justify-between items-start py-3 border-b border-border/50 last:border-0"
-                              >
-                                <div className="flex-1 pr-4">
-                                  <h4 className="font-medium">{item.name}</h4>
-                                  {item.description && (
-                                    <p className="text-sm text-muted-foreground mt-0.5">
-                                      {item.description}
-                                    </p>
-                                  )}
-                                </div>
-                                <span className="font-semibold text-primary whitespace-nowrap">
-                                  €{item.price.toFixed(2)}
-                                </span>
-                              </div>
-                            ))}
-                          </div>
+                {/* Features */}
+                {(restaurant.extra_features?.length > 0 || restaurant.occasions?.length > 0) && (
+                  <div className="mt-6">
+                    <h3 className="font-semibold mb-3">Caratteristiche</h3>
+                    <div className="flex flex-wrap gap-3">
+                      {restaurant.extra_features?.map((feature: string) => (
+                        <div key={feature} className="flex items-center gap-1.5 text-sm text-muted-foreground bg-muted/50 px-3 py-1.5 rounded-full">
+                          <Check className="w-4 h-4 text-green-600" />
+                          <span>{feature}</span>
                         </div>
                       ))}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-
-              {/* Reviews Section */}
-              <Card>
-                <CardHeader className="pb-3">
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-lg flex items-center gap-2">
-                      <Star className="w-5 h-5 text-primary" />
-                      Recensioni
-                      {rating?.total_reviews > 0 && (
-                        <Badge variant="secondary" className="ml-2">
-                          {rating.total_reviews}
+                      {restaurant.occasions?.map((occasion: string) => (
+                        <Badge key={occasion} variant="outline" className="rounded-full">
+                          {occasion}
                         </Badge>
-                      )}
-                    </CardTitle>
-                    <ReviewDialog restaurantId={id!} onReviewSubmitted={fetchRestaurant} />
+                      ))}
+                    </div>
                   </div>
-                </CardHeader>
-                <CardContent>
+                )}
+              </section>
+
+              <Separator />
+
+              {/* Posizione Section */}
+              <section ref={posizioneRef} id="posizione" className="scroll-mt-32">
+                <h2 className="text-xl font-semibold mb-4">Posizione</h2>
+                <div className="bg-muted/30 rounded-xl p-5">
+                  <div className="flex items-start gap-3">
+                    <MapPin className="w-5 h-5 text-primary mt-0.5" />
+                    <div>
+                      <p className="font-medium">{restaurant.address}</p>
+                      <p className="text-muted-foreground">{restaurant.city}</p>
+                      <a 
+                        href={`https://maps.google.com/?q=${encodeURIComponent(`${restaurant.address}, ${restaurant.city}`)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary text-sm mt-2 inline-block hover:underline"
+                      >
+                        Apri in Google Maps →
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <Separator />
+
+              {/* Menu Section */}
+              <section ref={menuRef} id="menu" className="scroll-mt-32">
+                <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                  <Utensils className="w-5 h-5 text-primary" />
+                  Menu
+                </h2>
+                
+                {Object.keys(groupedMenu).length === 0 ? (
+                  <div className="bg-muted/30 rounded-xl p-8 text-center">
+                    <p className="text-muted-foreground">
+                      Nessun piatto disponibile al momento
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-6">
+                    {Object.entries(groupedMenu).map(([category, items]: [string, any[]]) => (
+                      <div key={category} className="bg-muted/30 rounded-xl p-5">
+                        <h3 className="font-semibold text-lg mb-4 text-primary">{category}</h3>
+                        <div className="space-y-3">
+                          {items.map((item: any) => (
+                            <div 
+                              key={item.id} 
+                              className="flex justify-between items-start py-3 border-b border-border/50 last:border-0"
+                            >
+                              <div className="flex-1 pr-4">
+                                <h4 className="font-medium">{item.name}</h4>
+                                {item.description && (
+                                  <p className="text-sm text-muted-foreground mt-0.5">
+                                    {item.description}
+                                  </p>
+                                )}
+                              </div>
+                              <span className="font-semibold text-primary whitespace-nowrap">
+                                €{item.price.toFixed(2)}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </section>
+
+              <Separator />
+
+              {/* Recensioni Section */}
+              <section ref={recensioniRef} id="recensioni" className="scroll-mt-32">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-xl font-semibold flex items-center gap-2">
+                    <Star className="w-5 h-5 text-primary" />
+                    Recensioni
+                    {rating?.total_reviews > 0 && (
+                      <Badge variant="secondary" className="ml-2 rounded-full">
+                        {rating.total_reviews}
+                      </Badge>
+                    )}
+                  </h2>
+                  <ReviewDialog restaurantId={id!} onReviewSubmitted={fetchRestaurant}>
+                    <Button size="sm" className="gap-2 bg-green-600 hover:bg-green-700">
+                      <Star className="w-4 h-4" />
+                      Scrivi una recensione
+                    </Button>
+                  </ReviewDialog>
+                </div>
+
+                {/* Rating Breakdown */}
+                {rating && <RatingBreakdown rating={rating} />}
+
+                <div className="mt-6">
                   <ReviewsList restaurantId={id!} />
-                </CardContent>
-              </Card>
+                </div>
+              </section>
             </div>
 
-            {/* Right column - Booking widget & hours */}
+            {/* Right column - Sidebar */}
             <div className="space-y-6">
               <BookingWidget restaurantId={id!} restaurantName={restaurant.name} />
               
-              <OpeningHoursDisplay openingHours={restaurant.opening_hours} />
+              <div ref={orariRef} id="orari" className="scroll-mt-32">
+                <OpeningHoursDisplay openingHours={restaurant.opening_hours} />
+              </div>
             </div>
           </div>
         </div>
