@@ -14,9 +14,10 @@ interface ReviewDialogProps {
   restaurantId: string;
   bookingId?: string;
   onReviewSubmitted?: () => void;
+  children?: React.ReactNode;
 }
 
-export const ReviewDialog = ({ restaurantId, bookingId, onReviewSubmitted }: ReviewDialogProps) => {
+export const ReviewDialog = ({ restaurantId, bookingId, onReviewSubmitted, children }: ReviewDialogProps) => {
   const { user } = useAuth();
   const { t } = useLanguage();
   const [open, setOpen] = useState(false);
@@ -148,7 +149,7 @@ export const ReviewDialog = ({ restaurantId, bookingId, onReviewSubmitted }: Rev
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline">{t("review.writeReview")}</Button>
+        {children || <Button variant="outline">{t("review.writeReview")}</Button>}
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
