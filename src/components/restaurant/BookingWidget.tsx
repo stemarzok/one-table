@@ -1,33 +1,53 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calendar, Users, Clock, Heart } from "lucide-react";
+import { Calendar, Users, Clock, Heart, AlertCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Badge } from "@/components/ui/badge";
 import { useFavorites } from "@/hooks/useFavorites";
 
 interface BookingWidgetProps {
   restaurantId: string;
   restaurantName: string;
+  openingHours?: any;
 }
 
 interface TimeSlot {
   time: string;
   available: boolean;
+  period: 'lunch' | 'dinner';
 }
 
-export const BookingWidget = ({ restaurantId, restaurantName }: BookingWidgetProps) => {
+interface DaySchedule {
+  open?: boolean;
+  isOpen?: boolean;
+  openTime?: string;
+  closeTime?: string;
+  breakStart?: string;
+  breakEnd?: string;
+  hasBreak?: boolean;
+}
+
+const dayKeyMap: Record<number, string> = {
+  0: "sunday",
+  1: "monday",
+  2: "tuesday",
+  3: "wednesday",
+  4: "thursday",
+  5: "friday",
+  6: "saturday",
+};
+
+export const BookingWidget = ({ restaurantId, restaurantName, openingHours }: BookingWidgetProps) => {
   const { user, profile } = useAuth();
   const { t } = useLanguage();
   const { favorites, toggleFavorite } = useFavorites();
   const [loading, setLoading] = useState(false);
+  const [checkingSlots, setCheckingSlots] = useState(false);
   const [availableSlots, setAvailableSlots] = useState<TimeSlot[]>([]);
   const [formData, setFormData] = useState({
     date: "",
@@ -39,18 +59,115 @@ export const BookingWidget = ({ restaurantId, restaurantName }: BookingWidgetPro
 
   const isFavorite = favorites.includes(restaurantId);
   const guestOptions = [1, 2, 3, 4, 5, 6, 7, 8];
-  const timeSlots = ["12:00", "12:30", "13:00", "13:30", "19:00", "19:30", "20:00", "20:30", "21:00", "21:30"];
+
+  // Generate time slots based on opening hours
+  const generateTimeSlots = (date: string): string[] => {
+    if (!openingHours || typeof openingHours !== 'object') {
+      // Fallback to default slots if no opening hours configured
+      return ["12:00", "12:30", "13:00", "13:30", "19:00", "19:30", "20:00", "20:30", "21:00", "21:30"];
+    }
+
+    const selectedDate = new Date(date);
+    const dayOfWeek = selectedDate.getDay();
+    const dayKey = dayKeyMap[dayOfWeek];
+    const daySchedule: DaySchedule = openingHours[dayKey];
+
+    if (!daySchedule) {
+      return [];
+    }
+
+    // Check if open using either 'open' or 'isOpen' property
+    const isOpen = daySchedule.open ?? daySchedule.isOpen ?? false;
+    if (!isOpen) {
+      return [];
+    }
+
+    const slots: string[] = [];
+    const openTime = daySchedule.openTime || "12:00";
+    const closeTime = daySchedule.closeTime || "23:00";
+    const hasBreak = daySchedule.hasBreak || false;
+    const breakStart = daySchedule.breakStart || "15:00";
+    const breakEnd = daySchedule.breakEnd || "19:00";
+
+    // Parse times
+    const parseTime = (timeStr: string): number => {
+      const [hours, minutes] = timeStr.split(':').map(Number);
+      return hours * 60 + minutes;
+    };
+
+    const formatTime = (minutes: number): string => {
+      const hours = Math.floor(minutes / 60);
+      const mins = minutes % 60;
+      return `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
+    };
+
+    const openMinutes = parseTime(openTime);
+    // Stop 1 hour before closing to allow time for dining
+    const closeMinutes = parseTime(closeTime) - 60;
+    const breakStartMinutes = hasBreak ? parseTime(breakStart) : -1;
+    const breakEndMinutes = hasBreak ? parseTime(breakEnd) : -1;
+
+    // Generate slots every 30 minutes
+    for (let time = openMinutes; time <= closeMinutes; time += 30) {
+      // Skip slots during break time
+      if (hasBreak && time >= breakStartMinutes && time < breakEndMinutes) {
+        continue;
+      }
+      slots.push(formatTime(time));
+    }
+
+    return slots;
+  };
+
+  // Check if restaurant is closed on selected date
+  const isClosedOnDate = useMemo(() => {
+    if (!formData.date || !openingHours) return false;
+    
+    const selectedDate = new Date(formData.date);
+    const dayOfWeek = selectedDate.getDay();
+    const dayKey = dayKeyMap[dayOfWeek];
+    const daySchedule: DaySchedule = openingHours[dayKey];
+    
+    if (!daySchedule) return true;
+    return !(daySchedule.open ?? daySchedule.isOpen ?? false);
+  }, [formData.date, openingHours]);
+
+  // Get opening hours for selected date
+  const selectedDateHours = useMemo(() => {
+    if (!formData.date || !openingHours) return null;
+    
+    const selectedDate = new Date(formData.date);
+    const dayOfWeek = selectedDate.getDay();
+    const dayKey = dayKeyMap[dayOfWeek];
+    const daySchedule: DaySchedule = openingHours[dayKey];
+    
+    if (!daySchedule) return null;
+    const isOpen = daySchedule.open ?? daySchedule.isOpen ?? false;
+    if (!isOpen) return null;
+    
+    return {
+      openTime: daySchedule.openTime || "12:00",
+      closeTime: daySchedule.closeTime || "23:00",
+      hasBreak: daySchedule.hasBreak || false,
+      breakStart: daySchedule.breakStart,
+      breakEnd: daySchedule.breakEnd,
+    };
+  }, [formData.date, openingHours]);
 
   useEffect(() => {
-    if (formData.date) {
+    if (formData.date && !isClosedOnDate) {
       checkAvailableSlots();
+    } else {
+      setAvailableSlots([]);
     }
-  }, [formData.date, formData.guests]);
+  }, [formData.date, formData.guests, isClosedOnDate]);
 
   const checkAvailableSlots = async () => {
+    setCheckingSlots(true);
+    const dynamicSlots = generateTimeSlots(formData.date);
     const slots: TimeSlot[] = [];
     
-    for (const time of timeSlots) {
+    for (const time of dynamicSlots) {
       try {
         const { data: isAvailable } = await supabase.rpc("check_booking_availability", {
           _restaurant_id: restaurantId,
@@ -59,13 +176,18 @@ export const BookingWidget = ({ restaurantId, restaurantName }: BookingWidgetPro
           _guests_count: formData.guests,
         });
         
-        slots.push({ time, available: !!isAvailable });
+        const hour = parseInt(time.split(':')[0]);
+        const period = hour < 16 ? 'lunch' : 'dinner';
+        
+        slots.push({ time, available: !!isAvailable, period });
       } catch (error) {
-        slots.push({ time, available: false });
+        const hour = parseInt(time.split(':')[0]);
+        slots.push({ time, available: false, period: hour < 16 ? 'lunch' : 'dinner' });
       }
     }
     
     setAvailableSlots(slots);
+    setCheckingSlots(false);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -133,6 +255,7 @@ export const BookingWidget = ({ restaurantId, restaurantName }: BookingWidgetPro
 
       toast.success("Richiesta di prenotazione inviata!");
       setFormData({ date: "", time: "", guests: 2, specialRequests: "", marketingConsent: false });
+      setAvailableSlots([]);
     } catch (error: any) {
       console.error("Booking error:", error);
       toast.error(t("booking.bookingError"));
@@ -142,6 +265,9 @@ export const BookingWidget = ({ restaurantId, restaurantName }: BookingWidgetPro
   };
 
   const minDate = new Date().toISOString().split("T")[0];
+  
+  const lunchSlots = availableSlots.filter(s => s.period === 'lunch');
+  const dinnerSlots = availableSlots.filter(s => s.period === 'dinner');
 
   return (
     <Card className="sticky top-24 shadow-xl border-2">
@@ -170,20 +296,30 @@ export const BookingWidget = ({ restaurantId, restaurantName }: BookingWidgetPro
             />
           </div>
 
-          {/* Orario */}
-          <div>
-            <Label className="text-sm text-muted-foreground mb-1.5 flex items-center gap-1.5">
-              <Clock className="w-4 h-4" />
-              Orario
-            </Label>
-            <Input
-              type="time"
-              value={formData.time}
-              onChange={(e) => setFormData({ ...formData, time: e.target.value })}
-              required
-              className="h-11"
-            />
-          </div>
+          {/* Closed warning */}
+          {formData.date && isClosedOnDate && (
+            <div className="flex items-center gap-2 p-3 bg-destructive/10 text-destructive rounded-lg text-sm">
+              <AlertCircle className="w-4 h-4 flex-shrink-0" />
+              <span>Il ristorante è chiuso in questa data. Seleziona un altro giorno.</span>
+            </div>
+          )}
+
+          {/* Opening hours info */}
+          {formData.date && selectedDateHours && (
+            <div className="p-3 bg-muted/50 rounded-lg text-sm">
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <Clock className="w-4 h-4" />
+                <span>
+                  Aperto: {selectedDateHours.openTime} - {selectedDateHours.closeTime}
+                  {selectedDateHours.hasBreak && (
+                    <span className="text-xs ml-2">
+                      (pausa {selectedDateHours.breakStart}-{selectedDateHours.breakEnd})
+                    </span>
+                  )}
+                </span>
+              </div>
+            </div>
+          )}
 
           {/* Numero Ospiti */}
           <div>
@@ -221,28 +357,75 @@ export const BookingWidget = ({ restaurantId, restaurantName }: BookingWidgetPro
             </div>
           </div>
 
-          {/* Slot Disponibili */}
-          {formData.date && availableSlots.length > 0 && (
-            <div>
-              <Label className="text-sm text-muted-foreground mb-1.5">Slot Disponibili</Label>
-              <div className="grid grid-cols-3 gap-1.5">
-                {availableSlots.filter(s => s.available).slice(0, 6).map((slot) => (
-                  <Button
-                    key={slot.time}
-                    type="button"
-                    size="sm"
-                    variant={formData.time === slot.time ? "default" : "outline"}
-                    onClick={() => setFormData({ ...formData, time: slot.time })}
-                    className="h-9"
-                  >
-                    {slot.time}
-                  </Button>
-                ))}
-              </div>
+          {/* Time Slots */}
+          {formData.date && !isClosedOnDate && (
+            <div className="space-y-3">
+              {checkingSlots ? (
+                <div className="text-center py-4 text-sm text-muted-foreground">
+                  <Clock className="w-4 h-4 animate-spin inline-block mr-2" />
+                  Controllo disponibilità...
+                </div>
+              ) : (
+                <>
+                  {/* Lunch slots */}
+                  {lunchSlots.length > 0 && (
+                    <div>
+                      <Label className="text-sm text-muted-foreground mb-1.5 block">🌞 Pranzo</Label>
+                      <div className="grid grid-cols-3 gap-1.5">
+                        {lunchSlots.map((slot) => (
+                          <Button
+                            key={slot.time}
+                            type="button"
+                            size="sm"
+                            variant={formData.time === slot.time ? "default" : "outline"}
+                            onClick={() => slot.available && setFormData({ ...formData, time: slot.time })}
+                            disabled={!slot.available}
+                            className={`h-9 ${!slot.available ? 'opacity-50 line-through' : ''}`}
+                          >
+                            {slot.time}
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Dinner slots */}
+                  {dinnerSlots.length > 0 && (
+                    <div>
+                      <Label className="text-sm text-muted-foreground mb-1.5 block">🌙 Cena</Label>
+                      <div className="grid grid-cols-3 gap-1.5">
+                        {dinnerSlots.map((slot) => (
+                          <Button
+                            key={slot.time}
+                            type="button"
+                            size="sm"
+                            variant={formData.time === slot.time ? "default" : "outline"}
+                            onClick={() => slot.available && setFormData({ ...formData, time: slot.time })}
+                            disabled={!slot.available}
+                            className={`h-9 ${!slot.available ? 'opacity-50 line-through' : ''}`}
+                          >
+                            {slot.time}
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {lunchSlots.length === 0 && dinnerSlots.length === 0 && (
+                    <div className="text-center py-4 text-sm text-muted-foreground">
+                      Nessuno slot disponibile per questa data
+                    </div>
+                  )}
+                </>
+              )}
             </div>
           )}
 
-          <Button type="submit" className="w-full h-11" disabled={loading || !formData.date || !formData.time}>
+          <Button 
+            type="submit" 
+            className="w-full h-11" 
+            disabled={loading || !formData.date || !formData.time || isClosedOnDate}
+          >
             {loading ? "Invio..." : "Prenota ora"}
           </Button>
         </form>

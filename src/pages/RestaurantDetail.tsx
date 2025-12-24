@@ -384,7 +384,11 @@ const RestaurantDetail = () => {
 
             {/* Right column - Sidebar */}
             <div className="space-y-6">
-              <BookingWidget restaurantId={id!} restaurantName={restaurant.name} />
+              <BookingWidget 
+                restaurantId={id!} 
+                restaurantName={restaurant.name} 
+                openingHours={restaurant.opening_hours}
+              />
               
               <div ref={orariRef} id="orari" className="scroll-mt-32">
                 <OpeningHoursDisplay openingHours={restaurant.opening_hours} />
