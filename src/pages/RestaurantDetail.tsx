@@ -158,7 +158,7 @@ const RestaurantDetail = () => {
                     {restaurant.name}
                   </h1>
                   <div className="flex flex-wrap items-center gap-2 mt-1">
-                    {rating?.avg_rating && (
+                {rating?.avg_rating && (
                       <div className="flex items-center gap-1">
                         <div className="flex gap-0.5">
                           {[1, 2, 3, 4, 5].map((star) => (
@@ -166,7 +166,7 @@ const RestaurantDetail = () => {
                               key={star}
                               className={`w-3 h-3 rounded-full ${
                                 star <= Math.round(rating.avg_rating) 
-                                  ? 'bg-green-500' 
+                                  ? 'bg-primary' 
                                   : 'bg-muted'
                               }`}
                             />
@@ -202,7 +202,7 @@ const RestaurantDetail = () => {
                   {isFavorite ? 'Salvato' : 'Salva'}
                 </Button>
                 <ReviewDialog restaurantId={id!} onReviewSubmitted={fetchRestaurant}>
-                  <Button size="sm" className="gap-2 bg-green-600 hover:bg-green-700">
+                  <Button size="sm" className="gap-2">
                     <Star className="w-4 h-4" />
                     Scrivi una recensione
                   </Button>
@@ -223,6 +223,16 @@ const RestaurantDetail = () => {
               galleryImages={restaurant.gallery_images}
               restaurantName={restaurant.name}
             />
+          </div>
+
+          {/* Mobile: Booking and Hours first */}
+          <div className="lg:hidden space-y-4 mb-8">
+            <BookingWidget 
+              restaurantId={id!} 
+              restaurantName={restaurant.name} 
+              openingHours={restaurant.opening_hours}
+            />
+            <OpeningHoursDisplay openingHours={restaurant.opening_hours} />
           </div>
 
           {/* Main content grid */}
@@ -267,7 +277,7 @@ const RestaurantDetail = () => {
                     <div className="flex flex-wrap gap-3">
                       {restaurant.extra_features?.map((feature: string) => (
                         <div key={feature} className="flex items-center gap-1.5 text-sm text-muted-foreground bg-muted/50 px-3 py-1.5 rounded-full">
-                          <Check className="w-4 h-4 text-green-600" />
+                          <Check className="w-4 h-4 text-primary" />
                           <span>{feature}</span>
                         </div>
                       ))}
@@ -365,8 +375,8 @@ const RestaurantDetail = () => {
                       </Badge>
                     )}
                   </h2>
-                  <ReviewDialog restaurantId={id!} onReviewSubmitted={fetchRestaurant}>
-                    <Button size="sm" className="gap-2 bg-green-600 hover:bg-green-700">
+                <ReviewDialog restaurantId={id!} onReviewSubmitted={fetchRestaurant}>
+                    <Button size="sm" className="gap-2">
                       <Star className="w-4 h-4" />
                       Scrivi una recensione
                     </Button>
@@ -382,8 +392,8 @@ const RestaurantDetail = () => {
               </section>
             </div>
 
-            {/* Right column - Sidebar */}
-            <div className="lg:sticky lg:top-32 lg:self-start space-y-6">
+            {/* Right column - Sidebar (desktop only) */}
+            <div className="hidden lg:block lg:sticky lg:top-32 lg:self-start space-y-6">
               <BookingWidget 
                 restaurantId={id!} 
                 restaurantName={restaurant.name} 

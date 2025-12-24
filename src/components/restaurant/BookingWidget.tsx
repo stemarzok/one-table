@@ -281,19 +281,23 @@ export const BookingWidget = ({ restaurantId, restaurantName, openingHours }: Bo
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Data */}
           <div>
-            <Label htmlFor="date" className="text-sm text-muted-foreground mb-1.5 flex items-center gap-1.5">
-              <Calendar className="w-4 h-4" />
+            <Label htmlFor="date" className="text-sm font-medium text-foreground mb-2 flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                <Calendar className="w-4 h-4 text-primary" />
+              </div>
               Data
             </Label>
-            <Input
-              id="date"
-              type="date"
-              min={minDate}
-              value={formData.date}
-              onChange={(e) => setFormData({ ...formData, date: e.target.value, time: "" })}
-              required
-              className="h-11"
-            />
+            <div className="relative">
+              <Input
+                id="date"
+                type="date"
+                min={minDate}
+                value={formData.date}
+                onChange={(e) => setFormData({ ...formData, date: e.target.value, time: "" })}
+                required
+                className="h-12 pl-4 pr-4 rounded-xl border-2 border-border/60 bg-background hover:border-primary/40 focus:border-primary transition-colors text-base font-medium"
+              />
+            </div>
           </div>
 
           {/* Closed warning */}
@@ -323,36 +327,28 @@ export const BookingWidget = ({ restaurantId, restaurantName, openingHours }: Bo
 
           {/* Numero Ospiti */}
           <div>
-            <Label className="text-sm text-muted-foreground mb-1.5 flex items-center gap-1.5">
-              <Users className="w-4 h-4" />
+            <Label className="text-sm font-medium text-foreground mb-2 flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                <Users className="w-4 h-4 text-primary" />
+              </div>
               Ospiti
             </Label>
-            <div className="grid grid-cols-4 gap-1.5">
-              {guestOptions.slice(0, 4).map((num) => (
-                <Button
+            <div className="grid grid-cols-4 gap-2">
+              {guestOptions.map((num) => (
+                <button
                   key={num}
                   type="button"
-                  size="sm"
-                  variant={formData.guests === num ? "default" : "outline"}
                   onClick={() => setFormData({ ...formData, guests: num })}
-                  className="h-9"
+                  className={`
+                    h-12 rounded-xl border-2 font-semibold text-base transition-all duration-200
+                    ${formData.guests === num 
+                      ? 'bg-primary text-primary-foreground border-primary shadow-md scale-105' 
+                      : 'bg-background border-border/60 text-foreground hover:border-primary/40 hover:bg-muted/50'
+                    }
+                  `}
                 >
                   {num}
-                </Button>
-              ))}
-            </div>
-            <div className="grid grid-cols-4 gap-1.5 mt-1.5">
-              {guestOptions.slice(4).map((num) => (
-                <Button
-                  key={num}
-                  type="button"
-                  size="sm"
-                  variant={formData.guests === num ? "default" : "outline"}
-                  onClick={() => setFormData({ ...formData, guests: num })}
-                  className="h-9"
-                >
-                  {num}
-                </Button>
+                </button>
               ))}
             </div>
           </div>
