@@ -1,22 +1,25 @@
 import { useParams } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { MapPin, Phone, Mail, Clock } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Separator } from "@/components/ui/separator";
+import { MapPin, Phone, Mail, Star, Utensils, CreditCard, Check, Users } from "lucide-react";
+import { useEffect, useState, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { BookingDialog } from "@/components/BookingDialog";
 import { ReviewDialog } from "@/components/ReviewDialog";
 import { ReviewsList } from "@/components/ReviewsList";
+import { HeroCarousel } from "@/components/restaurant/HeroCarousel";
+import { BookingWidget } from "@/components/restaurant/BookingWidget";
+import { OpeningHoursDisplay } from "@/components/restaurant/OpeningHoursDisplay";
 
 const RestaurantDetail = () => {
   const { id } = useParams();
-  const [activeTab, setActiveTab] = useState<string>("menu");
   const [restaurant, setRestaurant] = useState<any>(null);
   const [menuItems, setMenuItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [rating, setRating] = useState<any>(null);
+  const [showAllDescription, setShowAllDescription] = useState(false);
 
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' as ScrollBehavior });
@@ -43,6 +46,15 @@ const RestaurantDetail = () => {
         .eq('is_available', true);
 
       setMenuItems(menuData || []);
+
+      // Fetch rating
+      const { data: ratingData } = await supabase.rpc('get_restaurant_rating', {
+        restaurant_id_param: id
+      });
+      
+      if (ratingData && ratingData.length > 0) {
+        setRating(ratingData[0]);
+      }
     } catch (error) {
       console.error('Error fetching restaurant:', error);
     } finally {
@@ -50,13 +62,26 @@ const RestaurantDetail = () => {
     }
   };
 
+  const groupedMenu = useMemo(() => {
+    return menuItems.reduce((acc, item) => {
+      if (!acc[item.category]) {
+        acc[item.category] = [];
+      }
+      acc[item.category].push(item);
+      return acc;
+    }, {} as Record<string, any[]>);
+  }, [menuItems]);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
         <Header />
         <main className="pt-24 pb-16">
           <div className="container mx-auto px-4 text-center">
-            <p className="text-lg text-muted-foreground">Caricamento...</p>
+            <div className="animate-pulse space-y-4">
+              <div className="h-[50vh] bg-muted rounded-xl" />
+              <div className="h-8 bg-muted rounded w-1/3 mx-auto" />
+            </div>
           </div>
         </main>
         <Footer />
@@ -78,147 +103,210 @@ const RestaurantDetail = () => {
     );
   }
 
-  const groupedMenu = menuItems.reduce((acc, item) => {
-    if (!acc[item.category]) {
-      acc[item.category] = [];
-    }
-    acc[item.category].push(item);
-    return acc;
-  }, {} as Record<string, any[]>);
+  const description = restaurant.description || "";
+  const truncatedDescription = description.length > 300 
+    ? description.substring(0, 300) + "..." 
+    : description;
 
   return (
     <div className="min-h-screen bg-background">
       <Header />
       
-      <main className="pt-24 pb-16">
-        <div className="relative h-[60vh] overflow-hidden">
-          <img 
-            src={restaurant.cover_image_url || restaurant.logo_url || "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=1200&q=80"} 
-            alt={restaurant.name}
-            className="w-full h-full object-cover"
-          />
-          {/* Dark gradient overlay at bottom with logo and name */}
-          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent p-8">
-            <div className="container mx-auto">
-              <div className="flex flex-wrap items-end justify-between gap-4">
-                <div className="flex items-center gap-4">
-                  {restaurant.logo_url && (
-                    <img 
-                      src={restaurant.logo_url} 
-                      alt={`${restaurant.name} logo`}
-                      className="w-16 h-16 md:w-20 md:h-20 rounded-full object-cover border-2 border-white/30"
-                    />
-                  )}
-                  <div>
-                    <h1 className="text-3xl md:text-5xl font-bold text-white mb-2">{restaurant.name}</h1>
-                    <div className="flex flex-wrap items-center gap-4 text-white/90">
-                      {restaurant.cuisine_type && (
-                        <Badge variant="secondary" className="text-base">
-                          {restaurant.cuisine_type}
-                        </Badge>
-                      )}
-                      <div className="flex items-center gap-1">
-                        <MapPin className="w-5 h-5" />
-                        <span>{restaurant.city}</span>
+      <main className="pt-20 pb-16">
+        <div className="container mx-auto px-4">
+          {/* Hero Carousel */}
+          <div className="mb-6">
+            <HeroCarousel 
+              coverImage={restaurant.cover_image_url}
+              galleryImages={restaurant.gallery_images}
+              restaurantName={restaurant.name}
+            />
+          </div>
+
+          {/* Main content grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Left column - Main info */}
+            <div className="lg:col-span-2 space-y-6">
+              {/* Restaurant Header */}
+              <div className="flex flex-col md:flex-row md:items-start gap-4">
+                {restaurant.logo_url && (
+                  <img 
+                    src={restaurant.logo_url} 
+                    alt={`${restaurant.name} logo`}
+                    className="w-20 h-20 rounded-xl object-cover border-2 border-border shadow-sm"
+                  />
+                )}
+                <div className="flex-1">
+                  <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">
+                    {restaurant.name}
+                  </h1>
+                  <div className="flex flex-wrap items-center gap-3 mb-3">
+                    {rating?.avg_rating && (
+                      <div className="flex items-center gap-1.5 bg-primary/10 px-3 py-1.5 rounded-full">
+                        <Star className="w-5 h-5 fill-primary text-primary" />
+                        <span className="font-semibold text-primary">{rating.avg_rating}</span>
+                        <span className="text-muted-foreground text-sm">
+                          ({rating.total_reviews} recensioni)
+                        </span>
                       </div>
-                    </div>
+                    )}
+                    {restaurant.price_range && (
+                      <Badge variant="outline" className="text-sm">
+                        {restaurant.price_range}
+                      </Badge>
+                    )}
+                    {restaurant.cuisine_type && (
+                      <Badge variant="secondary">{restaurant.cuisine_type}</Badge>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <MapPin className="w-4 h-4" />
+                    <span>{restaurant.address}, {restaurant.city}</span>
                   </div>
                 </div>
-                <BookingDialog restaurantId={id!} restaurantName={restaurant.name} />
               </div>
-            </div>
-          </div>
-        </div>
 
-        <div className="container mx-auto px-4 mt-8">
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
-            <TabsList className="grid w-full max-w-md mx-auto grid-cols-3">
-              <TabsTrigger value="menu">Menu</TabsTrigger>
-              <TabsTrigger value="reviews">Recensioni</TabsTrigger>
-              <TabsTrigger value="info">Info</TabsTrigger>
-            </TabsList>
+              <Separator />
 
-            <TabsContent value="menu" className="space-y-8">
-              {Object.keys(groupedMenu).length === 0 ? (
-                <Card className="p-12 text-center">
-                  <p className="text-muted-foreground">Nessun piatto disponibile al momento</p>
+              {/* Quick Info - In breve */}
+              <div>
+                <h2 className="text-xl font-semibold mb-4">In breve</h2>
+                <div className="flex flex-wrap gap-4 text-sm">
+                  <a href={`tel:${restaurant.phone}`} className="flex items-center gap-2 hover:text-primary transition-colors">
+                    <Phone className="w-4 h-4" />
+                    <span className="underline">{restaurant.phone}</span>
+                  </a>
+                  <a href={`mailto:${restaurant.email}`} className="flex items-center gap-2 hover:text-primary transition-colors">
+                    <Mail className="w-4 h-4" />
+                    <span className="underline">{restaurant.email}</span>
+                  </a>
+                </div>
+              </div>
+
+              {/* Description - Info */}
+              {description && (
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg">Info</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-muted-foreground leading-relaxed">
+                      {showAllDescription ? description : truncatedDescription}
+                    </p>
+                    {description.length > 300 && (
+                      <button 
+                        onClick={() => setShowAllDescription(!showAllDescription)}
+                        className="text-primary font-medium mt-2 hover:underline"
+                      >
+                        {showAllDescription ? "Mostra meno" : "Scopri di più"} ▾
+                      </button>
+                    )}
+                  </CardContent>
                 </Card>
-              ) : (
-                Object.entries(groupedMenu).map(([category, items]: [string, any[]]) => (
-                  <Card key={category} className="p-6">
-                    <h3 className="text-2xl font-semibold mb-6">{category}</h3>
-                    <div className="space-y-4">
-                      {items.map((item: any) => (
-                        <div key={item.id} className="flex justify-between items-start pb-4 border-b border-border last:border-0">
-                          <div className="flex-1">
-                            <h4 className="font-semibold">{item.name}</h4>
-                            {item.description && (
-                              <p className="text-sm text-muted-foreground mt-1">{item.description}</p>
-                            )}
+              )}
+
+              {/* Features - Caratteristiche */}
+              {(restaurant.extra_features?.length > 0 || restaurant.specializations?.length > 0 || restaurant.occasions?.length > 0) && (
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg">Caratteristiche</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {restaurant.extra_features?.length > 0 && (
+                      <div className="flex flex-wrap gap-2">
+                        {restaurant.extra_features.map((feature: string) => (
+                          <div key={feature} className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                            <Check className="w-4 h-4 text-green-600" />
+                            <span>{feature}</span>
                           </div>
-                          <span className="font-semibold text-primary ml-4">€{item.price}</span>
+                        ))}
+                      </div>
+                    )}
+                    {restaurant.occasions?.length > 0 && (
+                      <div className="flex flex-wrap gap-2">
+                        {restaurant.occasions.map((occasion: string) => (
+                          <Badge key={occasion} variant="outline">{occasion}</Badge>
+                        ))}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Menu Section */}
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Utensils className="w-5 h-5 text-primary" />
+                    Menu
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {Object.keys(groupedMenu).length === 0 ? (
+                    <p className="text-muted-foreground text-center py-8">
+                      Nessun piatto disponibile al momento
+                    </p>
+                  ) : (
+                    <div className="space-y-6">
+                      {Object.entries(groupedMenu).map(([category, items]: [string, any[]]) => (
+                        <div key={category}>
+                          <h3 className="font-semibold text-lg mb-3 text-primary">{category}</h3>
+                          <div className="space-y-3">
+                            {items.map((item: any) => (
+                              <div 
+                                key={item.id} 
+                                className="flex justify-between items-start py-3 border-b border-border/50 last:border-0"
+                              >
+                                <div className="flex-1 pr-4">
+                                  <h4 className="font-medium">{item.name}</h4>
+                                  {item.description && (
+                                    <p className="text-sm text-muted-foreground mt-0.5">
+                                      {item.description}
+                                    </p>
+                                  )}
+                                </div>
+                                <span className="font-semibold text-primary whitespace-nowrap">
+                                  €{item.price.toFixed(2)}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
                         </div>
                       ))}
                     </div>
-                  </Card>
-                ))
-              )}
-            </TabsContent>
-
-            <TabsContent value="reviews" className="space-y-6">
-              <div className="flex justify-end mb-4">
-                <ReviewDialog restaurantId={id!} onReviewSubmitted={fetchRestaurant} />
-              </div>
-              <ReviewsList restaurantId={id!} />
-            </TabsContent>
-
-            <TabsContent value="info" className="space-y-6">
-              <Card className="p-6">
-                <h3 className="text-2xl font-semibold mb-6">Informazioni</h3>
-                <div className="space-y-4">
-                  {restaurant.description && (
-                    <p className="text-muted-foreground">{restaurant.description}</p>
                   )}
-                  <div className="grid gap-4 md:grid-cols-2">
-                    <div className="flex items-center gap-3">
-                      <Phone className="w-5 h-5 text-primary" />
-                      <div>
-                        <p className="text-sm text-muted-foreground">Telefono</p>
-                        <p className="font-medium">{restaurant.phone}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <Mail className="w-5 h-5 text-primary" />
-                      <div>
-                        <p className="text-sm text-muted-foreground">Email</p>
-                        <p className="font-medium">{restaurant.email}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <MapPin className="w-5 h-5 text-primary" />
-                      <div>
-                        <p className="text-sm text-muted-foreground">Indirizzo</p>
-                        <p className="font-medium">{restaurant.address}</p>
-                      </div>
-                    </div>
-                    {restaurant.opening_hours && (
-                      <div className="flex items-center gap-3">
-                        <Clock className="w-5 h-5 text-primary" />
-                        <div>
-                          <p className="text-sm text-muted-foreground">Orari</p>
-                          <p className="font-medium">
-                            {typeof restaurant.opening_hours === 'string' 
-                              ? restaurant.opening_hours 
-                              : JSON.stringify(restaurant.opening_hours)}
-                          </p>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
+                </CardContent>
               </Card>
-            </TabsContent>
-          </Tabs>
+
+              {/* Reviews Section */}
+              <Card>
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <Star className="w-5 h-5 text-primary" />
+                      Recensioni
+                      {rating?.total_reviews > 0 && (
+                        <Badge variant="secondary" className="ml-2">
+                          {rating.total_reviews}
+                        </Badge>
+                      )}
+                    </CardTitle>
+                    <ReviewDialog restaurantId={id!} onReviewSubmitted={fetchRestaurant} />
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <ReviewsList restaurantId={id!} />
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Right column - Booking widget & hours */}
+            <div className="space-y-6">
+              <BookingWidget restaurantId={id!} restaurantName={restaurant.name} />
+              
+              <OpeningHoursDisplay openingHours={restaurant.opening_hours} />
+            </div>
+          </div>
         </div>
       </main>
 
