@@ -383,7 +383,7 @@ const RestaurantDetail = () => {
             </div>
 
             {/* Right column - Sidebar */}
-            <div className="space-y-6">
+            <div className="lg:sticky lg:top-32 lg:self-start space-y-6">
               <BookingWidget 
                 restaurantId={id!} 
                 restaurantName={restaurant.name} 

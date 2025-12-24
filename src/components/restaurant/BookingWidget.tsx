@@ -270,7 +270,7 @@ export const BookingWidget = ({ restaurantId, restaurantName, openingHours }: Bo
   const dinnerSlots = availableSlots.filter(s => s.period === 'dinner');
 
   return (
-    <Card className="sticky top-24 shadow-xl border-2">
+    <Card className="shadow-xl border-2">
       <CardHeader className="pb-4">
         <CardTitle className="text-xl flex items-center gap-2">
           <Calendar className="w-5 h-5 text-primary" />
