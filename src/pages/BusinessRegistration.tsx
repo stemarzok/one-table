@@ -56,9 +56,19 @@ const BusinessRegistration = () => {
   const [province, setProvince] = useState("");
   const [postalCode, setPostalCode] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [addressVerified, setAddressVerified] = useState(false);
 
   // Validation states
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  // Reset address verification when user clears address fields
+  const resetAddressVerification = () => {
+    setAddressVerified(false);
+    setStreet("");
+    setCity("");
+    setProvince("");
+    setPostalCode("");
+  };
 
   // Handle address selection from autocomplete
   const handleAddressSelect = (address: {
@@ -67,11 +77,21 @@ const BusinessRegistration = () => {
     province: string;
     postalCode: string;
     fullAddress: string;
+    hasHouseNumber: boolean;
   }) => {
+    if (!address.hasHouseNumber) {
+      setErrors(prev => ({
+        ...prev,
+        street: 'Seleziona un indirizzo con numero civico'
+      }));
+      return;
+    }
+
     if (address.street) setStreet(address.street);
     if (address.city) setCity(address.city);
     if (address.province) setProvince(address.province);
     if (address.postalCode) setPostalCode(address.postalCode);
+    setAddressVerified(true);
     
     // Clear related errors
     setErrors(prev => ({
@@ -194,6 +214,10 @@ const BusinessRegistration = () => {
     const phoneError = validateField('businessPhone', businessPhone);
     if (phoneError) validationErrors.businessPhone = phoneError;
 
+    if (!addressVerified) {
+      validationErrors.street = "Seleziona un indirizzo verificato dall'autocomplete";
+    }
+
     if (!province) {
       validationErrors.province = "Provincia richiesta (usa l'autocomplete)";
     }
@@ -204,6 +228,11 @@ const BusinessRegistration = () => {
 
     if (!street) {
       validationErrors.street = "Indirizzo richiesto (usa l'autocomplete)";
+    }
+
+    // Check if street has house number (contains comma followed by number)
+    if (street && !street.match(/,\s*\d+/)) {
+      validationErrors.street = "L'indirizzo deve includere il numero civico";
     }
 
     const postalCodeError = validateField('postalCode', postalCode);
@@ -520,96 +549,94 @@ const BusinessRegistration = () => {
 
                 {/* Address Autocomplete Section */}
                 <div className="space-y-4 p-4 border border-border rounded-lg bg-muted/30">
-                  <div>
-                    <Label>Cerca Indirizzo *</Label>
-                    <p className="text-xs text-muted-foreground mb-2">
-                      Inizia a digitare l'indirizzo e seleziona dai suggerimenti
-                    </p>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label>Cerca Indirizzo con Numero Civico *</Label>
+                      <p className="text-xs text-muted-foreground">
+                        Digita l'indirizzo completo (es: "Via Roma 15, Milano") e seleziona dai suggerimenti
+                      </p>
+                    </div>
+                    {addressVerified && (
+                      <button
+                        type="button"
+                        onClick={resetAddressVerification}
+                        className="text-xs text-destructive hover:underline"
+                      >
+                        Cambia indirizzo
+                      </button>
+                    )}
+                  </div>
+                  
+                  {!addressVerified ? (
                     <AddressAutocomplete 
                       onAddressSelect={handleAddressSelect}
-                      placeholder="Es: Via Roma 123, Milano"
+                      placeholder="Es: Via Roma 15, Milano"
                       className="mt-1"
                     />
-                  </div>
+                  ) : null}
+                  
+                  {renderFieldError('street')}
 
-                  {/* Display selected address details */}
-                  <div className="grid md:grid-cols-2 gap-4 pt-4 border-t border-border">
-                    <div>
-                      <Label htmlFor="street">Via/Indirizzo *</Label>
-                      <Input
-                        id="street"
-                        value={street}
-                        onChange={(e) => setStreet(e.target.value)}
-                        placeholder="Compilato automaticamente"
-                        className={`mt-2 bg-background ${errors.street ? 'border-destructive' : ''}`}
-                      />
-                      {renderFieldError('street')}
-                      {street && !errors.street && (
+                  {/* Display selected address details - readonly after selection */}
+                  {addressVerified && (
+                    <div className="grid md:grid-cols-2 gap-4 pt-4 border-t border-border">
+                      <div>
+                        <Label htmlFor="street">Via/Indirizzo *</Label>
+                        <Input
+                          id="street"
+                          value={street}
+                          readOnly
+                          className="mt-2 bg-muted cursor-not-allowed"
+                        />
                         <p className="text-green-600 text-sm mt-1 flex items-center gap-1">
                           <CheckCircle2 className="h-3 w-3" />
-                          Indirizzo selezionato
+                          Indirizzo verificato
                         </p>
-                      )}
-                    </div>
+                      </div>
 
-                    <div>
-                      <Label htmlFor="city">Città *</Label>
-                      <Input
-                        id="city"
-                        value={city}
-                        onChange={(e) => setCity(e.target.value)}
-                        placeholder="Compilato automaticamente"
-                        className={`mt-2 bg-background ${errors.city ? 'border-destructive' : ''}`}
-                      />
-                      {renderFieldError('city')}
-                      {city && !errors.city && (
+                      <div>
+                        <Label htmlFor="city">Città *</Label>
+                        <Input
+                          id="city"
+                          value={city}
+                          readOnly
+                          className="mt-2 bg-muted cursor-not-allowed"
+                        />
                         <p className="text-green-600 text-sm mt-1 flex items-center gap-1">
                           <CheckCircle2 className="h-3 w-3" />
-                          Città selezionata
+                          Città verificata
                         </p>
-                      )}
-                    </div>
+                      </div>
 
-                    <div>
-                      <Label htmlFor="province">Provincia *</Label>
-                      <Input
-                        id="province"
-                        value={province}
-                        onChange={(e) => setProvince(e.target.value)}
-                        placeholder="Compilato automaticamente"
-                        className={`mt-2 bg-background ${errors.province ? 'border-destructive' : ''}`}
-                      />
-                      {renderFieldError('province')}
-                      {province && !errors.province && (
+                      <div>
+                        <Label htmlFor="province">Provincia *</Label>
+                        <Input
+                          id="province"
+                          value={province}
+                          readOnly
+                          className="mt-2 bg-muted cursor-not-allowed"
+                        />
                         <p className="text-green-600 text-sm mt-1 flex items-center gap-1">
                           <CheckCircle2 className="h-3 w-3" />
-                          Provincia selezionata
+                          Provincia verificata
                         </p>
-                      )}
-                    </div>
+                      </div>
 
-                    <div>
-                      <Label htmlFor="postalCode">CAP *</Label>
-                      <Input
-                        id="postalCode"
-                        value={postalCode}
-                        onChange={(e) => {
-                          const value = e.target.value.replace(/\D/g, '').slice(0, 5);
-                          setPostalCode(value);
-                        }}
-                        placeholder="Compilato automaticamente"
-                        maxLength={5}
-                        className={`mt-2 bg-background ${errors.postalCode ? 'border-destructive' : ''}`}
-                      />
-                      {renderFieldError('postalCode')}
-                      {postalCode && !errors.postalCode && (
+                      <div>
+                        <Label htmlFor="postalCode">CAP *</Label>
+                        <Input
+                          id="postalCode"
+                          value={postalCode}
+                          readOnly
+                          className="mt-2 bg-muted cursor-not-allowed"
+                        />
                         <p className="text-green-600 text-sm mt-1 flex items-center gap-1">
                           <CheckCircle2 className="h-3 w-3" />
-                          CAP valido
+                          CAP verificato
                         </p>
-                      )}
+                      </div>
                     </div>
-                  </div>
+                  )}
 
                   <p className="text-xs text-muted-foreground">
                     🇮🇹 Solo indirizzi italiani verificati • Powered by OpenStreetMap
