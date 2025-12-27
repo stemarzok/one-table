@@ -101,8 +101,14 @@ export function AddressAutocomplete({
   const parseAddress = (result: AddressResult): ParsedAddress => {
     const addr = result.address;
     
-    const street = [addr.road, addr.house_number].filter(Boolean).join(" ") || "";
+    // Format: "Via Roma, 123" or just "Via Roma" if no house number
+    let street = addr.road || "";
+    if (addr.house_number) {
+      street = `${street}, ${addr.house_number}`;
+    }
+    
     const city = addr.city || addr.town || addr.village || addr.municipality || "";
+    // Use county for province (e.g., "Milano", "Roma")
     const province = addr.county || addr.state || "";
     const postalCode = addr.postcode || "";
 
