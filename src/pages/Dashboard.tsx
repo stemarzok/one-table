@@ -131,15 +131,9 @@ const Dashboard = () => {
 
   useEffect(() => {
     const fetchRestaurants = async () => {
-      if (isAdmin) {
-        const { data } = await supabase.from('restaurants').select('*').order('name');
-        if (data) {
-          setAllRestaurants(data);
-          if (data.length > 0 && !selectedRestaurantId) {
-            setSelectedRestaurantId(data[0].id);
-          }
-        }
-      } else if (businessRoles.length > 0) {
+      // Admins can ONLY access restaurants where they have a business role
+      // This prevents admins from seeing all restaurant data
+      if (businessRoles.length > 0) {
         const restaurantIds = businessRoles.map(r => r.restaurant_id);
         const { data } = await supabase.from('restaurants').select('*').in('id', restaurantIds);
         if (data) {
@@ -148,6 +142,9 @@ const Dashboard = () => {
             setSelectedRestaurantId(data[0].id);
           }
         }
+      } else if (isAdmin) {
+        // Admins without business roles can access admin panel but not restaurant dashboards
+        setAllRestaurants([]);
       }
     };
     if (!loading) fetchRestaurants();
