@@ -30,6 +30,72 @@ export const phoneSchema = z
   .trim()
   .regex(/^\+?[0-9\s()-]{8,20}$/, { message: "Inserisci un numero di telefono valido" });
 
+// Italian phone validation schema (more strict)
+export const italianPhoneSchema = z
+  .string()
+  .trim()
+  .refine((val) => {
+    const cleanPhone = val.replace(/[\s\-\(\)]/g, '');
+    const patterns = [
+      /^\+39\d{9,10}$/,
+      /^0039\d{9,10}$/,
+      /^0\d{9,10}$/,
+      /^3\d{8,9}$/,
+    ];
+    return patterns.some(pattern => pattern.test(cleanPhone));
+  }, { message: "Inserisci un numero di telefono italiano valido (es: +39 333 1234567)" });
+
+// Italian VAT number validation schema
+export const italianVATSchema = z
+  .string()
+  .trim()
+  .refine((val) => {
+    const cleanVat = val.replace(/\s/g, '').toUpperCase();
+    const vatNumber = cleanVat.startsWith('IT') ? cleanVat.slice(2) : cleanVat;
+    
+    if (!/^\d{11}$/.test(vatNumber)) {
+      return false;
+    }
+    
+    let sum = 0;
+    for (let i = 0; i < 11; i++) {
+      const digit = parseInt(vatNumber[i], 10);
+      if (i % 2 === 0) {
+        sum += digit;
+      } else {
+        const doubled = digit * 2;
+        sum += doubled > 9 ? doubled - 9 : doubled;
+      }
+    }
+    
+    return sum % 10 === 0;
+  }, { message: "Inserisci una Partita IVA italiana valida (11 cifre)" });
+
+// Italian postal code validation schema
+export const italianPostalCodeSchema = z
+  .string()
+  .trim()
+  .regex(/^\d{5}$/, { message: "Il CAP deve essere di 5 cifre" })
+  .refine((val) => {
+    const numCode = parseInt(val, 10);
+    return numCode >= 10 && numCode <= 98168;
+  }, { message: "Inserisci un CAP italiano valido" });
+
+// Street address validation
+export const streetAddressSchema = z
+  .string()
+  .trim()
+  .min(5, { message: "L'indirizzo deve essere almeno 5 caratteri" })
+  .max(200, { message: "L'indirizzo deve essere meno di 200 caratteri" })
+  .regex(/^[a-zA-ZÀ-ÿ0-9\s,.'°\/-]+$/, { message: "L'indirizzo contiene caratteri non validi" });
+
+// Business name validation
+export const businessNameSchema = z
+  .string()
+  .trim()
+  .min(2, { message: "Il nome dell'attività deve essere almeno 2 caratteri" })
+  .max(150, { message: "Il nome dell'attività deve essere meno di 150 caratteri" });
+
 // Review validation schema
 export const reviewSchema = z
   .string()
