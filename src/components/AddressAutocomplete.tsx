@@ -1,9 +1,10 @@
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { MapPin, Loader2, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface AddressResult {
+  place_id: number;
   display_name: string;
   address: {
     road?: string;
@@ -18,8 +19,9 @@ interface AddressResult {
   };
 }
 
-interface ParsedAddress {
-  street: string;
+export interface ParsedAddress {
+  street: string; // road only (no civic)
+  houseNumber: string;
   city: string;
   province: string;
   postalCode: string;
@@ -33,10 +35,20 @@ interface AddressAutocompleteProps {
   className?: string;
 }
 
-export function AddressAutocomplete({ 
-  onAddressSelect, 
-  placeholder = "Inizia a digitare l'indirizzo con numero civico...",
-  className 
+function buildAltQuery(q: string): string | null {
+  const match = q.match(/\b(\d+[a-zA-Z]?)\b/);
+  if (!match) return null;
+  const number = match[1];
+  const rest = q.replace(match[0], "").trim();
+  const alt = `${number} ${rest}`.trim();
+  if (!alt || alt.toLowerCase() === q.toLowerCase()) return null;
+  return alt;
+}
+
+export function AddressAutocomplete({
+  onAddressSelect,
+  placeholder = "Inizia a digitare l'indirizzo...",
+  className,
 }: AddressAutocompleteProps) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<AddressResult[]>([]);
@@ -57,11 +69,9 @@ export function AddressAutocomplete({
   }, []);
 
   useEffect(() => {
-    if (debounceRef.current) {
-      clearTimeout(debounceRef.current);
-    }
+    if (debounceRef.current) clearTimeout(debounceRef.current);
 
-    if (query.length < 3) {
+    if (query.trim().length < 3) {
       setResults([]);
       setShowDropdown(false);
       return;
@@ -70,21 +80,54 @@ export function AddressAutocomplete({
     debounceRef.current = setTimeout(async () => {
       setIsLoading(true);
       try {
-        const response = await fetch(
-          `https://nominatim.openstreetmap.org/search?` +
-          `format=json&addressdetails=1&countrycodes=it&limit=8&q=${encodeURIComponent(query)}`,
-          {
-            headers: {
-              'Accept-Language': 'it',
-            }
-          }
+        const alt = buildAltQuery(query);
+        const queries = [query, alt].filter(Boolean) as string[];
+
+        const urls = queries.map(
+          (q) =>
+            `https://nominatim.openstreetmap.org/search?` +
+            `format=json&addressdetails=1&countrycodes=it&limit=8&q=${encodeURIComponent(q)}`
         );
-        
-        if (response.ok) {
-          const data = await response.json();
-          setResults(data);
-          setShowDropdown(data.length > 0);
+
+        const responses = await Promise.all(
+          urls.map((url) =>
+            fetch(url, {
+              headers: {
+                "Accept-Language": "it",
+              },
+            }).catch(() => null)
+          )
+        );
+
+        const payloads = await Promise.all(
+          responses.map(async (r) => {
+            if (!r || !r.ok) return [];
+            try {
+              return (await r.json()) as AddressResult[];
+            } catch {
+              return [];
+            }
+          })
+        );
+
+        const merged = payloads.flat();
+        const dedup = new Map<number, AddressResult>();
+        for (const item of merged) {
+          if (typeof item?.place_id === "number" && !dedup.has(item.place_id)) {
+            dedup.set(item.place_id, item);
+          }
         }
+
+        // Prefer results that include house number
+        const list = Array.from(dedup.values());
+        list.sort((a, b) => {
+          const ah = a.address?.house_number ? 1 : 0;
+          const bh = b.address?.house_number ? 1 : 0;
+          return bh - ah;
+        });
+
+        setResults(list);
+        setShowDropdown(list.length > 0);
       } catch (error) {
         console.error("Error fetching addresses:", error);
       } finally {
@@ -93,65 +136,49 @@ export function AddressAutocomplete({
     }, 400);
 
     return () => {
-      if (debounceRef.current) {
-        clearTimeout(debounceRef.current);
-      }
+      if (debounceRef.current) clearTimeout(debounceRef.current);
     };
   }, [query]);
 
   const formatDisplayAddress = (result: AddressResult): string => {
-    const addr = result.address;
+    const addr = result.address || {};
     const parts: string[] = [];
-    
-    // Street with house number
+
     if (addr.road) {
-      if (addr.house_number) {
-        parts.push(`${addr.road}, ${addr.house_number}`);
-      } else {
-        parts.push(addr.road);
-      }
+      parts.push(addr.house_number ? `${addr.road}, ${addr.house_number}` : addr.road);
     }
-    
-    // City
+
     const city = addr.city || addr.town || addr.village || addr.municipality;
     if (city) parts.push(city);
-    
-    // Province
+
     if (addr.county) parts.push(addr.county);
-    
-    // CAP
     if (addr.postcode) parts.push(addr.postcode);
-    
-    return parts.join(" - ");
+
+    return parts.length > 0 ? parts.join(" - ") : result.display_name;
   };
 
   const parseAddress = (result: AddressResult): ParsedAddress => {
-    const addr = result.address;
-    
-    // Format: "Via Roma, 123" - comma separates street from number
-    let street = addr.road || "";
-    const hasHouseNumber = !!addr.house_number;
-    if (hasHouseNumber) {
-      street = `${street}, ${addr.house_number}`;
-    }
-    
-    const city = addr.city || addr.town || addr.village || addr.municipality || "";
-    const province = addr.county || addr.state || "";
-    const postalCode = addr.postcode || "";
+    const addr = result.address || {};
+    const houseNumber = addr.house_number || "";
 
     return {
-      street,
-      city,
-      province,
-      postalCode,
+      street: addr.road || "",
+      houseNumber,
+      city: addr.city || addr.town || addr.village || addr.municipality || "",
+      province: addr.county || addr.state || "",
+      postalCode: addr.postcode || "",
       fullAddress: result.display_name,
-      hasHouseNumber
+      hasHouseNumber: !!houseNumber,
     };
   };
 
   const handleSelect = (result: AddressResult) => {
     const parsed = parseAddress(result);
-    setQuery(parsed.street || result.display_name);
+    const preview = parsed.hasHouseNumber
+      ? `${parsed.street}, ${parsed.houseNumber}`
+      : parsed.street || result.display_name;
+
+    setQuery(preview);
     setShowDropdown(false);
     onAddressSelect(parsed);
   };
@@ -167,6 +194,7 @@ export function AddressAutocomplete({
           onFocus={() => results.length > 0 && setShowDropdown(true)}
           placeholder={placeholder}
           className="pl-10 pr-10"
+          autoComplete="off"
         />
         {isLoading && (
           <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />
@@ -175,25 +203,30 @@ export function AddressAutocomplete({
 
       {showDropdown && results.length > 0 && (
         <div className="absolute z-50 w-full mt-1 bg-background border border-border rounded-md shadow-lg max-h-80 overflow-auto">
-          {results.map((result, index) => {
-            const hasNumber = !!result.address.house_number;
+          {results.map((result) => {
+            const hasNumber = !!result.address?.house_number;
             return (
               <button
-                key={index}
+                key={result.place_id}
                 type="button"
                 onClick={() => handleSelect(result)}
                 className={cn(
                   "w-full px-4 py-3 text-left hover:bg-muted transition-colors flex items-start gap-3 border-b border-border last:border-b-0",
-                  !hasNumber && "opacity-60"
+                  !hasNumber && "opacity-70"
                 )}
               >
-                <MapPin className={cn("h-4 w-4 mt-0.5 flex-shrink-0", hasNumber ? "text-primary" : "text-muted-foreground")} />
+                <MapPin
+                  className={cn(
+                    "h-4 w-4 mt-0.5 flex-shrink-0",
+                    hasNumber ? "text-primary" : "text-muted-foreground"
+                  )}
+                />
                 <div className="flex-1">
                   <span className="text-sm block">{formatDisplayAddress(result)}</span>
                   {!hasNumber && (
-                    <span className="text-xs text-destructive flex items-center gap-1 mt-1">
+                    <span className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
                       <AlertCircle className="h-3 w-3" />
-                      Manca il numero civico - aggiungi il numero nella ricerca
+                      Se non compare il civico, potrai inserirlo manualmente nel prossimo step
                     </span>
                   )}
                 </div>
@@ -203,9 +236,9 @@ export function AddressAutocomplete({
         </div>
       )}
 
-      {showDropdown && results.length === 0 && !isLoading && query.length >= 3 && (
+      {showDropdown && results.length === 0 && !isLoading && query.trim().length >= 3 && (
         <div className="absolute z-50 w-full mt-1 bg-background border border-border rounded-md shadow-lg p-4 text-center text-muted-foreground text-sm">
-          Nessun indirizzo trovato. Prova con "Via Nome, numero civico, città"
+          Nessun indirizzo trovato. Prova con "Via Nome 12, Città"
         </div>
       )}
     </div>
