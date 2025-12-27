@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
@@ -16,15 +16,10 @@ import {
   italianVATSchema, 
   italianPostalCodeSchema,
   italianPhoneSchema,
-  streetAddressSchema,
   businessNameSchema,
   nameSchema
 } from "@/lib/validation";
-import { 
-  ITALIAN_PROVINCES, 
-  BUSINESS_ROLES, 
-  getCitiesByProvince 
-} from "@/lib/italianLocations";
+import { BUSINESS_ROLES } from "@/lib/italianLocations";
 import {
   Select,
   SelectContent,
@@ -33,6 +28,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { AlertCircle, CheckCircle2, Shield } from "lucide-react";
+import { AddressAutocomplete } from "@/components/AddressAutocomplete";
 
 const BusinessRegistration = () => {
   const { toast } = useToast();
@@ -64,16 +60,28 @@ const BusinessRegistration = () => {
   // Validation states
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  // Get cities based on selected province
-  const availableCities = useMemo(() => {
-    if (!province) return [];
-    return getCitiesByProvince(province);
-  }, [province]);
-
-  // Reset city when province changes
-  useEffect(() => {
-    setCity("");
-  }, [province]);
+  // Handle address selection from autocomplete
+  const handleAddressSelect = (address: {
+    street: string;
+    city: string;
+    province: string;
+    postalCode: string;
+    fullAddress: string;
+  }) => {
+    if (address.street) setStreet(address.street);
+    if (address.city) setCity(address.city);
+    if (address.province) setProvince(address.province);
+    if (address.postalCode) setPostalCode(address.postalCode);
+    
+    // Clear related errors
+    setErrors(prev => ({
+      ...prev,
+      street: '',
+      city: '',
+      province: '',
+      postalCode: ''
+    }));
+  };
 
   useEffect(() => {
     // Redirect if already logged in with business role
@@ -125,11 +133,6 @@ const BusinessRegistration = () => {
         if (!value) return null;
         const phoneResult = italianPhoneSchema.safeParse(value);
         return phoneResult.success ? null : phoneResult.error.errors[0].message;
-      
-      case 'street':
-        if (!value) return null;
-        const streetResult = streetAddressSchema.safeParse(value);
-        return streetResult.success ? null : streetResult.error.errors[0].message;
       
       case 'businessName':
         const businessNameResult = businessNameSchema.safeParse(value);
@@ -192,15 +195,16 @@ const BusinessRegistration = () => {
     if (phoneError) validationErrors.businessPhone = phoneError;
 
     if (!province) {
-      validationErrors.province = "Seleziona una provincia";
+      validationErrors.province = "Provincia richiesta (usa l'autocomplete)";
     }
 
     if (!city) {
-      validationErrors.city = "Seleziona una città";
+      validationErrors.city = "Città richiesta (usa l'autocomplete)";
     }
 
-    const streetError = validateField('street', street);
-    if (streetError) validationErrors.street = streetError;
+    if (!street) {
+      validationErrors.street = "Indirizzo richiesto (usa l'autocomplete)";
+    }
 
     const postalCodeError = validateField('postalCode', postalCode);
     if (postalCodeError) validationErrors.postalCode = postalCodeError;
@@ -514,104 +518,102 @@ const BusinessRegistration = () => {
                   {renderFieldSuccess('businessPhone', businessPhone)}
                 </div>
 
-                <div>
-                  <Label htmlFor="country">Paese *</Label>
-                  <Input
-                    id="country"
-                    value={country}
-                    disabled
-                    className="mt-2 bg-muted"
-                  />
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Al momento il servizio è disponibile solo in Italia
+                {/* Address Autocomplete Section */}
+                <div className="space-y-4 p-4 border border-border rounded-lg bg-muted/30">
+                  <div>
+                    <Label>Cerca Indirizzo *</Label>
+                    <p className="text-xs text-muted-foreground mb-2">
+                      Inizia a digitare l'indirizzo e seleziona dai suggerimenti
+                    </p>
+                    <AddressAutocomplete 
+                      onAddressSelect={handleAddressSelect}
+                      placeholder="Es: Via Roma 123, Milano"
+                      className="mt-1"
+                    />
+                  </div>
+
+                  {/* Display selected address details */}
+                  <div className="grid md:grid-cols-2 gap-4 pt-4 border-t border-border">
+                    <div>
+                      <Label htmlFor="street">Via/Indirizzo *</Label>
+                      <Input
+                        id="street"
+                        value={street}
+                        onChange={(e) => setStreet(e.target.value)}
+                        placeholder="Compilato automaticamente"
+                        className={`mt-2 bg-background ${errors.street ? 'border-destructive' : ''}`}
+                      />
+                      {renderFieldError('street')}
+                      {street && !errors.street && (
+                        <p className="text-green-600 text-sm mt-1 flex items-center gap-1">
+                          <CheckCircle2 className="h-3 w-3" />
+                          Indirizzo selezionato
+                        </p>
+                      )}
+                    </div>
+
+                    <div>
+                      <Label htmlFor="city">Città *</Label>
+                      <Input
+                        id="city"
+                        value={city}
+                        onChange={(e) => setCity(e.target.value)}
+                        placeholder="Compilato automaticamente"
+                        className={`mt-2 bg-background ${errors.city ? 'border-destructive' : ''}`}
+                      />
+                      {renderFieldError('city')}
+                      {city && !errors.city && (
+                        <p className="text-green-600 text-sm mt-1 flex items-center gap-1">
+                          <CheckCircle2 className="h-3 w-3" />
+                          Città selezionata
+                        </p>
+                      )}
+                    </div>
+
+                    <div>
+                      <Label htmlFor="province">Provincia *</Label>
+                      <Input
+                        id="province"
+                        value={province}
+                        onChange={(e) => setProvince(e.target.value)}
+                        placeholder="Compilato automaticamente"
+                        className={`mt-2 bg-background ${errors.province ? 'border-destructive' : ''}`}
+                      />
+                      {renderFieldError('province')}
+                      {province && !errors.province && (
+                        <p className="text-green-600 text-sm mt-1 flex items-center gap-1">
+                          <CheckCircle2 className="h-3 w-3" />
+                          Provincia selezionata
+                        </p>
+                      )}
+                    </div>
+
+                    <div>
+                      <Label htmlFor="postalCode">CAP *</Label>
+                      <Input
+                        id="postalCode"
+                        value={postalCode}
+                        onChange={(e) => {
+                          const value = e.target.value.replace(/\D/g, '').slice(0, 5);
+                          setPostalCode(value);
+                        }}
+                        placeholder="Compilato automaticamente"
+                        maxLength={5}
+                        className={`mt-2 bg-background ${errors.postalCode ? 'border-destructive' : ''}`}
+                      />
+                      {renderFieldError('postalCode')}
+                      {postalCode && !errors.postalCode && (
+                        <p className="text-green-600 text-sm mt-1 flex items-center gap-1">
+                          <CheckCircle2 className="h-3 w-3" />
+                          CAP valido
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  <p className="text-xs text-muted-foreground">
+                    🇮🇹 Solo indirizzi italiani verificati • Powered by OpenStreetMap
                   </p>
-                </div>
-
-                <div>
-                  <Label htmlFor="province">Provincia *</Label>
-                  <Select value={province} onValueChange={setProvince}>
-                    <SelectTrigger className={`mt-2 ${errors.province ? 'border-destructive' : ''}`}>
-                      <SelectValue placeholder="Seleziona la provincia" />
-                    </SelectTrigger>
-                    <SelectContent className="max-h-[300px]">
-                      {ITALIAN_PROVINCES.map((prov) => (
-                        <SelectItem key={prov.code} value={prov.code}>
-                          {prov.name} ({prov.code})
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {renderFieldError('province')}
-                </div>
-
-                <div>
-                  <Label htmlFor="city">Città *</Label>
-                  {availableCities.length > 0 ? (
-                    <Select value={city} onValueChange={setCity} disabled={!province}>
-                      <SelectTrigger className={`mt-2 ${errors.city ? 'border-destructive' : ''}`}>
-                        <SelectValue placeholder="Seleziona la città" />
-                      </SelectTrigger>
-                      <SelectContent className="max-h-[300px]">
-                        {availableCities.map((cityName) => (
-                          <SelectItem key={cityName} value={cityName}>
-                            {cityName}
-                          </SelectItem>
-                        ))}
-                        <SelectItem value="__other__">Altra città...</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  ) : (
-                    <Input
-                      id="city"
-                      value={city}
-                      onChange={(e) => setCity(e.target.value)}
-                      placeholder={province ? "Inserisci la città" : "Seleziona prima la provincia"}
-                      disabled={!province}
-                      required
-                      className={`mt-2 ${errors.city ? 'border-destructive' : ''}`}
-                    />
-                  )}
-                  {city === "__other__" && (
-                    <Input
-                      value=""
-                      onChange={(e) => setCity(e.target.value)}
-                      placeholder="Inserisci il nome della città"
-                      className="mt-2"
-                    />
-                  )}
-                  {renderFieldError('city')}
-                </div>
-
-                <div>
-                  <Label htmlFor="street">Indirizzo (Via e Numero) *</Label>
-                  <Input
-                    id="street"
-                    value={street}
-                    onChange={(e) => handleFieldChange('street', e.target.value, setStreet)}
-                    placeholder="Es: Via Roma, 123"
-                    required
-                    className={`mt-2 ${errors.street ? 'border-destructive' : ''}`}
-                  />
-                  {renderFieldError('street')}
-                  {renderFieldSuccess('street', street)}
-                </div>
-
-                <div>
-                  <Label htmlFor="postalCode">CAP *</Label>
-                  <Input
-                    id="postalCode"
-                    value={postalCode}
-                    onChange={(e) => {
-                      const value = e.target.value.replace(/\D/g, '').slice(0, 5);
-                      handleFieldChange('postalCode', value, setPostalCode);
-                    }}
-                    placeholder="00100"
-                    maxLength={5}
-                    required
-                    className={`mt-2 ${errors.postalCode ? 'border-destructive' : ''}`}
-                  />
-                  {renderFieldError('postalCode')}
-                  {renderFieldSuccess('postalCode', postalCode)}
                 </div>
               </div>
             </Card>
