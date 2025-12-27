@@ -214,8 +214,22 @@ const BusinessRegistration = () => {
     const phoneError = validateField('businessPhone', businessPhone);
     if (phoneError) validationErrors.businessPhone = phoneError;
 
+    // Address validation
+    const civic = civicNumber.trim();
+    const civicRegex = /^[0-9]{1,6}[A-Za-z]?([\/-][0-9]{1,6}[A-Za-z]?)?$/;
+
     if (!addressVerified) {
-      validationErrors.street = "Seleziona un indirizzo verificato dall'autocomplete";
+      validationErrors.street = "Seleziona un indirizzo dall'autocomplete";
+    }
+
+    if (!street) {
+      validationErrors.street = "Via richiesta (seleziona dall'autocomplete)";
+    }
+
+    if (!civic) {
+      validationErrors.civicNumber = "Numero civico obbligatorio";
+    } else if (!civicRegex.test(civic)) {
+      validationErrors.civicNumber = "Numero civico non valido";
     }
 
     if (!province) {
@@ -224,15 +238,6 @@ const BusinessRegistration = () => {
 
     if (!city) {
       validationErrors.city = "Città richiesta (usa l'autocomplete)";
-    }
-
-    if (!street) {
-      validationErrors.street = "Indirizzo richiesto (usa l'autocomplete)";
-    }
-
-    // Check if street has house number (contains comma followed by number)
-    if (street && !street.match(/,\s*\d+/)) {
-      validationErrors.street = "L'indirizzo deve includere il numero civico";
     }
 
     const postalCodeError = validateField('postalCode', postalCode);
@@ -270,7 +275,7 @@ const BusinessRegistration = () => {
           businessPhone,
           country,
           city,
-          street,
+          street: `${street}, ${civicNumber.trim()}`,
           province,
           postalCode
         }
@@ -549,39 +554,38 @@ const BusinessRegistration = () => {
 
                 {/* Address Autocomplete Section */}
                 <div className="space-y-4 p-4 border border-border rounded-lg bg-muted/30">
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-start justify-between gap-4">
                     <div>
-                      <Label>Cerca Indirizzo con Numero Civico *</Label>
+                      <Label>Cerca Indirizzo *</Label>
                       <p className="text-xs text-muted-foreground">
-                        Digita l'indirizzo completo (es: "Via Roma 15, Milano") e seleziona dai suggerimenti
+                        Seleziona la via dai suggerimenti; il numero civico è obbligatorio (se non compare, lo inserisci sotto).
                       </p>
                     </div>
                     {addressVerified && (
                       <button
                         type="button"
                         onClick={resetAddressVerification}
-                        className="text-xs text-destructive hover:underline"
+                        className="text-xs text-destructive hover:underline whitespace-nowrap"
                       >
                         Cambia indirizzo
                       </button>
                     )}
                   </div>
-                  
+
                   {!addressVerified ? (
-                    <AddressAutocomplete 
+                    <AddressAutocomplete
                       onAddressSelect={handleAddressSelect}
-                      placeholder="Es: Via Roma 15, Milano"
+                      placeholder="Es: Via Vittorio Emanuele 71, Colturano"
                       className="mt-1"
                     />
                   ) : null}
-                  
+
                   {renderFieldError('street')}
 
-                  {/* Display selected address details - readonly after selection */}
                   {addressVerified && (
                     <div className="grid md:grid-cols-2 gap-4 pt-4 border-t border-border">
-                      <div>
-                        <Label htmlFor="street">Via/Indirizzo *</Label>
+                      <div className="md:col-span-2">
+                        <Label htmlFor="street">Via *</Label>
                         <Input
                           id="street"
                           value={street}
@@ -590,7 +594,48 @@ const BusinessRegistration = () => {
                         />
                         <p className="text-green-600 text-sm mt-1 flex items-center gap-1">
                           <CheckCircle2 className="h-3 w-3" />
-                          Indirizzo verificato
+                          Via verificata
+                        </p>
+                      </div>
+
+                      <div>
+                        <Label htmlFor="civicNumber">Numero civico *</Label>
+                        <Input
+                          id="civicNumber"
+                          value={civicNumber}
+                          readOnly={civicLocked}
+                          onChange={(e) => {
+                            const v = e.target.value.trim();
+                            setCivicNumber(v);
+                            setErrors((prev) => ({ ...prev, civicNumber: '' }));
+                          }}
+                          placeholder={civicLocked ? "Verificato" : "Es: 71 o 71A"}
+                          className={cn(
+                            "mt-2",
+                            civicLocked ? "bg-muted cursor-not-allowed" : "bg-background",
+                            errors.civicNumber ? "border-destructive" : ""
+                          )}
+                        />
+                        {renderFieldError('civicNumber')}
+                        {civicNumber && !errors.civicNumber && (
+                          <p className="text-green-600 text-sm mt-1 flex items-center gap-1">
+                            <CheckCircle2 className="h-3 w-3" />
+                            Numero civico OK
+                          </p>
+                        )}
+                      </div>
+
+                      <div>
+                        <Label htmlFor="postalCode">CAP *</Label>
+                        <Input
+                          id="postalCode"
+                          value={postalCode}
+                          readOnly
+                          className="mt-2 bg-muted cursor-not-allowed"
+                        />
+                        <p className="text-green-600 text-sm mt-1 flex items-center gap-1">
+                          <CheckCircle2 className="h-3 w-3" />
+                          CAP verificato
                         </p>
                       </div>
 
@@ -621,25 +666,11 @@ const BusinessRegistration = () => {
                           Provincia verificata
                         </p>
                       </div>
-
-                      <div>
-                        <Label htmlFor="postalCode">CAP *</Label>
-                        <Input
-                          id="postalCode"
-                          value={postalCode}
-                          readOnly
-                          className="mt-2 bg-muted cursor-not-allowed"
-                        />
-                        <p className="text-green-600 text-sm mt-1 flex items-center gap-1">
-                          <CheckCircle2 className="h-3 w-3" />
-                          CAP verificato
-                        </p>
-                      </div>
                     </div>
                   )}
 
                   <p className="text-xs text-muted-foreground">
-                    🇮🇹 Solo indirizzi italiani verificati • Powered by OpenStreetMap
+                    🇮🇹 Powered by OpenStreetMap • Nota: alcuni indirizzi non restituiscono il civico nei suggerimenti.
                   </p>
                 </div>
               </div>
