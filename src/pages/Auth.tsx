@@ -80,7 +80,7 @@ const Auth = () => {
       localStorage.removeItem('rememberedPassword');
     }
     
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data: authData, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
@@ -95,6 +95,23 @@ const Auth = () => {
       }
       setIsLoading(false);
       return;
+    }
+
+    // Check if this is a business-only account
+    if (authData.user) {
+      const { data: businessRole } = await supabase
+        .from('business_roles')
+        .select('id')
+        .eq('user_id', authData.user.id)
+        .maybeSingle();
+      
+      if (businessRole) {
+        // Business users cannot access customer section
+        await supabase.auth.signOut();
+        toast.error("Questo account è registrato come ristoratore. Usa il login business per accedere.");
+        setIsLoading(false);
+        return;
+      }
     }
 
     toast.success("Accesso effettuato con successo!");
