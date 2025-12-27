@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Input } from "@/components/ui/input";
-import { MapPin, Loader2 } from "lucide-react";
+import { MapPin, Loader2, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface AddressResult {
@@ -24,6 +24,7 @@ interface ParsedAddress {
   province: string;
   postalCode: string;
   fullAddress: string;
+  hasHouseNumber: boolean;
 }
 
 interface AddressAutocompleteProps {
@@ -34,7 +35,7 @@ interface AddressAutocompleteProps {
 
 export function AddressAutocomplete({ 
   onAddressSelect, 
-  placeholder = "Inizia a digitare l'indirizzo...",
+  placeholder = "Inizia a digitare l'indirizzo con numero civico...",
   className 
 }: AddressAutocompleteProps) {
   const [query, setQuery] = useState("");
@@ -71,7 +72,7 @@ export function AddressAutocomplete({
       try {
         const response = await fetch(
           `https://nominatim.openstreetmap.org/search?` +
-          `format=json&addressdetails=1&countrycodes=it&limit=5&q=${encodeURIComponent(query)}`,
+          `format=json&addressdetails=1&countrycodes=it&limit=8&q=${encodeURIComponent(query)}`,
           {
             headers: {
               'Accept-Language': 'it',
@@ -98,17 +99,43 @@ export function AddressAutocomplete({
     };
   }, [query]);
 
+  const formatDisplayAddress = (result: AddressResult): string => {
+    const addr = result.address;
+    const parts: string[] = [];
+    
+    // Street with house number
+    if (addr.road) {
+      if (addr.house_number) {
+        parts.push(`${addr.road}, ${addr.house_number}`);
+      } else {
+        parts.push(addr.road);
+      }
+    }
+    
+    // City
+    const city = addr.city || addr.town || addr.village || addr.municipality;
+    if (city) parts.push(city);
+    
+    // Province
+    if (addr.county) parts.push(addr.county);
+    
+    // CAP
+    if (addr.postcode) parts.push(addr.postcode);
+    
+    return parts.join(" - ");
+  };
+
   const parseAddress = (result: AddressResult): ParsedAddress => {
     const addr = result.address;
     
-    // Format: "Via Roma, 123" or just "Via Roma" if no house number
+    // Format: "Via Roma, 123" - comma separates street from number
     let street = addr.road || "";
-    if (addr.house_number) {
+    const hasHouseNumber = !!addr.house_number;
+    if (hasHouseNumber) {
       street = `${street}, ${addr.house_number}`;
     }
     
     const city = addr.city || addr.town || addr.village || addr.municipality || "";
-    // Use county for province (e.g., "Milano", "Roma")
     const province = addr.county || addr.state || "";
     const postalCode = addr.postcode || "";
 
@@ -117,7 +144,8 @@ export function AddressAutocomplete({
       city,
       province,
       postalCode,
-      fullAddress: result.display_name
+      fullAddress: result.display_name,
+      hasHouseNumber
     };
   };
 
@@ -146,24 +174,38 @@ export function AddressAutocomplete({
       </div>
 
       {showDropdown && results.length > 0 && (
-        <div className="absolute z-50 w-full mt-1 bg-background border border-border rounded-md shadow-lg max-h-60 overflow-auto">
-          {results.map((result, index) => (
-            <button
-              key={index}
-              type="button"
-              onClick={() => handleSelect(result)}
-              className="w-full px-4 py-3 text-left hover:bg-muted transition-colors flex items-start gap-3 border-b border-border last:border-b-0"
-            >
-              <MapPin className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
-              <span className="text-sm">{result.display_name}</span>
-            </button>
-          ))}
+        <div className="absolute z-50 w-full mt-1 bg-background border border-border rounded-md shadow-lg max-h-80 overflow-auto">
+          {results.map((result, index) => {
+            const hasNumber = !!result.address.house_number;
+            return (
+              <button
+                key={index}
+                type="button"
+                onClick={() => handleSelect(result)}
+                className={cn(
+                  "w-full px-4 py-3 text-left hover:bg-muted transition-colors flex items-start gap-3 border-b border-border last:border-b-0",
+                  !hasNumber && "opacity-60"
+                )}
+              >
+                <MapPin className={cn("h-4 w-4 mt-0.5 flex-shrink-0", hasNumber ? "text-primary" : "text-muted-foreground")} />
+                <div className="flex-1">
+                  <span className="text-sm block">{formatDisplayAddress(result)}</span>
+                  {!hasNumber && (
+                    <span className="text-xs text-destructive flex items-center gap-1 mt-1">
+                      <AlertCircle className="h-3 w-3" />
+                      Manca il numero civico - aggiungi il numero nella ricerca
+                    </span>
+                  )}
+                </div>
+              </button>
+            );
+          })}
         </div>
       )}
 
       {showDropdown && results.length === 0 && !isLoading && query.length >= 3 && (
         <div className="absolute z-50 w-full mt-1 bg-background border border-border rounded-md shadow-lg p-4 text-center text-muted-foreground text-sm">
-          Nessun indirizzo trovato
+          Nessun indirizzo trovato. Prova con "Via Nome, numero civico, città"
         </div>
       )}
     </div>
