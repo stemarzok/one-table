@@ -27,6 +27,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { AlertCircle, CheckCircle2, Shield } from "lucide-react";
 import { AddressAutocomplete, type ParsedAddress } from "@/components/AddressAutocomplete";
 import { cn } from "@/lib/utils";
@@ -61,7 +71,7 @@ const BusinessRegistration = () => {
   const [addressFieldsLocked, setAddressFieldsLocked] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [addressVerified, setAddressVerified] = useState(false);
-
+  const [showUnlockDialog, setShowUnlockDialog] = useState(false);
   // Civic number auto-correction: '71 a' → '71A', '  12b  ' → '12B'
   const normalizeCivic = (raw: string): string => {
     return raw
@@ -87,13 +97,12 @@ const BusinessRegistration = () => {
 
   // Unlock street/city/CAP/province for manual editing
   const handleUnlockAddressFields = () => {
-    if (
-      window.confirm(
-        "Sei sicuro di voler modificare i campi indirizzo? Eventuali modifiche manuali non saranno verificate automaticamente."
-      )
-    ) {
-      setAddressFieldsLocked(false);
-    }
+    setShowUnlockDialog(true);
+  };
+
+  const confirmUnlockAddressFields = () => {
+    setAddressFieldsLocked(false);
+    setShowUnlockDialog(false);
   };
 
   // Handle address selection from autocomplete
@@ -750,6 +759,22 @@ const BusinessRegistration = () => {
       </main>
       
       <Footer />
+
+      {/* AlertDialog for unlocking address fields */}
+      <AlertDialog open={showUnlockDialog} onOpenChange={setShowUnlockDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Modificare l'indirizzo?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Sei sicuro di voler modificare i campi indirizzo? Eventuali modifiche manuali non saranno verificate automaticamente.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annulla</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmUnlockAddressFields}>Conferma</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

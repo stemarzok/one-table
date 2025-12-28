@@ -86,6 +86,7 @@ const RestaurantCard = ({
             <img
               src={image}
               alt={name}
+              loading="lazy"
               className="w-full h-full object-cover transition-transform duration-500 group-hover/card:scale-105"
             />
           )}
@@ -100,6 +101,7 @@ const RestaurantCard = ({
           {/* Heart button - stile TripAdvisor */}
           <button
             onClick={handleFavoriteClick}
+            aria-label={isFavorite(String(id)) ? "Rimuovi dai preferiti" : "Aggiungi ai preferiti"}
             className="absolute top-3 right-3 p-2 rounded-full bg-white/90 backdrop-blur-sm shadow-md hover:bg-white transition-all duration-200 hover:scale-110"
           >
             <Heart 

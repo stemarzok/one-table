@@ -134,6 +134,7 @@ const Header = () => {
           <button 
             className={`md:hidden ${textColorClass}`}
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label={mobileMenuOpen ? "Chiudi menu" : "Apri menu"}
           >
             {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>

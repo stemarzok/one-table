@@ -35,6 +35,7 @@ export const HeroCarousel = ({ coverImage, galleryImages = [], restaurantName }:
       <img
         src={allImages[currentIndex]}
         alt={`${restaurantName} - ${currentIndex + 1}`}
+        loading="lazy"
         className="w-full h-full object-cover transition-all duration-500"
       />
       
@@ -54,6 +55,7 @@ export const HeroCarousel = ({ coverImage, galleryImages = [], restaurantName }:
             variant="ghost"
             size="icon"
             onClick={handlePrev}
+            aria-label="Immagine precedente"
             className="absolute left-4 top-1/2 -translate-y-1/2 h-12 w-12 rounded-full bg-white/90 backdrop-blur-sm shadow-lg hover:bg-white text-foreground opacity-0 group-hover:opacity-100 transition-all duration-300"
           >
             <ChevronLeft className="w-6 h-6" />
@@ -63,6 +65,7 @@ export const HeroCarousel = ({ coverImage, galleryImages = [], restaurantName }:
             variant="ghost"
             size="icon"
             onClick={handleNext}
+            aria-label="Immagine successiva"
             className="absolute right-4 top-1/2 -translate-y-1/2 h-12 w-12 rounded-full bg-white/90 backdrop-blur-sm shadow-lg hover:bg-white text-foreground opacity-0 group-hover:opacity-100 transition-all duration-300"
           >
             <ChevronRight className="w-6 h-6" />
@@ -74,6 +77,7 @@ export const HeroCarousel = ({ coverImage, galleryImages = [], restaurantName }:
               <button
                 key={index}
                 onClick={() => goToSlide(index)}
+                aria-label={`Vai all'immagine ${index + 1}`}
                 className={`w-16 h-12 rounded-lg overflow-hidden border-2 transition-all duration-200 ${
                   index === currentIndex 
                     ? 'border-white shadow-lg scale-105' 
@@ -83,6 +87,7 @@ export const HeroCarousel = ({ coverImage, galleryImages = [], restaurantName }:
                 <img 
                   src={img} 
                   alt={`Thumbnail ${index + 1}`}
+                  loading="lazy"
                   className="w-full h-full object-cover"
                 />
               </button>
