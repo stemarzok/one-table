@@ -8,6 +8,7 @@ import { MapPin, SlidersHorizontal, ChevronDown, X } from "lucide-react";
 import { useState } from "react";
 import Map from "@/components/Map";
 import { CUISINE_TYPES, SPECIALIZATIONS, OCCASIONS, EXTRA_FEATURES } from "@/lib/restaurantCategories";
+import { toast } from "sonner";
 
 interface Restaurant {
   id: number;
@@ -103,11 +104,11 @@ const RestaurantFilters = ({ onFilterChange, restaurants }: RestaurantFiltersPro
           if (import.meta.env.DEV) {
             console.error("Geolocation error:", error);
           }
-          alert("Non è stato possibile ottenere la tua posizione. Verifica le autorizzazioni del browser.");
+          toast.error("Non è stato possibile ottenere la tua posizione. Verifica le autorizzazioni del browser.");
         }
       );
     } else {
-      alert("La geolocalizzazione non è supportata dal tuo browser.");
+      toast.error("La geolocalizzazione non è supportata dal tuo browser.");
     }
   };
 
@@ -135,6 +136,7 @@ const RestaurantFilters = ({ onFilterChange, restaurants }: RestaurantFiltersPro
               variant="outline"
               size="sm"
               className="gap-2"
+              aria-label="Trova ristoranti vicino a me"
             >
               <MapPin className="w-4 h-4" />
               Vicino a me

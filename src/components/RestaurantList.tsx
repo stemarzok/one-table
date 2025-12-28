@@ -1,4 +1,5 @@
 import RestaurantCard from "./RestaurantCard";
+import RestaurantCardSkeleton from "./RestaurantCardSkeleton";
 import { FilterState } from "./RestaurantFilters";
 import UnifiedSearchBar from "./UnifiedSearchBar";
 import SponsoredCarousel from "./SponsoredCarousel";
@@ -7,9 +8,10 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useState, useMemo, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, MapPin, X } from "lucide-react";
+import { MapPin, X } from "lucide-react";
 import Map from "@/components/Map";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
 
 interface Restaurant {
   id: string;
@@ -108,8 +110,10 @@ const RestaurantList = () => {
           setUserLocation({ lat: position.coords.latitude, lng: position.coords.longitude });
           setShowMap(true);
         },
-        () => alert("Non è stato possibile ottenere la tua posizione.")
+        () => toast.error("Non è stato possibile ottenere la tua posizione. Verifica le autorizzazioni del browser.")
       );
+    } else {
+      toast.error("La geolocalizzazione non è supportata dal tuo browser.");
     }
   };
 
@@ -191,8 +195,12 @@ const RestaurantList = () => {
   if (loading) {
     return (
       <section className="py-24 bg-muted/30 relative">
-        <div className="container mx-auto px-4 flex items-center justify-center min-h-[400px]">
-          <Loader2 className="w-12 h-12 animate-spin text-primary" />
+        <div className="container mx-auto px-4">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {[...Array(6)].map((_, i) => (
+              <RestaurantCardSkeleton key={i} />
+            ))}
+          </div>
         </div>
       </section>
     );
