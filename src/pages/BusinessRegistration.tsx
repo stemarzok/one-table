@@ -58,8 +58,17 @@ const BusinessRegistration = () => {
   const [postalCode, setPostalCode] = useState("");
   const [civicNumber, setCivicNumber] = useState("");
   const [civicLocked, setCivicLocked] = useState(false);
+  const [addressFieldsLocked, setAddressFieldsLocked] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [addressVerified, setAddressVerified] = useState(false);
+
+  // Civic number auto-correction: '71 a' → '71A', '  12b  ' → '12B'
+  const normalizeCivic = (raw: string): string => {
+    return raw
+      .toUpperCase()
+      .replace(/\s+/g, "")
+      .replace(/^0+/, "");
+  };
 
   // Validation states
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -73,6 +82,18 @@ const BusinessRegistration = () => {
     setPostalCode("");
     setCivicNumber("");
     setCivicLocked(false);
+    setAddressFieldsLocked(true);
+  };
+
+  // Unlock street/city/CAP/province for manual editing
+  const handleUnlockAddressFields = () => {
+    if (
+      window.confirm(
+        "Sei sicuro di voler modificare i campi indirizzo? Eventuali modifiche manuali non saranno verificate automaticamente."
+      )
+    ) {
+      setAddressFieldsLocked(false);
+    }
   };
 
   // Handle address selection from autocomplete
@@ -580,18 +601,39 @@ const BusinessRegistration = () => {
 
                   {addressVerified && (
                     <div className="grid md:grid-cols-2 gap-4 pt-4 border-t border-border">
+                      {/* Modifica Indirizzo button */}
+                      {addressFieldsLocked && (
+                        <div className="md:col-span-2 flex justify-end">
+                          <button
+                            type="button"
+                            onClick={handleUnlockAddressFields}
+                            className="text-xs text-primary hover:underline"
+                          >
+                            Modifica indirizzo manualmente
+                          </button>
+                        </div>
+                      )}
+
                       <div className="md:col-span-2">
                         <Label htmlFor="street">Via *</Label>
                         <Input
                           id="street"
                           value={street}
-                          readOnly
-                          className="mt-2 bg-muted cursor-not-allowed"
+                          readOnly={addressFieldsLocked}
+                          onChange={(e) => setStreet(e.target.value)}
+                          className={cn(
+                            "mt-2",
+                            addressFieldsLocked
+                              ? "bg-muted cursor-not-allowed"
+                              : "bg-background"
+                          )}
                         />
-                        <p className="text-green-600 text-sm mt-1 flex items-center gap-1">
-                          <CheckCircle2 className="h-3 w-3" />
-                          Via verificata
-                        </p>
+                        {addressFieldsLocked && (
+                          <p className="text-green-600 text-sm mt-1 flex items-center gap-1">
+                            <CheckCircle2 className="h-3 w-3" />
+                            Via verificata
+                          </p>
+                        )}
                       </div>
 
                       <div>
@@ -599,20 +641,24 @@ const BusinessRegistration = () => {
                         <Input
                           id="civicNumber"
                           value={civicNumber}
-                          readOnly={civicLocked}
                           onChange={(e) => {
-                            const v = e.target.value.trim();
-                            setCivicNumber(v);
-                            setErrors((prev) => ({ ...prev, civicNumber: '' }));
+                            setCivicNumber(e.target.value);
+                            setErrors((prev) => ({ ...prev, civicNumber: "" }));
                           }}
-                          placeholder={civicLocked ? "Verificato" : "Es: 71 o 71A"}
+                          onBlur={(e) => {
+                            const normalized = normalizeCivic(e.target.value);
+                            setCivicNumber(normalized);
+                          }}
+                          placeholder="Es: 71, 71A, 12/B"
                           className={cn(
-                            "mt-2",
-                            civicLocked ? "bg-muted cursor-not-allowed" : "bg-background",
+                            "mt-2 bg-background",
                             errors.civicNumber ? "border-destructive" : ""
                           )}
                         />
-                        {renderFieldError('civicNumber')}
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Esempi validi: 1, 22, 71A, 3/B, 10-12
+                        </p>
+                        {renderFieldError("civicNumber")}
                         {civicNumber && !errors.civicNumber && (
                           <p className="text-green-600 text-sm mt-1 flex items-center gap-1">
                             <CheckCircle2 className="h-3 w-3" />
@@ -626,13 +672,21 @@ const BusinessRegistration = () => {
                         <Input
                           id="postalCode"
                           value={postalCode}
-                          readOnly
-                          className="mt-2 bg-muted cursor-not-allowed"
+                          readOnly={addressFieldsLocked}
+                          onChange={(e) => setPostalCode(e.target.value)}
+                          className={cn(
+                            "mt-2",
+                            addressFieldsLocked
+                              ? "bg-muted cursor-not-allowed"
+                              : "bg-background"
+                          )}
                         />
-                        <p className="text-green-600 text-sm mt-1 flex items-center gap-1">
-                          <CheckCircle2 className="h-3 w-3" />
-                          CAP verificato
-                        </p>
+                        {addressFieldsLocked && (
+                          <p className="text-green-600 text-sm mt-1 flex items-center gap-1">
+                            <CheckCircle2 className="h-3 w-3" />
+                            CAP verificato
+                          </p>
+                        )}
                       </div>
 
                       <div>
@@ -640,13 +694,21 @@ const BusinessRegistration = () => {
                         <Input
                           id="city"
                           value={city}
-                          readOnly
-                          className="mt-2 bg-muted cursor-not-allowed"
+                          readOnly={addressFieldsLocked}
+                          onChange={(e) => setCity(e.target.value)}
+                          className={cn(
+                            "mt-2",
+                            addressFieldsLocked
+                              ? "bg-muted cursor-not-allowed"
+                              : "bg-background"
+                          )}
                         />
-                        <p className="text-green-600 text-sm mt-1 flex items-center gap-1">
-                          <CheckCircle2 className="h-3 w-3" />
-                          Città verificata
-                        </p>
+                        {addressFieldsLocked && (
+                          <p className="text-green-600 text-sm mt-1 flex items-center gap-1">
+                            <CheckCircle2 className="h-3 w-3" />
+                            Città verificata
+                          </p>
+                        )}
                       </div>
 
                       <div>
@@ -654,13 +716,21 @@ const BusinessRegistration = () => {
                         <Input
                           id="province"
                           value={province}
-                          readOnly
-                          className="mt-2 bg-muted cursor-not-allowed"
+                          readOnly={addressFieldsLocked}
+                          onChange={(e) => setProvince(e.target.value)}
+                          className={cn(
+                            "mt-2",
+                            addressFieldsLocked
+                              ? "bg-muted cursor-not-allowed"
+                              : "bg-background"
+                          )}
                         />
-                        <p className="text-green-600 text-sm mt-1 flex items-center gap-1">
-                          <CheckCircle2 className="h-3 w-3" />
-                          Provincia verificata
-                        </p>
+                        {addressFieldsLocked && (
+                          <p className="text-green-600 text-sm mt-1 flex items-center gap-1">
+                            <CheckCircle2 className="h-3 w-3" />
+                            Provincia verificata
+                          </p>
+                        )}
                       </div>
                     </div>
                   )}
