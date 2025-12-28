@@ -10,14 +10,14 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { 
-  passwordSchema, 
-  emailSchema, 
-  italianVATSchema, 
+import {
+  passwordSchema,
+  emailSchema,
+  italianVATSchema,
   italianPostalCodeSchema,
   italianPhoneSchema,
   businessNameSchema,
-  nameSchema
+  nameSchema,
 } from "@/lib/validation";
 import { BUSINESS_ROLES } from "@/lib/italianLocations";
 import {
@@ -28,7 +28,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { AlertCircle, CheckCircle2, Shield } from "lucide-react";
-import { AddressAutocomplete } from "@/components/AddressAutocomplete";
+import { AddressAutocomplete, type ParsedAddress } from "@/components/AddressAutocomplete";
+import { cn } from "@/lib/utils";
 
 const BusinessRegistration = () => {
   const { toast } = useToast();
@@ -55,6 +56,8 @@ const BusinessRegistration = () => {
   const [street, setStreet] = useState("");
   const [province, setProvince] = useState("");
   const [postalCode, setPostalCode] = useState("");
+  const [civicNumber, setCivicNumber] = useState("");
+  const [civicLocked, setCivicLocked] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [addressVerified, setAddressVerified] = useState(false);
 
@@ -68,38 +71,31 @@ const BusinessRegistration = () => {
     setCity("");
     setProvince("");
     setPostalCode("");
+    setCivicNumber("");
+    setCivicLocked(false);
   };
 
   // Handle address selection from autocomplete
-  const handleAddressSelect = (address: {
-    street: string;
-    city: string;
-    province: string;
-    postalCode: string;
-    fullAddress: string;
-    hasHouseNumber: boolean;
-  }) => {
-    if (!address.hasHouseNumber) {
-      setErrors(prev => ({
-        ...prev,
-        street: 'Seleziona un indirizzo con numero civico'
-      }));
-      return;
-    }
-
+  const handleAddressSelect = (address: ParsedAddress) => {
     if (address.street) setStreet(address.street);
     if (address.city) setCity(address.city);
     if (address.province) setProvince(address.province);
     if (address.postalCode) setPostalCode(address.postalCode);
+
+    // Civic is always editable and mandatory; prefill when available.
+    setCivicNumber(address.houseNumber || "");
+    setCivicLocked(false);
+
     setAddressVerified(true);
-    
+
     // Clear related errors
-    setErrors(prev => ({
+    setErrors((prev) => ({
       ...prev,
-      street: '',
-      city: '',
-      province: '',
-      postalCode: ''
+      street: "",
+      city: "",
+      province: "",
+      postalCode: "",
+      civicNumber: "",
     }));
   };
 
