@@ -55,18 +55,38 @@ const Auth = () => {
 
   const handleGoogleLogin = async () => {
     setIsLoading(true);
+
     const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
+      provider: "google",
       options: {
         redirectTo: `${window.location.origin}/auth`,
       },
     });
 
     if (error) {
-      toast.error("Errore durante l'accesso con Google: " + error.message);
+      if (error.message?.toLowerCase().includes("provider is not enabled")) {
+        toast.error(
+          "Google non è ancora abilitato nel backend. Attiva il provider Google nelle impostazioni Auth e riprova."
+        );
+      } else {
+        toast.error("Errore durante l'accesso con Google: " + error.message);
+      }
       setIsLoading(false);
     }
   };
+
+  const handleAppleLogin = () => {
+    toast.message("Accesso con Apple non disponibile", {
+      description: "Apple non è ancora supportato: il pulsante è solo grafico.",
+    });
+  };
+
+  const AppleIcon = (props: React.SVGProps<SVGSVGElement>) => (
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" {...props}>
+      <path d="M16.64 13.17c.02 2.08 1.82 2.77 1.84 2.78-.01.05-.29 1.01-.96 2-.58.86-1.18 1.71-2.13 1.73-.93.02-1.23-.55-2.3-.55-1.07 0-1.4.53-2.29.57-.92.03-1.62-.92-2.2-1.78-1.2-1.75-2.12-4.94-.88-7.1.62-1.07 1.73-1.75 2.94-1.77.91-.02 1.77.61 2.3.61.54 0 1.54-.75 2.6-.64.44.02 1.68.18 2.48 1.37-.06.04-1.48.86-1.46 2.58Zm-1.7-4.97c.48-.58.81-1.39.72-2.2-.69.03-1.53.46-2.03 1.05-.45.52-.84 1.35-.73 2.14.76.06 1.56-.39 2.04-.99Z" />
+    </svg>
+  );
+
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -293,8 +313,9 @@ const Auth = () => {
                     className="w-full"
                     onClick={handleGoogleLogin}
                     disabled={isLoading}
+                    aria-label="Continua con Google"
                   >
-                    <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
+                    <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24" aria-hidden="true">
                       <path
                         fill="currentColor"
                         d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -314,6 +335,19 @@ const Auth = () => {
                     </svg>
                     Continua con Google
                   </Button>
+
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full"
+                    onClick={handleAppleLogin}
+                    disabled={isLoading}
+                    aria-label="Continua con Apple (non disponibile)"
+                  >
+                    <AppleIcon className="mr-2 h-4 w-4" />
+                    Continua con Apple
+                  </Button>
+
                 </form>
               </TabsContent>
               
@@ -388,8 +422,9 @@ const Auth = () => {
                     className="w-full"
                     onClick={handleGoogleLogin}
                     disabled={isLoading}
+                    aria-label="Continua con Google"
                   >
-                    <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
+                    <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24" aria-hidden="true">
                       <path
                         fill="currentColor"
                         d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -409,6 +444,19 @@ const Auth = () => {
                     </svg>
                     Continua con Google
                   </Button>
+
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full"
+                    onClick={handleAppleLogin}
+                    disabled={isLoading}
+                    aria-label="Continua con Apple (non disponibile)"
+                  >
+                    <AppleIcon className="mr-2 h-4 w-4" />
+                    Continua con Apple
+                  </Button>
+
                   
                   <p className="text-xs text-muted-foreground text-center">
                     Registrandoti, accetti i nostri{" "}
