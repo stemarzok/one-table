@@ -347,6 +347,9 @@ const Auth = () => {
                     <AppleIcon className="mr-2 h-4 w-4" />
                     Continua con Apple
                   </Button>
+                  <p className="text-xs text-muted-foreground text-center -mt-2">
+                    Apple: disponibile a breve
+                  </p>
 
                 </form>
               </TabsContent>
@@ -456,6 +459,9 @@ const Auth = () => {
                     <AppleIcon className="mr-2 h-4 w-4" />
                     Continua con Apple
                   </Button>
+                  <p className="text-xs text-muted-foreground text-center -mt-2">
+                    Apple: disponibile a breve
+                  </p>
 
                   
                   <p className="text-xs text-muted-foreground text-center">
