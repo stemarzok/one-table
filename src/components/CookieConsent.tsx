@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+
 import { X, Cookie } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -27,50 +27,34 @@ const CookieConsent = () => {
   if (!isVisible) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 p-4 animate-in slide-in-from-bottom-5">
-      <Card className="max-w-4xl mx-auto shadow-elegant border-2">
-        <CardHeader className="pb-3">
-          <div className="flex items-start justify-between gap-4">
-            <div className="flex gap-3">
-              <Cookie className="w-6 h-6 text-primary mt-1" />
-              <div>
-                <CardTitle className="text-xl mb-2">Consenso Cookie</CardTitle>
-                <CardDescription className="text-base">
-                  Utilizziamo cookie essenziali per il funzionamento del sito e cookie analitici per migliorare la tua esperienza. 
-                  Puoi gestire le tue preferenze in qualsiasi momento.
-                </CardDescription>
-              </div>
-            </div>
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              onClick={handleDecline}
-              className="shrink-0"
-            >
-              <X className="w-4 h-4" />
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent className="flex flex-col sm:flex-row gap-3 items-center justify-between">
-          <div className="flex gap-2 text-sm">
-            <Link to="/privacy" className="text-primary hover:underline">
-              Privacy Policy
-            </Link>
-            <span className="text-muted-foreground">•</span>
-            <Link to="/cookies" className="text-primary hover:underline">
-              Cookie Policy
-            </Link>
-          </div>
-          <div className="flex gap-3">
-            <Button variant="outline" onClick={handleDecline}>
-              Rifiuta Non Essenziali
-            </Button>
-            <Button onClick={handleAccept} className="bg-primary text-primary-foreground">
-              Accetta Tutti
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+    <div className="fixed bottom-0 left-0 right-0 z-50 p-3 animate-in slide-in-from-bottom-5">
+      <div className="max-w-5xl mx-auto bg-card/95 backdrop-blur-md border border-border rounded-xl shadow-lg px-4 py-3 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div className="flex items-center gap-3 flex-1">
+          <Cookie className="w-5 h-5 text-primary shrink-0" />
+          <p className="text-sm text-muted-foreground">
+            Utilizziamo cookie per migliorare la tua esperienza.{" "}
+            <Link to="/privacy" className="text-primary hover:underline">Privacy</Link>
+            {" • "}
+            <Link to="/cookies" className="text-primary hover:underline">Cookie Policy</Link>
+          </p>
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          <Button variant="ghost" size="sm" onClick={handleDecline} className="text-muted-foreground">
+            Rifiuta
+          </Button>
+          <Button size="sm" onClick={handleAccept}>
+            Accetta
+          </Button>
+          <Button 
+            variant="ghost" 
+            size="icon"
+            className="h-8 w-8"
+            onClick={handleDecline}
+          >
+            <X className="w-4 h-4" />
+          </Button>
+        </div>
+      </div>
     </div>
   );
 };

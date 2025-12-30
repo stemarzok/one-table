@@ -121,9 +121,9 @@ const Pricing = () => {
             </div>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+          <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto items-stretch">
             {/* Piano Base */}
-            <Card className="p-8 relative">
+            <Card className="p-8 relative flex flex-col">
               <div className="mb-6">
                 <div className="flex items-center gap-2 mb-2">
                   <Sparkles className="h-6 w-6 text-primary" />
@@ -142,7 +142,7 @@ const Pricing = () => {
                 )}
               </div>
 
-              <ul className="space-y-3 mb-8">
+              <ul className="space-y-3 mb-8 flex-1">
                 <li className="flex items-start gap-2">
                   <Check className="h-5 w-5 text-primary mt-0.5" />
                   <span>Gestione prenotazioni illimitata</span>
@@ -166,7 +166,7 @@ const Pricing = () => {
               </ul>
 
               <Button 
-                className="w-full" 
+                className="w-full mt-auto" 
                 size="lg"
                 onClick={() => handleCheckout(
                   PLANS.base[billingPeriod].priceId,
@@ -179,8 +179,8 @@ const Pricing = () => {
             </Card>
 
             {/* Piano Pro */}
-            <Card className="p-8 relative border-primary shadow-lg">
-              <Badge className="absolute -top-3 left-1/2 -translate-x-1/2">
+            <Card className="p-8 relative border-primary border-2 shadow-lg flex flex-col">
+              <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 text-sm font-bold">
                 PIÙ POPOLARE
               </Badge>
               
@@ -202,7 +202,7 @@ const Pricing = () => {
                 )}
               </div>
 
-              <ul className="space-y-3 mb-8">
+              <ul className="space-y-3 mb-8 flex-1">
                 <li className="flex items-start gap-2">
                   <Check className="h-5 w-5 text-primary mt-0.5" />
                   <span className="font-medium">Tutto del Piano Base, più:</span>
@@ -230,7 +230,7 @@ const Pricing = () => {
               </ul>
 
               <Button 
-                className="w-full" 
+                className="w-full mt-auto" 
                 size="lg"
                 onClick={() => handleCheckout(
                   PLANS.pro[billingPeriod].priceId,

@@ -2,7 +2,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { CheckCircle, TrendingDown, Users, Calendar, BarChart3, Shield, ArrowRight } from "lucide-react";
+import { CheckCircle, TrendingDown, Users, Calendar, BarChart3, Shield, ArrowRight, TrendingUp } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, useInView, useScroll, useTransform } from "framer-motion";
@@ -116,21 +116,39 @@ const Business = () => {
               reputazione incentiva i clienti affidabili e riduce drasticamente le mancate presentazioni.
             </motion.p>
             
-            <motion.div 
-              className="flex items-center gap-4 px-6 py-5 bg-[hsl(0,0%,8%)] backdrop-blur-md rounded-2xl border border-white/20 mb-10 max-w-md shadow-xl"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.5 }}
-              whileHover={{ scale: 1.02 }}
-            >
-              <div className="w-14 h-14 rounded-xl bg-destructive/20 flex items-center justify-center flex-shrink-0">
-                <TrendingDown className="w-7 h-7 text-destructive" />
-              </div>
-              <div>
-                <div className="text-3xl font-extrabold text-white">€16 Miliardi</div>
-                <p className="text-white/70 text-sm font-medium">Perdite annuali in Europa per no-show</p>
-              </div>
-            </motion.div>
+            <div className="flex flex-wrap gap-4 mb-10">
+              <motion.div 
+                className="flex items-center gap-4 px-6 py-5 bg-card/90 backdrop-blur-md rounded-2xl border border-border shadow-xl"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.5 }}
+                whileHover={{ scale: 1.02 }}
+              >
+                <div className="w-14 h-14 rounded-xl bg-destructive/20 flex items-center justify-center flex-shrink-0">
+                  <TrendingDown className="w-7 h-7 text-destructive" />
+                </div>
+                <div>
+                  <div className="text-3xl font-extrabold text-foreground">€16 Miliardi</div>
+                  <p className="text-muted-foreground text-sm font-medium">Perdite annuali in Europa per no-show</p>
+                </div>
+              </motion.div>
+              
+              <motion.div 
+                className="flex items-center gap-4 px-6 py-5 bg-card/90 backdrop-blur-md rounded-2xl border border-border shadow-xl"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.6 }}
+                whileHover={{ scale: 1.02 }}
+              >
+                <div className="w-14 h-14 rounded-xl bg-primary/20 flex items-center justify-center flex-shrink-0">
+                  <TrendingUp className="w-7 h-7 text-primary" />
+                </div>
+                <div>
+                  <div className="text-3xl font-extrabold text-foreground">500+</div>
+                  <p className="text-muted-foreground text-sm font-medium">Ristoranti Partner</p>
+                </div>
+              </motion.div>
+            </div>
             
             <motion.div 
               className="flex flex-wrap gap-4"
@@ -149,7 +167,7 @@ const Business = () => {
               <Button 
                 size="lg" 
                 variant="outline" 
-                className="border-white/30 text-white hover:bg-white/10 text-base px-8 font-semibold"
+                className="border-border bg-card/80 text-foreground hover:bg-card text-base px-8 font-semibold"
                 onClick={() => document.getElementById('benefits')?.scrollIntoView({ behavior: 'smooth' })}
               >
                 Scopri di Più
