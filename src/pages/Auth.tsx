@@ -133,20 +133,26 @@ const Auth = () => {
       return;
     }
 
-    // Check if this is a business-only account
+    // Check if this is a business-only account (admins can access everything)
     if (authData.user) {
-      const { data: businessRole } = await supabase
-        .from('business_roles')
-        .select('id')
-        .eq('user_id', authData.user.id)
-        .maybeSingle();
+      // First check if user is admin
+      const { data: isAdmin } = await supabase.rpc('is_admin', { _user_id: authData.user.id });
       
-      if (businessRole) {
-        // Business users cannot access customer section
-        await supabase.auth.signOut();
-        toast.error("Questo account è registrato come ristoratore. Usa il login business per accedere.");
-        setIsLoading(false);
-        return;
+      // If not admin, check if they have business role
+      if (!isAdmin) {
+        const { data: businessRole } = await supabase
+          .from('business_roles')
+          .select('id')
+          .eq('user_id', authData.user.id)
+          .maybeSingle();
+        
+        if (businessRole) {
+          // Business users (non-admin) cannot access customer section
+          await supabase.auth.signOut();
+          toast.error("Questo account è registrato come ristoratore. Usa il login business per accedere.");
+          setIsLoading(false);
+          return;
+        }
       }
     }
 
