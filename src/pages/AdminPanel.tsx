@@ -11,9 +11,9 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useAdminRole } from "@/hooks/useAdminRole";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { AlertCircle, CheckCircle, XCircle, FileText, Clock, BarChart3 } from "lucide-react";
+import { AlertCircle, CheckCircle, XCircle, FileText, Clock, BarChart3, Crown } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { PromoteUserPanel } from "@/components/admin/PromoteUserPanel";
+import { AdminManagementPanel } from "@/components/admin/AdminManagementPanel";
 import { GlobalStats } from "@/components/admin/GlobalStats";
 import { PromoRequestsPanel } from "@/components/admin/PromoRequestsPanel";
 import { ReviewReportsPanel } from "@/components/admin/ReviewReportsPanel";
@@ -38,7 +38,7 @@ interface Application {
 
 const AdminPanel = () => {
   const { isLoggedIn, profile } = useAuth();
-  const { isAdmin, loading } = useAdminRole();
+  const { isAdmin, isSuperAdmin, loading } = useAdminRole();
   const navigate = useNavigate();
   const { toast } = useToast();
   
@@ -208,7 +208,15 @@ const AdminPanel = () => {
       
       <main className="pt-24 pb-16">
         <div className="container mx-auto px-4">
-          <h1 className="text-4xl font-bold mb-8">Pannello Amministratore</h1>
+          <div className="flex items-center gap-3 mb-8">
+            <h1 className="text-4xl font-bold">Pannello Amministratore</h1>
+            {isSuperAdmin && (
+              <Badge className="bg-amber-500 hover:bg-amber-600 text-white">
+                <Crown className="w-3 h-3 mr-1" />
+                Super Admin
+              </Badge>
+            )}
+          </div>
 
           <Tabs defaultValue="applications" className="space-y-6">
             <TabsList className="grid w-full max-w-5xl grid-cols-6">
@@ -411,7 +419,7 @@ const AdminPanel = () => {
             </TabsContent>
 
             <TabsContent value="users">
-              <PromoteUserPanel />
+              <AdminManagementPanel />
             </TabsContent>
           </Tabs>
         </div>
