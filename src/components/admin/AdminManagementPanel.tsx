@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { UserPlus, Trash2, Crown, Shield, Loader2 } from "lucide-react";
 import { useAdminRole } from "@/hooks/useAdminRole";
+import { AdminActivityLogs } from "./AdminActivityLogs";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -317,6 +318,9 @@ export const AdminManagementPanel = () => {
           )}
         </CardContent>
       </Card>
+
+      {/* Activity Logs */}
+      <AdminActivityLogs />
 
       {/* Info about SuperAdmin */}
       <Card className="border-amber-500/50 bg-amber-500/5">
