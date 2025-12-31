@@ -19,18 +19,21 @@ export type Database = {
           created_at: string
           created_by: string | null
           id: string
+          role: Database["public"]["Enums"]["admin_role_type"]
           user_id: string
         }
         Insert: {
           created_at?: string
           created_by?: string | null
           id?: string
+          role?: Database["public"]["Enums"]["admin_role_type"]
           user_id: string
         }
         Update: {
           created_at?: string
           created_by?: string | null
           id?: string
+          role?: Database["public"]["Enums"]["admin_role_type"]
           user_id?: string
         }
         Relationships: []
@@ -1106,6 +1109,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      get_admin_role: { Args: { _user_id: string }; Returns: string }
       get_restaurant_rating: {
         Args: { restaurant_id_param: string }
         Returns: {
@@ -1131,12 +1135,14 @@ export type Database = {
         Returns: boolean
       }
       is_admin: { Args: { _user_id: string }; Returns: boolean }
+      is_superadmin: { Args: { _user_id: string }; Returns: boolean }
       reject_business_application: {
         Args: { _admin_id: string; _application_id: string; _reason: string }
         Returns: undefined
       }
     }
     Enums: {
+      admin_role_type: "admin" | "superadmin"
       application_status: "pending" | "approved" | "rejected"
       business_role: "owner" | "manager" | "staff"
     }
@@ -1266,6 +1272,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      admin_role_type: ["admin", "superadmin"],
       application_status: ["pending", "approved", "rejected"],
       business_role: ["owner", "manager", "staff"],
     },

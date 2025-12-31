@@ -4,9 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { User, Calendar, Heart, Settings, LogOut, Globe, Moon, Sun, Shield } from "lucide-react";
+import { User, Calendar, Heart, Settings, LogOut, Globe, Moon, Sun, Shield, Crown } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useNavigate } from "react-router-dom";
@@ -17,7 +18,7 @@ export const MobileUserMenu = () => {
   const { profile, logout } = useAuth();
   const { language, setLanguage } = useLanguage();
   const navigate = useNavigate();
-  const { isAdmin } = useAdminRole();
+  const { isAdmin, isSuperAdmin } = useAdminRole();
   const [theme, setTheme] = useState<"light" | "dark">("light");
   const [open, setOpen] = useState(false);
 
@@ -39,19 +40,42 @@ export const MobileUserMenu = () => {
     { icon: Calendar, label: "Le Mie Prenotazioni", path: "/my-bookings" },
     { icon: Heart, label: "Preferiti", path: "/favorites" },
     { icon: Settings, label: "Impostazioni", path: "/settings" },
-    ...(isAdmin ? [{ icon: Shield, label: "Pannello Admin", path: "/admin" }] : []),
+    ...(isAdmin ? [{ icon: isSuperAdmin ? Crown : Shield, label: "Pannello Admin", path: "/admin" }] : []),
   ];
+
+  const getAdminBadge = () => {
+    if (isSuperAdmin) {
+      return (
+        <Badge variant="default" className="bg-amber-500 hover:bg-amber-600 text-white gap-1 text-xs">
+          <Crown className="w-3 h-3" />
+          Super Admin
+        </Badge>
+      );
+    }
+    if (isAdmin) {
+      return (
+        <Badge variant="secondary" className="bg-primary/10 text-primary gap-1 text-xs">
+          <Shield className="w-3 h-3" />
+          Admin
+        </Badge>
+      );
+    }
+    return null;
+  };
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button variant="ghost" size="icon" className="lg:hidden rounded-full">
+        <Button variant="ghost" size="icon" className="lg:hidden rounded-full relative">
           <Avatar className="w-8 h-8">
             <AvatarImage src={profile?.avatar_url || undefined} />
             <AvatarFallback>
               <User className="w-5 h-5" />
             </AvatarFallback>
           </Avatar>
+          {isAdmin && (
+            <span className="absolute -top-1 -right-1 w-3 h-3 bg-amber-500 rounded-full border-2 border-background" />
+          )}
         </Button>
       </SheetTrigger>
       <SheetContent side="right" className="w-[300px] sm:w-[400px]">
@@ -75,7 +99,10 @@ export const MobileUserMenu = () => {
               </AvatarFallback>
             </Avatar>
             <div className="flex-1 min-w-0">
-              <p className="font-semibold truncate">{profile?.name || "Utente"}</p>
+              <div className="flex items-center gap-2 flex-wrap">
+                <p className="font-semibold truncate">{profile?.name || "Utente"}</p>
+                {getAdminBadge()}
+              </div>
               <p className="text-sm text-muted-foreground truncate">{profile?.email}</p>
               <p className="text-xs text-primary font-medium mt-1">
                 {profile?.level || "Bronze"} • {profile?.points || 0} punti
@@ -97,7 +124,7 @@ export const MobileUserMenu = () => {
                   setOpen(false);
                 }}
               >
-                <item.icon className="w-5 h-5" />
+                <item.icon className={`w-5 h-5 ${item.path === '/admin' && isSuperAdmin ? 'text-amber-500' : ''}`} />
                 {item.label}
               </Button>
             ))}
