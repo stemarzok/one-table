@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { UserPlus, Trash2, Crown, Shield, Loader2 } from "lucide-react";
 import { useAdminRole } from "@/hooks/useAdminRole";
+import { useAuth } from "@/contexts/AuthContext";
 import { AdminActivityLogs } from "./AdminActivityLogs";
 import {
   AlertDialog,
@@ -35,6 +36,7 @@ interface AdminUser {
 export const AdminManagementPanel = () => {
   const { toast } = useToast();
   const { isSuperAdmin } = useAdminRole();
+  const { profile } = useAuth();
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [admins, setAdmins] = useState<AdminUser[]>([]);
@@ -78,6 +80,27 @@ export const AdminManagementPanel = () => {
     }
   }, [isSuperAdmin]);
 
+  const sendNotificationEmail = async (action: 'promoted' | 'removed', targetEmail: string, targetName: string, role?: string) => {
+    try {
+      const actorName = profile?.name || 'Super Admin';
+      
+      await supabase.functions.invoke('send-admin-notification', {
+        body: {
+          action,
+          targetEmail,
+          targetName,
+          actorName,
+          role
+        }
+      });
+      
+      console.log(`Notification email sent for ${action} to ${targetEmail}`);
+    } catch (error) {
+      console.error('Error sending notification email:', error);
+      // Don't throw - email failure shouldn't block the main action
+    }
+  };
+
   const handlePromote = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -114,6 +137,13 @@ export const AdminManagementPanel = () => {
         throw new Error('Questo utente è già un amministratore');
       }
 
+      // Get target user name for email
+      const { data: targetProfile } = await supabase
+        .from('profiles')
+        .select('name')
+        .eq('id', profile.id)
+        .single();
+
       // Insert new admin role
       const { error: insertError } = await supabase
         .from('admin_roles')
@@ -124,9 +154,17 @@ export const AdminManagementPanel = () => {
 
       if (insertError) throw insertError;
 
+      // Send notification email
+      await sendNotificationEmail(
+        'promoted', 
+        email.trim(), 
+        targetProfile?.name || 'Utente',
+        'admin'
+      );
+
       toast({
         title: "Successo",
-        description: `Utente ${email} promosso ad amministratore`,
+        description: `Utente ${email} promosso ad amministratore. Email di notifica inviata.`,
       });
       
       setEmail("");
@@ -142,7 +180,7 @@ export const AdminManagementPanel = () => {
     }
   };
 
-  const handleRemoveAdmin = async (adminId: string, adminEmail: string) => {
+  const handleRemoveAdmin = async (adminId: string, adminEmail: string, adminName: string) => {
     try {
       const { error } = await supabase
         .from('admin_roles')
@@ -151,9 +189,12 @@ export const AdminManagementPanel = () => {
 
       if (error) throw error;
 
+      // Send notification email
+      await sendNotificationEmail('removed', adminEmail, adminName);
+
       toast({
         title: "Successo",
-        description: `${adminEmail} rimosso dagli amministratori`,
+        description: `${adminEmail} rimosso dagli amministratori. Email di notifica inviata.`,
       });
       
       fetchAdmins();
@@ -302,7 +343,7 @@ export const AdminManagementPanel = () => {
                           <AlertDialogFooter>
                             <AlertDialogCancel>Annulla</AlertDialogCancel>
                             <AlertDialogAction
-                              onClick={() => handleRemoveAdmin(admin.id, admin.profile?.email || '')}
+                              onClick={() => handleRemoveAdmin(admin.id, admin.profile?.email || '', admin.profile?.name || 'Utente')}
                               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                             >
                               Rimuovi Admin
