@@ -101,6 +101,36 @@ export const AdminManagementPanel = () => {
     }
   };
 
+  const sendInAppNotification = async (userId: string, action: 'promoted' | 'removed', roleName?: string) => {
+    try {
+      const actorName = profile?.name || 'Super Admin';
+      
+      const title = action === 'promoted' 
+        ? '🎉 Sei stato promosso ad Admin!' 
+        : '📢 Ruolo Admin rimosso';
+      
+      const message = action === 'promoted'
+        ? `${actorName} ti ha promosso al ruolo di ${roleName || 'Amministratore'}. Ora hai accesso al pannello di amministrazione.`
+        : `Il tuo ruolo di amministratore è stato rimosso da ${actorName}.`;
+      
+      const { error } = await supabase
+        .from('notifications')
+        .insert({
+          user_id: userId,
+          type: action === 'promoted' ? 'admin_promoted' : 'admin_removed',
+          title,
+          message,
+          link: action === 'promoted' ? '/admin' : null
+        });
+      
+      if (error) throw error;
+      console.log(`In-app notification sent for ${action} to user ${userId}`);
+    } catch (error) {
+      console.error('Error sending in-app notification:', error);
+      // Don't throw - notification failure shouldn't block the main action
+    }
+  };
+
   const handlePromote = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -162,9 +192,12 @@ export const AdminManagementPanel = () => {
         'admin'
       );
 
+      // Send in-app notification
+      await sendInAppNotification(profile.id, 'promoted', 'Admin');
+
       toast({
         title: "Successo",
-        description: `Utente ${email} promosso ad amministratore. Email di notifica inviata.`,
+        description: `Utente ${email} promosso ad amministratore. Notifiche inviate.`,
       });
       
       setEmail("");
@@ -180,7 +213,7 @@ export const AdminManagementPanel = () => {
     }
   };
 
-  const handleRemoveAdmin = async (adminId: string, adminEmail: string, adminName: string) => {
+  const handleRemoveAdmin = async (adminId: string, adminEmail: string, adminName: string, adminUserId: string) => {
     try {
       const { error } = await supabase
         .from('admin_roles')
@@ -192,9 +225,12 @@ export const AdminManagementPanel = () => {
       // Send notification email
       await sendNotificationEmail('removed', adminEmail, adminName);
 
+      // Send in-app notification
+      await sendInAppNotification(adminUserId, 'removed');
+
       toast({
         title: "Successo",
-        description: `${adminEmail} rimosso dagli amministratori. Email di notifica inviata.`,
+        description: `${adminEmail} rimosso dagli amministratori. Notifiche inviate.`,
       });
       
       fetchAdmins();
@@ -343,7 +379,7 @@ export const AdminManagementPanel = () => {
                           <AlertDialogFooter>
                             <AlertDialogCancel>Annulla</AlertDialogCancel>
                             <AlertDialogAction
-                              onClick={() => handleRemoveAdmin(admin.id, admin.profile?.email || '', admin.profile?.name || 'Utente')}
+                              onClick={() => handleRemoveAdmin(admin.id, admin.profile?.email || '', admin.profile?.name || 'Utente', admin.user_id)}
                               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                             >
                               Rimuovi Admin
