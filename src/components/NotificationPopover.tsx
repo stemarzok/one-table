@@ -265,8 +265,8 @@ export const NotificationPopover = () => {
 
   // Get icon based on notification type
   const NotificationIcon = ({ type, isRead }: { type: string; isRead: boolean }) => {
-    const iconClass = `w-5 h-5 ${isRead ? 'text-muted-foreground' : ''}`;
     const containerClass = `w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0`;
+    const iconClass = "w-4 h-4";
     
     switch (type) {
       // Booking notifications
@@ -274,21 +274,21 @@ export const NotificationPopover = () => {
       case 'booking':
       case 'booking_confirmed':
         return (
-          <div className={`${containerClass} bg-green-100 dark:bg-green-900/30`}>
-            <CalendarCheck className={`${iconClass} text-green-600 dark:text-green-400`} />
+          <div className={`${containerClass} bg-green-500/20`}>
+            <CalendarCheck className={`${iconClass} text-green-700 dark:text-green-300`} />
           </div>
         );
       case 'booking_cancelled':
       case 'booking_cancelled_by_user':
         return (
-          <div className={`${containerClass} bg-red-100 dark:bg-red-900/30`}>
-            <XCircle className={`${iconClass} text-red-600 dark:text-red-400`} />
+          <div className={`${containerClass} bg-red-500/20`}>
+            <XCircle className={`${iconClass} text-red-700 dark:text-red-300`} />
           </div>
         );
       case 'booking_completed':
         return (
-          <div className={`${containerClass} bg-blue-100 dark:bg-blue-900/30`}>
-            <CalendarCheck className={`${iconClass} text-blue-600 dark:text-blue-400`} />
+          <div className={`${containerClass} bg-blue-500/20`}>
+            <CalendarCheck className={`${iconClass} text-blue-700 dark:text-blue-300`} />
           </div>
         );
       
@@ -296,42 +296,42 @@ export const NotificationPopover = () => {
       case 'new_review':
       case 'review':
         return (
-          <div className={`${containerClass} bg-yellow-100 dark:bg-yellow-900/30`}>
-            <Star className={`${iconClass} text-yellow-600 dark:text-yellow-400`} />
+          <div className={`${containerClass} bg-amber-500/20`}>
+            <Star className={`${iconClass} text-amber-700 dark:text-amber-300`} />
           </div>
         );
       case 'review_response':
         return (
-          <div className={`${containerClass} bg-purple-100 dark:bg-purple-900/30`}>
-            <MessageSquare className={`${iconClass} text-purple-600 dark:text-purple-400`} />
+          <div className={`${containerClass} bg-purple-500/20`}>
+            <MessageSquare className={`${iconClass} text-purple-700 dark:text-purple-300`} />
           </div>
         );
       
       // Admin notifications
       case 'admin_promoted':
         return (
-          <div className={`${containerClass} bg-amber-100 dark:bg-amber-900/30`}>
-            <Crown className={`${iconClass} text-amber-600 dark:text-amber-400`} />
+          <div className={`${containerClass} bg-amber-500/20`}>
+            <Crown className={`${iconClass} text-amber-700 dark:text-amber-300`} />
           </div>
         );
       case 'admin_removed':
         return (
-          <div className={`${containerClass} bg-slate-100 dark:bg-slate-900/30`}>
-            <Shield className={`${iconClass} text-slate-600 dark:text-slate-400`} />
+          <div className={`${containerClass} bg-slate-500/20`}>
+            <Shield className={`${iconClass} text-slate-700 dark:text-slate-300`} />
           </div>
         );
       
       // Application notifications
       case 'application_approved':
         return (
-          <div className={`${containerClass} bg-green-100 dark:bg-green-900/30`}>
-            <FileCheck className={`${iconClass} text-green-600 dark:text-green-400`} />
+          <div className={`${containerClass} bg-green-500/20`}>
+            <FileCheck className={`${iconClass} text-green-700 dark:text-green-300`} />
           </div>
         );
       case 'application_rejected':
         return (
-          <div className={`${containerClass} bg-red-100 dark:bg-red-900/30`}>
-            <FileX className={`${iconClass} text-red-600 dark:text-red-400`} />
+          <div className={`${containerClass} bg-red-500/20`}>
+            <FileX className={`${iconClass} text-red-700 dark:text-red-300`} />
           </div>
         );
       
@@ -339,22 +339,22 @@ export const NotificationPopover = () => {
       case 'points_change':
       case 'points':
         return (
-          <div className={`${containerClass} bg-emerald-100 dark:bg-emerald-900/30`}>
-            <Coins className={`${iconClass} text-emerald-600 dark:text-emerald-400`} />
+          <div className={`${containerClass} bg-emerald-500/20`}>
+            <Coins className={`${iconClass} text-emerald-700 dark:text-emerald-300`} />
           </div>
         );
       case 'level_up':
         return (
-          <div className={`${containerClass} bg-indigo-100 dark:bg-indigo-900/30`}>
-            <Trophy className={`${iconClass} text-indigo-600 dark:text-indigo-400`} />
+          <div className={`${containerClass} bg-indigo-500/20`}>
+            <Trophy className={`${iconClass} text-indigo-700 dark:text-indigo-300`} />
           </div>
         );
       
       // Promo notifications
       case 'promo':
         return (
-          <div className={`${containerClass} bg-pink-100 dark:bg-pink-900/30`}>
-            <Gift className={`${iconClass} text-pink-600 dark:text-pink-400`} />
+          <div className={`${containerClass} bg-pink-500/20`}>
+            <Gift className={`${iconClass} text-pink-700 dark:text-pink-300`} />
           </div>
         );
       
@@ -362,7 +362,7 @@ export const NotificationPopover = () => {
       default:
         return (
           <div className={`${containerClass} bg-muted`}>
-            <Bell className={`${iconClass}`} />
+            <Bell className={`${iconClass} text-foreground`} />
           </div>
         );
     }

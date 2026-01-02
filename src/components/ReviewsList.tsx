@@ -437,15 +437,57 @@ export const ReviewsList = ({ restaurantId }: ReviewsListProps) => {
                 ))}
               </div>
               {(review.food_rating || review.service_rating || review.ambiance_rating) && (
-                <div className="flex gap-4 text-sm text-muted-foreground">
+                <div className="flex flex-wrap gap-4 text-sm">
                   {review.food_rating && (
-                    <span>{t("review.food")}: {review.food_rating}/5</span>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-foreground font-medium">{t("review.food")}:</span>
+                      <div className="flex items-center gap-0.5">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <Star
+                            key={star}
+                            className={`h-3.5 w-3.5 ${
+                              star <= review.food_rating!
+                                ? "fill-amber-500 text-amber-500"
+                                : "text-muted-foreground/40"
+                            }`}
+                          />
+                        ))}
+                      </div>
+                    </div>
                   )}
                   {review.service_rating && (
-                    <span>{t("review.service")}: {review.service_rating}/5</span>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-foreground font-medium">{t("review.service")}:</span>
+                      <div className="flex items-center gap-0.5">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <Star
+                            key={star}
+                            className={`h-3.5 w-3.5 ${
+                              star <= review.service_rating!
+                                ? "fill-amber-500 text-amber-500"
+                                : "text-muted-foreground/40"
+                            }`}
+                          />
+                        ))}
+                      </div>
+                    </div>
                   )}
                   {review.ambiance_rating && (
-                    <span>{t("review.ambiance")}: {review.ambiance_rating}/5</span>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-foreground font-medium">{t("review.ambiance")}:</span>
+                      <div className="flex items-center gap-0.5">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <Star
+                            key={star}
+                            className={`h-3.5 w-3.5 ${
+                              star <= review.ambiance_rating!
+                                ? "fill-amber-500 text-amber-500"
+                                : "text-muted-foreground/40"
+                            }`}
+                          />
+                        ))}
+                      </div>
+                    </div>
                   )}
                 </div>
               )}
