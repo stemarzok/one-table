@@ -151,28 +151,28 @@ export const ProfileCompletionProgress = ({
               {items.map((item) => {
                 const Icon = item.icon;
                 
-                return (
-                  <div
-                    key={item.id}
-                    className={`flex items-center gap-3 p-3 rounded-xl transition-all ${
-                      item.completed 
-                        ? "bg-primary/10" 
-                        : "bg-muted/50 hover:bg-muted"
-                    }`}
-                  >
-                    <div className={`p-2 rounded-lg ${
-                      item.completed 
-                        ? "bg-primary/20 text-primary" 
-                        : "bg-background text-muted-foreground"
-                    }`}>
-                      <Icon className="w-4 h-4" />
-                    </div>
-                    
-                    <span className={`flex-1 text-sm ${
-                      item.completed ? "text-primary font-medium" : ""
-                    }`}>
-                      {item.label}
-                    </span>
+                  return (
+                    <div
+                      key={item.id}
+                      className={`flex items-center gap-3 p-3 rounded-xl transition-all ${
+                        item.completed 
+                          ? "bg-primary/10" 
+                          : "bg-muted/50 hover:bg-muted"
+                      }`}
+                    >
+                      <div className={`p-2 rounded-lg ${
+                        item.completed 
+                          ? "bg-primary/20 text-primary" 
+                          : "bg-background text-muted-foreground"
+                      }`}>
+                        <Icon className="w-4 h-4" />
+                      </div>
+                      
+                      <span className={`flex-1 text-sm font-medium ${
+                        item.completed ? "text-foreground" : "text-foreground"
+                      }`}>
+                        {item.label}
+                      </span>
                     
                     {item.completed ? (
                       <div className="p-1 rounded-full bg-primary text-primary-foreground">

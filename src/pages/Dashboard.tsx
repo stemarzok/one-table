@@ -300,19 +300,7 @@ const Dashboard = () => {
               <div className="space-y-8">
                 {/* Header del Ristorante */}
                 {restaurant && (
-                  <section className="relative overflow-hidden rounded-2xl border-0 bg-gradient-to-br from-card via-card to-primary/5 shadow-lg">
-                    {/* Cover image background */}
-                    {restaurant.cover_image_url && (
-                      <div className="absolute inset-0 opacity-10">
-                        <img 
-                          src={restaurant.cover_image_url} 
-                          alt="" 
-                          className="w-full h-full object-cover"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-card via-card/80 to-transparent" />
-                      </div>
-                    )}
-                    
+                  <section className="relative overflow-hidden rounded-2xl border bg-card shadow-lg">
                     <div className="relative p-6 md:p-8">
                       <div className="flex flex-col md:flex-row gap-6 items-start">
                         {/* Logo */}
@@ -346,7 +334,7 @@ const Dashboard = () => {
                               <h2 className="text-2xl md:text-3xl font-bold mb-1">{restaurant.name}</h2>
                               <div className="flex flex-wrap items-center gap-2 mb-3">
                                 {restaurant.cuisine_type && (
-                                  <Badge className="bg-primary/10 text-primary border-0 font-medium">
+                                  <Badge variant="secondary" className="font-medium">
                                     {restaurant.cuisine_type}
                                   </Badge>
                                 )}
