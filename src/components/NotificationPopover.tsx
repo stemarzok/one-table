@@ -1,5 +1,19 @@
 import { useEffect, useState, useCallback, useRef } from "react";
-import { Bell, CheckCheck } from "lucide-react";
+import { 
+  Bell, 
+  CheckCheck, 
+  CalendarCheck, 
+  Star, 
+  Shield, 
+  Crown, 
+  Trophy, 
+  Gift, 
+  FileCheck, 
+  FileX, 
+  XCircle,
+  MessageSquare,
+  Coins
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -249,6 +263,111 @@ export const NotificationPopover = () => {
     fetchNotifications();
   };
 
+  // Get icon based on notification type
+  const NotificationIcon = ({ type, isRead }: { type: string; isRead: boolean }) => {
+    const iconClass = `w-5 h-5 ${isRead ? 'text-muted-foreground' : ''}`;
+    const containerClass = `w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0`;
+    
+    switch (type) {
+      // Booking notifications
+      case 'new_booking':
+      case 'booking':
+      case 'booking_confirmed':
+        return (
+          <div className={`${containerClass} bg-green-100 dark:bg-green-900/30`}>
+            <CalendarCheck className={`${iconClass} text-green-600 dark:text-green-400`} />
+          </div>
+        );
+      case 'booking_cancelled':
+      case 'booking_cancelled_by_user':
+        return (
+          <div className={`${containerClass} bg-red-100 dark:bg-red-900/30`}>
+            <XCircle className={`${iconClass} text-red-600 dark:text-red-400`} />
+          </div>
+        );
+      case 'booking_completed':
+        return (
+          <div className={`${containerClass} bg-blue-100 dark:bg-blue-900/30`}>
+            <CalendarCheck className={`${iconClass} text-blue-600 dark:text-blue-400`} />
+          </div>
+        );
+      
+      // Review notifications
+      case 'new_review':
+      case 'review':
+        return (
+          <div className={`${containerClass} bg-yellow-100 dark:bg-yellow-900/30`}>
+            <Star className={`${iconClass} text-yellow-600 dark:text-yellow-400`} />
+          </div>
+        );
+      case 'review_response':
+        return (
+          <div className={`${containerClass} bg-purple-100 dark:bg-purple-900/30`}>
+            <MessageSquare className={`${iconClass} text-purple-600 dark:text-purple-400`} />
+          </div>
+        );
+      
+      // Admin notifications
+      case 'admin_promoted':
+        return (
+          <div className={`${containerClass} bg-amber-100 dark:bg-amber-900/30`}>
+            <Crown className={`${iconClass} text-amber-600 dark:text-amber-400`} />
+          </div>
+        );
+      case 'admin_removed':
+        return (
+          <div className={`${containerClass} bg-slate-100 dark:bg-slate-900/30`}>
+            <Shield className={`${iconClass} text-slate-600 dark:text-slate-400`} />
+          </div>
+        );
+      
+      // Application notifications
+      case 'application_approved':
+        return (
+          <div className={`${containerClass} bg-green-100 dark:bg-green-900/30`}>
+            <FileCheck className={`${iconClass} text-green-600 dark:text-green-400`} />
+          </div>
+        );
+      case 'application_rejected':
+        return (
+          <div className={`${containerClass} bg-red-100 dark:bg-red-900/30`}>
+            <FileX className={`${iconClass} text-red-600 dark:text-red-400`} />
+          </div>
+        );
+      
+      // Points notifications
+      case 'points_change':
+      case 'points':
+        return (
+          <div className={`${containerClass} bg-emerald-100 dark:bg-emerald-900/30`}>
+            <Coins className={`${iconClass} text-emerald-600 dark:text-emerald-400`} />
+          </div>
+        );
+      case 'level_up':
+        return (
+          <div className={`${containerClass} bg-indigo-100 dark:bg-indigo-900/30`}>
+            <Trophy className={`${iconClass} text-indigo-600 dark:text-indigo-400`} />
+          </div>
+        );
+      
+      // Promo notifications
+      case 'promo':
+        return (
+          <div className={`${containerClass} bg-pink-100 dark:bg-pink-900/30`}>
+            <Gift className={`${iconClass} text-pink-600 dark:text-pink-400`} />
+          </div>
+        );
+      
+      // Default
+      default:
+        return (
+          <div className={`${containerClass} bg-muted`}>
+            <Bell className={`${iconClass}`} />
+          </div>
+        );
+    }
+  };
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -300,7 +419,8 @@ export const NotificationPopover = () => {
                   }`}
                   onClick={() => handleNotificationClick(notification)}
                 >
-                  <div className="flex items-start justify-between gap-2">
+                  <div className="flex items-start gap-3">
+                    <NotificationIcon type={notification.type} isRead={notification.is_read} />
                     <div className="flex-1 min-w-0">
                       <p className={`text-sm font-medium truncate ${!notification.is_read ? 'text-primary' : ''}`}>
                         {notification.title}
