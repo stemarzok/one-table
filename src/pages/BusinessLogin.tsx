@@ -24,15 +24,17 @@ const BusinessLogin = () => {
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    // Load saved credentials if remember me was checked
+    
+    // Clean up any previously stored passwords (security fix)
+    localStorage.removeItem('rememberedPassword');
+    localStorage.removeItem('businessRememberedPassword');
+    
+    // Load saved email only if remember me was checked (never store passwords)
     const savedEmail = localStorage.getItem('businessRememberedEmail');
-    const savedPassword = localStorage.getItem('businessRememberedPassword');
-    if (savedEmail && savedPassword) {
+    if (savedEmail) {
       setRememberMe(true);
       const emailInput = document.querySelector('input[name="email"]') as HTMLInputElement;
-      const passwordInput = document.querySelector('input[name="password"]') as HTMLInputElement;
       if (emailInput) emailInput.value = savedEmail;
-      if (passwordInput) passwordInput.value = savedPassword;
     }
   }, []);
 
@@ -75,13 +77,11 @@ const BusinessLogin = () => {
       return;
     }
 
-    // Save credentials if remember me is checked
+    // Save email only if remember me is checked (never store passwords)
     if (rememberMe) {
       localStorage.setItem('businessRememberedEmail', email);
-      localStorage.setItem('businessRememberedPassword', password);
     } else {
       localStorage.removeItem('businessRememberedEmail');
-      localStorage.removeItem('businessRememberedPassword');
     }
     
     const { data: authData, error } = await supabase.auth.signInWithPassword({
