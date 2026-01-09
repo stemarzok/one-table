@@ -27,17 +27,19 @@ const Auth = () => {
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    // Load saved credentials if remember me was checked
+    
+    // Clean up any previously stored passwords (security fix)
+    localStorage.removeItem('rememberedPassword');
+    localStorage.removeItem('businessRememberedPassword');
+    
+    // Load saved email only if remember me was checked (never store passwords)
     const savedEmail = localStorage.getItem('rememberedEmail');
-    const savedPassword = localStorage.getItem('rememberedPassword');
-    if (savedEmail && savedPassword) {
+    if (savedEmail) {
       setRememberMe(true);
-      // Wait for the form to render before setting values
+      // Wait for the form to render before setting email value
       setTimeout(() => {
         const emailInput = document.querySelector('input[name="email"]') as HTMLInputElement;
-        const passwordInput = document.querySelector('input[name="password"]') as HTMLInputElement;
         if (emailInput) emailInput.value = savedEmail;
-        if (passwordInput) passwordInput.value = savedPassword;
       }, 100);
     }
 
@@ -110,13 +112,11 @@ const Auth = () => {
       return;
     }
 
-    // Save credentials if remember me is checked
+    // Save email only if remember me is checked (never store passwords)
     if (rememberMe) {
       localStorage.setItem('rememberedEmail', email);
-      localStorage.setItem('rememberedPassword', password);
     } else {
       localStorage.removeItem('rememberedEmail');
-      localStorage.removeItem('rememberedPassword');
     }
     
     const { data: authData, error } = await supabase.auth.signInWithPassword({
