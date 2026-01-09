@@ -14,7 +14,33 @@ export const passwordSchema = z
   .max(128, { message: "La password deve essere meno di 128 caratteri" })
   .regex(/[A-Z]/, { message: "Deve contenere almeno una lettera maiuscola" })
   .regex(/[a-z]/, { message: "Deve contenere almeno una lettera minuscola" })
-  .regex(/[0-9]/, { message: "Deve contenere almeno un numero" });
+  .regex(/[0-9]/, { message: "Deve contenere almeno un numero" })
+  .regex(/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/, { message: "Deve contenere almeno un carattere speciale (!@#$%^&*...)" });
+
+// Password strength checker for UI feedback
+export const checkPasswordStrength = (password: string): {
+  isValid: boolean;
+  checks: {
+    minLength: boolean;
+    hasUppercase: boolean;
+    hasLowercase: boolean;
+    hasNumber: boolean;
+    hasSpecial: boolean;
+  };
+} => {
+  const checks = {
+    minLength: password.length >= 8,
+    hasUppercase: /[A-Z]/.test(password),
+    hasLowercase: /[a-z]/.test(password),
+    hasNumber: /[0-9]/.test(password),
+    hasSpecial: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password),
+  };
+  
+  return {
+    isValid: Object.values(checks).every(Boolean),
+    checks,
+  };
+};
 
 // Name validation schema
 export const nameSchema = z

@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Separator } from "@/components/ui/separator";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import PasswordStrengthIndicator from "@/components/PasswordStrengthIndicator";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
@@ -19,6 +20,7 @@ const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [showPasswordReset, setShowPasswordReset] = useState(false);
+  const [signupPassword, setSignupPassword] = useState("");
   const { isLoggedIn } = useAuth();
   const navigate = useNavigate();
 
@@ -393,10 +395,10 @@ const Auth = () => {
                       required
                       placeholder="••••••••"
                       minLength={8}
+                      value={signupPassword}
+                      onChange={(e) => setSignupPassword(e.target.value)}
                     />
-                    <p className="text-xs text-muted-foreground">
-                      Minimo 8 caratteri, con maiuscola, minuscola e numero
-                    </p>
+                    <PasswordStrengthIndicator password={signupPassword} />
                   </div>
                   
                   <div className="space-y-2">
