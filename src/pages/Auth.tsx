@@ -21,6 +21,7 @@ const Auth = () => {
   const [rememberMe, setRememberMe] = useState(false);
   const [showPasswordReset, setShowPasswordReset] = useState(false);
   const [signupPassword, setSignupPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const { isLoggedIn } = useAuth();
   const navigate = useNavigate();
 
@@ -196,6 +197,15 @@ const Auth = () => {
     const email = formData.get('email') as string;
     const password = formData.get('password') as string;
     const phone = formData.get('phone') as string;
+
+    const confirmPwd = formData.get('confirmPassword') as string;
+
+    // Check password match first
+    if (password !== confirmPwd) {
+      toast.error("Le password non corrispondono");
+      setIsLoading(false);
+      return;
+    }
 
     try {
       nameSchema.parse(name);
@@ -401,6 +411,24 @@ const Auth = () => {
                     <PasswordStrengthIndicator password={signupPassword} />
                   </div>
                   
+                  <div className="space-y-2">
+                    <Label htmlFor="confirm-password">Conferma Password <span className="text-destructive">*</span></Label>
+                    <Input
+                      id="confirm-password"
+                      name="confirmPassword"
+                      type="password"
+                      required
+                      placeholder="••••••••"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                    />
+                    {confirmPassword && signupPassword !== confirmPassword && (
+                      <p className="text-xs text-destructive">Le password non corrispondono</p>
+                    )}
+                    {confirmPassword && signupPassword === confirmPassword && (
+                      <p className="text-xs text-green-600 dark:text-green-500">Le password corrispondono ✓</p>
+                    )}
+                  </div>
                   <div className="space-y-2">
                     <Label htmlFor="phone">Telefono <span className="text-destructive">*</span></Label>
                     <Input
