@@ -927,6 +927,105 @@ export type Database = {
           },
         ]
       }
+      sponsorship_codes: {
+        Row: {
+          code: string
+          created_at: string
+          duration_days: number | null
+          expires_at: string | null
+          id: string
+          restaurant_id: string
+          used_at: string | null
+          user_id: string
+          valid: boolean
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          duration_days?: number | null
+          expires_at?: string | null
+          id?: string
+          restaurant_id: string
+          used_at?: string | null
+          user_id: string
+          valid?: boolean
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          duration_days?: number | null
+          expires_at?: string | null
+          id?: string
+          restaurant_id?: string
+          used_at?: string | null
+          user_id?: string
+          valid?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sponsorship_codes_restaurant_id_fkey"
+            columns: ["restaurant_id"]
+            isOneToOne: false
+            referencedRelation: "restaurants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sponsorship_codes_restaurant_id_fkey"
+            columns: ["restaurant_id"]
+            isOneToOne: false
+            referencedRelation: "restaurants_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sponsorship_requests: {
+        Row: {
+          created_at: string
+          duration_days: number | null
+          email: string
+          id: string
+          restaurant_id: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          duration_days?: number | null
+          email: string
+          id?: string
+          restaurant_id: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          duration_days?: number | null
+          email?: string
+          id?: string
+          restaurant_id?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sponsorship_requests_restaurant_id_fkey"
+            columns: ["restaurant_id"]
+            isOneToOne: false
+            referencedRelation: "restaurants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sponsorship_requests_restaurant_id_fkey"
+            columns: ["restaurant_id"]
+            isOneToOne: false
+            referencedRelation: "restaurants_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       subscriptions: {
         Row: {
           billing_period: string
