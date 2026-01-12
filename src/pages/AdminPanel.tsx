@@ -11,13 +11,14 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useAdminRole } from "@/hooks/useAdminRole";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { AlertCircle, CheckCircle, XCircle, FileText, Clock, BarChart3, Crown } from "lucide-react";
+import { AlertCircle, CheckCircle, XCircle, FileText, Clock, BarChart3, Crown, Megaphone } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AdminManagementPanel } from "@/components/admin/AdminManagementPanel";
 import { GlobalStats } from "@/components/admin/GlobalStats";
 import { PromoRequestsPanel } from "@/components/admin/PromoRequestsPanel";
 import { ReviewReportsPanel } from "@/components/admin/ReviewReportsPanel";
 import { UserBehaviorAnalytics } from "@/components/admin/UserBehaviorAnalytics";
+import { SponsorshipRequestsPanel } from "@/components/admin/SponsorshipRequestsPanel";
 
 interface Application {
   id: string;
@@ -219,10 +220,14 @@ const AdminPanel = () => {
           </div>
 
           <Tabs defaultValue="applications" className="space-y-6">
-            <TabsList className="grid w-full max-w-5xl grid-cols-6">
+            <TabsList className="grid w-full max-w-6xl grid-cols-7">
               <TabsTrigger value="applications">Richieste</TabsTrigger>
               <TabsTrigger value="reviews">Recensioni</TabsTrigger>
               <TabsTrigger value="promo">Promo</TabsTrigger>
+              <TabsTrigger value="sponsorships">
+                <Megaphone className="w-4 h-4 mr-1" />
+                Sponsor
+              </TabsTrigger>
               <TabsTrigger value="stats">Statistiche</TabsTrigger>
               <TabsTrigger value="analytics">Analytics</TabsTrigger>
               <TabsTrigger value="users">Utenti</TabsTrigger>
@@ -408,6 +413,10 @@ const AdminPanel = () => {
 
             <TabsContent value="promo">
               <PromoRequestsPanel />
+            </TabsContent>
+
+            <TabsContent value="sponsorships">
+              <SponsorshipRequestsPanel />
             </TabsContent>
 
             <TabsContent value="stats">
