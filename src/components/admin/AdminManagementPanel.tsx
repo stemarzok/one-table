@@ -49,22 +49,25 @@ export const AdminManagementPanel = () => {
         .select('id, user_id, role, created_at');
 
       if (error) throw error;
+      if (!data || data.length === 0) {
+        setAdmins([]);
+        setLoadingAdmins(false);
+        return;
+      }
 
-      // Fetch profile info for each admin
-      const adminsWithProfiles = await Promise.all(
-        (data || []).map(async (admin) => {
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('name, email')
-            .eq('id', admin.user_id)
-            .single();
-          
-          return {
-            ...admin,
-            profile: profile || undefined
-          };
-        })
-      );
+      // Batch fetch all profiles at once (fixes N+1 query)
+      const userIds = data.map(a => a.user_id);
+      const { data: profilesData } = await supabase
+        .from('profiles')
+        .select('id, name, email')
+        .in('id', userIds);
+      
+      const profilesMap = new Map(profilesData?.map(p => [p.id, { name: p.name, email: p.email }]) || []);
+
+      const adminsWithProfiles = data.map(admin => ({
+        ...admin,
+        profile: profilesMap.get(admin.user_id)
+      }));
 
       setAdmins(adminsWithProfiles);
     } catch (error) {
