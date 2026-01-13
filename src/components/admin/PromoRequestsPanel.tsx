@@ -120,25 +120,16 @@ export const PromoRequestsPanel = () => {
   useEffect(() => {
     fetchData();
 
-    const requestsChannel = supabase
-      .channel('promo-requests-changes')
+    // Single consolidated realtime channel for all promo-related tables
+    const channel = supabase
+      .channel('promo-all-changes')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'promo_requests' }, fetchData)
-      .subscribe();
-
-    const codesChannel = supabase
-      .channel('promo-codes-changes')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'promo_codes' }, fetchData)
-      .subscribe();
-
-    const subsChannel = supabase
-      .channel('promo-subs-changes')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'subscriptions' }, fetchData)
       .subscribe();
 
     return () => {
-      supabase.removeChannel(requestsChannel);
-      supabase.removeChannel(codesChannel);
-      supabase.removeChannel(subsChannel);
+      supabase.removeChannel(channel);
     };
   }, []);
 

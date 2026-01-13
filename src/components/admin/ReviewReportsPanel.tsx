@@ -75,28 +75,32 @@ export const ReviewReportsPanel = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
+      if (!data || data.length === 0) {
+        setReports([]);
+        setLoading(false);
+        return;
+      }
 
-      // Fetch user profiles for each review
-      const reportsWithProfiles = await Promise.all(
-        (data || []).map(async (report) => {
-          if (report.review?.user_id) {
-            const { data: profileData } = await supabase
-              .from('profiles')
-              .select('name, email')
-              .eq('id', report.review.user_id)
-              .single();
-            
-            return {
-              ...report,
-              review: {
-                ...report.review,
-                profiles: profileData
-              }
-            };
-          }
-          return report;
-        })
-      );
+      // Batch fetch all user profiles at once (fixes N+1 query)
+      const userIds = [...new Set(data.map(r => r.review?.user_id).filter(Boolean))];
+      
+      let profilesMap = new Map<string, { name: string; email: string }>();
+      if (userIds.length > 0) {
+        const { data: profilesData } = await supabase
+          .from('profiles')
+          .select('id, name, email')
+          .in('id', userIds);
+        
+        profilesMap = new Map(profilesData?.map(p => [p.id, { name: p.name, email: p.email }]) || []);
+      }
+
+      const reportsWithProfiles = data.map(report => ({
+        ...report,
+        review: report.review ? {
+          ...report.review,
+          profiles: profilesMap.get(report.review.user_id) || null
+        } : null
+      }));
 
       setReports(reportsWithProfiles as ReviewReport[]);
     } catch (error) {

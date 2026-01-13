@@ -5,20 +5,28 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { useEffect, useState } from "react";
+import { useEffect, useState, lazy, Suspense, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAdminRole } from "@/hooks/useAdminRole";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { AlertCircle, CheckCircle, XCircle, FileText, Clock, BarChart3, Crown, Megaphone } from "lucide-react";
+import { AlertCircle, CheckCircle, XCircle, FileText, Clock, BarChart3, Crown, Megaphone, Loader2 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { AdminManagementPanel } from "@/components/admin/AdminManagementPanel";
-import { GlobalStats } from "@/components/admin/GlobalStats";
-import { PromoRequestsPanel } from "@/components/admin/PromoRequestsPanel";
-import { ReviewReportsPanel } from "@/components/admin/ReviewReportsPanel";
-import { UserBehaviorAnalytics } from "@/components/admin/UserBehaviorAnalytics";
-import { SponsorshipRequestsPanel } from "@/components/admin/SponsorshipRequestsPanel";
+
+// Lazy load heavy components for better initial load
+const AdminManagementPanel = lazy(() => import("@/components/admin/AdminManagementPanel").then(m => ({ default: m.AdminManagementPanel })));
+const GlobalStats = lazy(() => import("@/components/admin/GlobalStats").then(m => ({ default: m.GlobalStats })));
+const PromoRequestsPanel = lazy(() => import("@/components/admin/PromoRequestsPanel").then(m => ({ default: m.PromoRequestsPanel })));
+const ReviewReportsPanel = lazy(() => import("@/components/admin/ReviewReportsPanel").then(m => ({ default: m.ReviewReportsPanel })));
+const UserBehaviorAnalytics = lazy(() => import("@/components/admin/UserBehaviorAnalytics"));
+const SponsorshipRequestsPanel = lazy(() => import("@/components/admin/SponsorshipRequestsPanel").then(m => ({ default: m.SponsorshipRequestsPanel })));
+
+const TabLoader = () => (
+  <div className="flex items-center justify-center py-12">
+    <Loader2 className="w-6 h-6 animate-spin text-primary" />
+  </div>
+);
 
 interface Application {
   id: string;
@@ -63,44 +71,42 @@ const AdminPanel = () => {
     }
   }, [isAdmin, loading, navigate]);
 
-  useEffect(() => {
-    const fetchApplications = async () => {
-      if (!isAdmin) return;
+  const fetchApplications = useCallback(async () => {
+    if (!isAdmin) return;
 
-      const { data, error } = await supabase
-        .from('business_applications')
-        .select('*')
-        .order('submitted_at', { ascending: false });
+    const { data, error } = await supabase
+      .from('business_applications')
+      .select('*')
+      .order('submitted_at', { ascending: false });
 
-      if (!error && data) {
-        setApplications(data);
-      }
-    };
-
-    if (isAdmin) {
-      fetchApplications();
-
-      // Subscribe to realtime updates
-      const channel = supabase
-        .channel('business-applications-changes')
-        .on(
-          'postgres_changes',
-          {
-            event: '*',
-            schema: 'public',
-            table: 'business_applications'
-          },
-          () => {
-            fetchApplications();
-          }
-        )
-        .subscribe();
-
-      return () => {
-        supabase.removeChannel(channel);
-      };
+    if (!error && data) {
+      setApplications(data);
     }
   }, [isAdmin]);
+
+  useEffect(() => {
+    if (!isAdmin) return;
+    
+    fetchApplications();
+
+    // Subscribe to realtime updates - single channel for applications tab
+    const channel = supabase
+      .channel('business-applications-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'business_applications'
+        },
+        fetchApplications
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [isAdmin, fetchApplications]);
 
   const viewDocument = async (fileName: string) => {
     try {
@@ -408,27 +414,39 @@ const AdminPanel = () => {
             </TabsContent>
 
             <TabsContent value="reviews">
-              <ReviewReportsPanel />
+              <Suspense fallback={<TabLoader />}>
+                <ReviewReportsPanel />
+              </Suspense>
             </TabsContent>
 
             <TabsContent value="promo">
-              <PromoRequestsPanel />
+              <Suspense fallback={<TabLoader />}>
+                <PromoRequestsPanel />
+              </Suspense>
             </TabsContent>
 
             <TabsContent value="sponsorships">
-              <SponsorshipRequestsPanel />
+              <Suspense fallback={<TabLoader />}>
+                <SponsorshipRequestsPanel />
+              </Suspense>
             </TabsContent>
 
             <TabsContent value="stats">
-              <GlobalStats />
+              <Suspense fallback={<TabLoader />}>
+                <GlobalStats />
+              </Suspense>
             </TabsContent>
 
             <TabsContent value="analytics">
-              <UserBehaviorAnalytics />
+              <Suspense fallback={<TabLoader />}>
+                <UserBehaviorAnalytics />
+              </Suspense>
             </TabsContent>
 
             <TabsContent value="users">
-              <AdminManagementPanel />
+              <Suspense fallback={<TabLoader />}>
+                <AdminManagementPanel />
+              </Suspense>
             </TabsContent>
           </Tabs>
         </div>

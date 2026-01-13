@@ -34,95 +34,57 @@ export const GlobalStats = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchStats();
-    fetchChartData();
+    fetchAllData();
   }, [dateRange]);
 
-  const fetchStats = async () => {
+  const fetchAllData = async () => {
+    setLoading(true);
     try {
       const today = new Date().toISOString().split('T')[0];
-
-      // Total restaurants
-      const { count: restaurantsCount } = await supabase
-        .from('restaurants')
-        .select('*', { count: 'exact', head: true })
-        .eq('is_active', true);
-
-      // Today's bookings
-      const { count: todayCount } = await supabase
-        .from('bookings')
-        .select('*', { count: 'exact', head: true })
-        .eq('booking_date', today)
-        .in('status', ['pending', 'confirmed']);
-
-      // Cancelled bookings (last 30 days)
       const thirtyDaysAgo = new Date();
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-      const { count: cancelledCount } = await supabase
-        .from('bookings')
-        .select('*', { count: 'exact', head: true })
-        .eq('status', 'cancelled')
-        .gte('booking_date', thirtyDaysAgo.toISOString().split('T')[0]);
-
-      // Recent reviews (last 7 days)
       const sevenDaysAgo = new Date();
       sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-      const { count: reviewsCount } = await supabase
-        .from('reviews')
-        .select('*', { count: 'exact', head: true })
-        .gte('created_at', sevenDaysAgo.toISOString());
+      
+      const days = parseInt(dateRange);
+      const chartStartDate = new Date();
+      chartStartDate.setDate(chartStartDate.getDate() - days);
 
-      // Calculate revenue (based on completed bookings and restaurant price ranges)
-      const { data: completedBookings } = await supabase
-        .from('bookings')
-        .select(`
-          guests_count,
-          restaurants:restaurant_id (
-            price_range
-          )
-        `)
-        .eq('status', 'completed')
-        .gte('booking_date', thirtyDaysAgo.toISOString().split('T')[0]);
+      // Execute all queries in parallel
+      const [
+        restaurantsResult,
+        todayBookingsResult,
+        cancelledResult,
+        reviewsResult,
+        completedBookingsResult,
+        chartBookingsResult
+      ] = await Promise.all([
+        supabase.from('restaurants').select('*', { count: 'exact', head: true }).eq('is_active', true),
+        supabase.from('bookings').select('*', { count: 'exact', head: true }).eq('booking_date', today).in('status', ['pending', 'confirmed']),
+        supabase.from('bookings').select('*', { count: 'exact', head: true }).eq('status', 'cancelled').gte('booking_date', thirtyDaysAgo.toISOString().split('T')[0]),
+        supabase.from('reviews').select('*', { count: 'exact', head: true }).gte('created_at', sevenDaysAgo.toISOString()),
+        supabase.from('bookings').select('guests_count, restaurants:restaurant_id(price_range)').eq('status', 'completed').gte('booking_date', thirtyDaysAgo.toISOString().split('T')[0]),
+        supabase.from('bookings').select('booking_date, status').gte('booking_date', chartStartDate.toISOString().split('T')[0]).order('booking_date')
+      ]);
 
+      // Calculate revenue
       let totalRevenue = 0;
-      completedBookings?.forEach((booking: any) => {
+      completedBookingsResult.data?.forEach((booking: any) => {
         const priceRange = booking.restaurants?.price_range || '€';
-        const avgPrice = priceRange === '€' ? 15 : 
-                        priceRange === '€€' ? 30 : 
-                        priceRange === '€€€' ? 50 : 80;
+        const avgPrice = priceRange === '€' ? 15 : priceRange === '€€' ? 30 : priceRange === '€€€' ? 50 : 80;
         totalRevenue += avgPrice * booking.guests_count;
       });
 
       setStats({
-        totalRestaurants: restaurantsCount || 0,
-        todayBookings: todayCount || 0,
-        cancelledBookings: cancelledCount || 0,
-        recentReviews: reviewsCount || 0,
+        totalRestaurants: restaurantsResult.count || 0,
+        todayBookings: todayBookingsResult.count || 0,
+        cancelledBookings: cancelledResult.count || 0,
+        recentReviews: reviewsResult.count || 0,
         revenue: totalRevenue,
       });
-    } catch (error) {
-      console.error("Error fetching stats:", error);
-      toast.error("Errore nel caricamento delle statistiche");
-    } finally {
-      setLoading(false);
-    }
-  };
 
-  const fetchChartData = async () => {
-    try {
-      const days = parseInt(dateRange);
-      const startDate = new Date();
-      startDate.setDate(startDate.getDate() - days);
-
-      const { data: bookingsData } = await supabase
-        .from('bookings')
-        .select('booking_date, status')
-        .gte('booking_date', startDate.toISOString().split('T')[0])
-        .order('booking_date');
-
-      // Group by date
+      // Process chart data
       const dataMap = new Map<string, { bookings: number; cancelled: number }>();
-      
       for (let i = 0; i < days; i++) {
         const date = new Date();
         date.setDate(date.getDate() - (days - 1 - i));
@@ -130,7 +92,7 @@ export const GlobalStats = () => {
         dataMap.set(dateStr, { bookings: 0, cancelled: 0 });
       }
 
-      bookingsData?.forEach((booking) => {
+      chartBookingsResult.data?.forEach((booking: any) => {
         const existing = dataMap.get(booking.booking_date);
         if (existing) {
           existing.bookings++;
@@ -149,9 +111,14 @@ export const GlobalStats = () => {
 
       setChartData(chartArray);
     } catch (error) {
-      console.error("Error fetching chart data:", error);
+      console.error("Error fetching stats:", error);
+      toast.error("Errore nel caricamento delle statistiche");
+    } finally {
+      setLoading(false);
     }
   };
+
+  // Remove fetchChartData - now integrated into fetchAllData
 
   const exportToCSV = () => {
     const headers = ['Data', 'Prenotazioni', 'Cancellate'];

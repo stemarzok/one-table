@@ -58,20 +58,15 @@ export const SponsorshipRequestsPanel = () => {
   useEffect(() => {
     fetchData();
 
-    // Subscribe to realtime updates
-    const requestsChannel = supabase
-      .channel('sponsorship-requests-changes')
+    // Single consolidated realtime channel for all sponsorship-related tables
+    const channel = supabase
+      .channel('sponsorship-all-changes')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'sponsorship_requests' }, fetchData)
-      .subscribe();
-
-    const codesChannel = supabase
-      .channel('sponsorship-codes-changes')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'sponsorship_codes' }, fetchData)
       .subscribe();
 
     return () => {
-      supabase.removeChannel(requestsChannel);
-      supabase.removeChannel(codesChannel);
+      supabase.removeChannel(channel);
     };
   }, []);
 

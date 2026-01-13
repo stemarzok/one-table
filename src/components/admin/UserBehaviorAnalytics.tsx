@@ -1,10 +1,10 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, AreaChart, Area } from "recharts";
-import { MousePointer, Eye, ArrowDown, Clock, Users, TrendingUp, MapPin } from "lucide-react";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line, AreaChart, Area } from "recharts";
+import { MousePointer, Eye, Users, TrendingUp, MapPin } from "lucide-react";
 
 interface AnalyticsEvent {
   id: string;
@@ -18,19 +18,13 @@ interface AnalyticsEvent {
   metadata: any;
 }
 
-const COLORS = ['hsl(var(--primary))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))', 'hsl(var(--chart-5))'];
-
 export const UserBehaviorAnalytics = () => {
   const [events, setEvents] = useState<AnalyticsEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [dateRange, setDateRange] = useState("7d");
   const [selectedPage, setSelectedPage] = useState("all");
 
-  useEffect(() => {
-    fetchAnalytics();
-  }, [dateRange]);
-
-  const fetchAnalytics = async () => {
+  const fetchAnalytics = useCallback(async () => {
     setLoading(true);
     
     const daysAgo = dateRange === "1d" ? 1 : dateRange === "7d" ? 7 : 30;
@@ -39,16 +33,20 @@ export const UserBehaviorAnalytics = () => {
 
     const { data, error } = await supabase
       .from('user_analytics')
-      .select('*')
+      .select('id, event_type, page_path, x_position, y_position, viewport_width, viewport_height, created_at, metadata')
       .gte('created_at', since.toISOString())
       .order('created_at', { ascending: false })
-      .limit(5000);
+      .limit(2000); // Reduced limit for faster loading
 
     if (data && !error) {
       setEvents(data);
     }
     setLoading(false);
-  };
+  }, [dateRange]);
+
+  useEffect(() => {
+    fetchAnalytics();
+  }, [fetchAnalytics]);
 
   // Aggregate data
   const stats = useMemo(() => {
