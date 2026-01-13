@@ -52,6 +52,7 @@ interface Subscription {
   status: string;
   current_period_end: string;
   current_period_start: string;
+  profiles?: { email: string; name: string } | null;
 }
 
 export const PromoRequestsPanel = () => {
@@ -90,7 +91,25 @@ export const PromoRequestsPanel = () => {
         .select('*')
         .eq('plan_type', 'promo_speciale')
         .order('current_period_end', { ascending: false });
-      setActivePromos(subData || []);
+      
+      // Fetch profiles for subscriptions
+      if (subData && subData.length > 0) {
+        const userIds = [...new Set(subData.map(s => s.user_id))];
+        const { data: profilesData } = await supabase
+          .from('profiles')
+          .select('id, email, name')
+          .in('id', userIds);
+        
+        const profilesMap = new Map(profilesData?.map(p => [p.id, p]) || []);
+        
+        const subsWithProfiles = subData.map(sub => ({
+          ...sub,
+          profiles: profilesMap.get(sub.user_id) || null
+        }));
+        setActivePromos(subsWithProfiles);
+      } else {
+        setActivePromos([]);
+      }
     } catch (error) {
       console.error('Error fetching promo data:', error);
     } finally {
@@ -311,10 +330,8 @@ export const PromoRequestsPanel = () => {
   const processedRequests = requests.filter(r => r.status !== 'pending');
   const activeCodes = codes.filter(c => c.valid && (!c.expires_at || new Date(c.expires_at) >= new Date()));
   const usedCodes = codes.filter(c => !c.valid || (c.expires_at && new Date(c.expires_at) < new Date()));
-  const activeSubscriptions = activePromos.filter(s => s.status === 'active' && new Date(s.current_period_end) >= new Date());
-  const expiredSubscriptions = activePromos.filter(s => 
-    (s.status === 'active' && new Date(s.current_period_end) < new Date()) || s.status === 'cancelled'
-  );
+  const activeSubscriptions = activePromos.filter(s => s.status === 'active');
+  const expiredSubscriptions = activePromos.filter(s => s.status === 'cancelled');
 
   if (loading) {
     return (
@@ -469,24 +486,29 @@ export const PromoRequestsPanel = () => {
             </Card>
           ) : (
             activeSubscriptions.map(sub => {
-              const relatedRequest = requests.find(r => r.user_id === sub.user_id);
+              const email = sub.profiles?.email || requests.find(r => r.user_id === sub.user_id)?.email || 'Email non disponibile';
               const isUnlimited = new Date(sub.current_period_end).getFullYear() >= 2099;
+              const isExpired = new Date(sub.current_period_end) < new Date();
               return (
                 <Card key={sub.id} className="p-4">
                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
                         <User className="w-4 h-4 text-primary" />
-                        <span className="font-medium">{relatedRequest?.email || 'Email non disponibile'}</span>
+                        <span className="font-medium">{email}</span>
                       </div>
                       <p className="text-sm text-muted-foreground">
                         {isUnlimited 
                           ? 'Nessuna scadenza (illimitato)'
-                          : `Scade il ${format(new Date(sub.current_period_end), 'dd MMM yyyy', { locale: it })}`}
+                          : isExpired 
+                            ? `Scaduto il ${format(new Date(sub.current_period_end), 'dd MMM yyyy', { locale: it })}`
+                            : `Scade il ${format(new Date(sub.current_period_end), 'dd MMM yyyy', { locale: it })}`}
                       </p>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Badge className="bg-green-500 text-white">Attivo</Badge>
+                      <Badge className={isExpired ? "bg-orange-500 text-white" : "bg-green-500 text-white"}>
+                        {isExpired ? 'Scaduto' : 'Attivo'}
+                      </Badge>
                       <Button variant="outline" size="sm" onClick={() => handleEditSubscription(sub)}>
                         <Edit className="h-4 w-4 mr-1" />
                         Modifica
@@ -553,12 +575,12 @@ export const PromoRequestsPanel = () => {
             <p className="text-sm text-muted-foreground">Nessun abbonamento scaduto</p>
           ) : (
             expiredSubscriptions.slice(0, 20).map(sub => {
-              const relatedRequest = requests.find(r => r.user_id === sub.user_id);
+              const email = sub.profiles?.email || requests.find(r => r.user_id === sub.user_id)?.email || 'Utente';
               return (
                 <Card key={sub.id} className="p-3">
                   <div className="flex items-center justify-between">
                     <div>
-                      <span className="font-medium text-sm">{relatedRequest?.email || 'Utente'}</span>
+                      <span className="font-medium text-sm">{email}</span>
                       <span className="text-xs text-muted-foreground ml-2">
                         {format(new Date(sub.current_period_end), 'dd MMM yyyy', { locale: it })}
                       </span>
