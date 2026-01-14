@@ -351,12 +351,25 @@ const Dashboard = () => {
                               </div>
                             </div>
                             
-                            {/* Rating badge */}
+                            {/* Rating badge - TripAdvisor dots style */}
                             {stats.totalReviews > 0 && (
-                              <div className="flex-shrink-0 flex items-center gap-2 px-4 py-2 rounded-xl bg-primary/10 border border-primary/20">
-                                <Star className="w-5 h-5 fill-primary text-primary" />
-                                <span className="text-xl font-bold">{stats.avgRating}</span>
-                                <span className="text-xs text-muted-foreground">({stats.totalReviews})</span>
+                              <div className="flex-shrink-0 flex flex-col items-end gap-1">
+                                <div className="flex items-center gap-2">
+                                  <span className="text-lg font-bold text-foreground">{stats.avgRating}</span>
+                                  <div className="flex gap-0.5">
+                                    {[1, 2, 3, 4, 5].map((dot) => (
+                                      <div
+                                        key={dot}
+                                        className={`w-3.5 h-3.5 rounded-full transition-colors ${
+                                          dot <= Math.round(stats.avgRating) 
+                                            ? 'bg-primary' 
+                                            : 'bg-muted'
+                                        }`}
+                                      />
+                                    ))}
+                                  </div>
+                                </div>
+                                <span className="text-xs text-muted-foreground">{stats.totalReviews} recensioni</span>
                               </div>
                             )}
                           </div>
@@ -368,13 +381,13 @@ const Dashboard = () => {
                           )}
                           
                           <Button 
-                            variant="outline" 
+                            variant="ghost" 
                             size="sm"
                             onClick={() => {
                               setInfoModalTab("info");
                               setShowInfoModal(true);
                             }}
-                            className="gap-2"
+                            className="gap-2 text-primary hover:text-primary hover:bg-primary/10 font-medium"
                           >
                             <Settings className="w-4 h-4" />
                             Gestisci Info e Orari
