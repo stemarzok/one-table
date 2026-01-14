@@ -274,22 +274,34 @@ const Dashboard = () => {
             </div>
           )}
           <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-8">
-            <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4 gap-1">
-              <TabsTrigger value="overview">
+            <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4 gap-2 bg-muted/50 p-1.5 rounded-xl">
+              <TabsTrigger 
+                value="overview"
+                className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md rounded-lg transition-all duration-200 hover:bg-muted"
+              >
                 <LayoutDashboard className="w-4 h-4 mr-2" />
                 <span className="hidden sm:inline">{t('dashboard.overview')}</span>
               </TabsTrigger>
-              <TabsTrigger value="bookings" className="relative">
+              <TabsTrigger 
+                value="bookings" 
+                className="relative data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md rounded-lg transition-all duration-200 hover:bg-muted"
+              >
                 <Calendar className="w-4 h-4 mr-2" />
                 <span className="hidden sm:inline">Prenotazioni</span>
                 {!hasProAccess && <Lock className="w-3 h-3 absolute -top-1 -right-1 text-muted-foreground" />}
               </TabsTrigger>
-              <TabsTrigger value="tables" className="relative">
+              <TabsTrigger 
+                value="tables" 
+                className="relative data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md rounded-lg transition-all duration-200 hover:bg-muted"
+              >
                 <Table2 className="w-4 h-4 mr-2" />
                 <span className="hidden sm:inline">{t('dashboard.tables')}</span>
                 {!hasProAccess && <Lock className="w-3 h-3 absolute -top-1 -right-1 text-muted-foreground" />}
               </TabsTrigger>
-              <TabsTrigger value="menu" className="relative">
+              <TabsTrigger 
+                value="menu" 
+                className="relative data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md rounded-lg transition-all duration-200 hover:bg-muted"
+              >
                 <UtensilsCrossed className="w-4 h-4 mr-2" />
                 <span className="hidden sm:inline">{t('dashboard.menu')}</span>
                 {!hasProAccess && <Lock className="w-3 h-3 absolute -top-1 -right-1 text-muted-foreground" />}

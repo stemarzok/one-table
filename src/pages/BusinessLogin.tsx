@@ -38,24 +38,20 @@ const BusinessLogin = () => {
     }
   }, []);
 
+  // Fast redirect if already logged in with business role
   useEffect(() => {
-    const checkBusinessRole = async () => {
-      if (isLoggedIn && user) {
-        // Check if user is admin or has business role
-        const [businessRoleResult, adminRoleResult] = await Promise.all([
-          supabase.from('business_roles').select('*').eq('user_id', user.id).maybeSingle(),
-          supabase.from('admin_roles').select('*').eq('user_id', user.id).maybeSingle()
-        ]);
-        
-        if (businessRoleResult.data || adminRoleResult.data) {
-          // Set business mode and redirect
+    if (isLoggedIn && user) {
+      // Quick check - use cached query with minimal fields
+      Promise.all([
+        supabase.from('business_roles').select('id').eq('user_id', user.id).limit(1).maybeSingle(),
+        supabase.from('admin_roles').select('id').eq('user_id', user.id).limit(1).maybeSingle()
+      ]).then(([businessResult, adminResult]) => {
+        if (businessResult.data || adminResult.data) {
           setBusinessMode(true);
-          navigate('/dashboard');
+          navigate('/dashboard', { replace: true });
         }
-      }
-    };
-    
-    checkBusinessRole();
+      });
+    }
   }, [isLoggedIn, user, navigate, setBusinessMode]);
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -102,12 +98,12 @@ const BusinessLogin = () => {
       return;
     }
 
-    // Check if user is admin or has business role
+    // Check if user is admin or has business role - optimized with minimal fields
     if (authData.user) {
       const [businessRoleResult, adminRoleResult, profileResult] = await Promise.all([
-        supabase.from('business_roles').select('*').eq('user_id', authData.user.id).maybeSingle(),
-        supabase.from('admin_roles').select('*').eq('user_id', authData.user.id).maybeSingle(),
-        supabase.from('profiles').select('avatar_url').eq('id', authData.user.id).maybeSingle()
+        supabase.from('business_roles').select('id').eq('user_id', authData.user.id).limit(1).maybeSingle(),
+        supabase.from('admin_roles').select('id').eq('user_id', authData.user.id).limit(1).maybeSingle(),
+        supabase.from('profiles').select('onboarding_completed').eq('id', authData.user.id).maybeSingle()
       ]);
       
       if (!businessRoleResult.data && !adminRoleResult.data) {
@@ -117,20 +113,17 @@ const BusinessLogin = () => {
         return;
       }
       
-      // Check if onboarding has been completed
-      const hasCompletedOnboarding = profileResult.data?.avatar_url === 'onboarding_completed';
-      
-      // Set business mode to isolate this session from client section
+      // Set business mode immediately
       setBusinessMode(true);
+      toast.success("Accesso effettuato!");
       
-      toast.success("Accesso effettuato! Reindirizzamento...");
-      setTimeout(() => {
-        if (!hasCompletedOnboarding && businessRoleResult.data) {
-          navigate('/onboarding');
-        } else {
-          navigate('/dashboard');
-        }
-      }, 1000);
+      // Navigate immediately without delay
+      const hasCompletedOnboarding = profileResult.data?.onboarding_completed;
+      if (!hasCompletedOnboarding && businessRoleResult.data) {
+        navigate('/onboarding', { replace: true });
+      } else {
+        navigate('/dashboard', { replace: true });
+      }
     }
     
     setIsLoading(false);
