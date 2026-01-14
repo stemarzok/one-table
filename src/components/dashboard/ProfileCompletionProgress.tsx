@@ -180,13 +180,13 @@ export const ProfileCompletionProgress = ({
                       </div>
                     ) : item.action ? (
                       <Button
-                        variant="ghost"
+                        variant="outline"
                         size="sm"
                         onClick={(e) => {
                           e.stopPropagation();
                           item.action?.();
                         }}
-                        className="text-primary hover:text-primary hover:bg-primary/10 gap-1"
+                        className="hover:bg-muted transition-all duration-200 gap-1"
                       >
                         {item.actionLabel}
                         <ArrowRight className="w-3 h-3" />

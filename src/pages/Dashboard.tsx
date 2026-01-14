@@ -393,13 +393,13 @@ const Dashboard = () => {
                           )}
                           
                           <Button 
-                            variant="ghost" 
+                            variant="outline" 
                             size="sm"
                             onClick={() => {
                               setInfoModalTab("info");
                               setShowInfoModal(true);
                             }}
-                            className="gap-2 text-primary hover:text-primary hover:bg-primary/10 font-medium"
+                            className="gap-2 hover:bg-muted transition-all duration-200"
                           >
                             <Settings className="w-4 h-4" />
                             Gestisci Info e Orari
