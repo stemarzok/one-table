@@ -164,9 +164,9 @@ export const ContextualAlerts = ({
               {alert.action && (
                 <Button
                   size="sm"
-                  variant={alert.type === "warning" ? "default" : "outline"}
+                  variant="outline"
                   onClick={alert.action.onClick}
-                  className="flex-shrink-0"
+                  className="flex-shrink-0 hover:bg-muted transition-all duration-200"
                 >
                   {alert.action.label}
                 </Button>

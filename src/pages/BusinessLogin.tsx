@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Skeleton } from "@/components/ui/skeleton";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { toast } from "sonner";
@@ -12,10 +13,11 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { emailSchema } from "@/lib/validation";
 import { supabase } from "@/integrations/supabase/client";
-import { Store, Lock, Mail } from "lucide-react";
+import { Store, Lock, Mail, Loader2 } from "lucide-react";
 
 const BusinessLogin = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [rememberMe, setRememberMe] = useState(false);
   const [showPasswordReset, setShowPasswordReset] = useState(false);
   const [showResendConfirmation, setShowResendConfirmation] = useState(false);
@@ -49,8 +51,12 @@ const BusinessLogin = () => {
         if (businessResult.data || adminResult.data) {
           setBusinessMode(true);
           navigate('/dashboard', { replace: true });
+        } else {
+          setIsCheckingAuth(false);
         }
       });
+    } else {
+      setIsCheckingAuth(false);
     }
   }, [isLoggedIn, user, navigate, setBusinessMode]);
 
@@ -180,11 +186,45 @@ const BusinessLogin = () => {
     setIsLoading(false);
   };
 
+  // Skeleton loading state
+  if (isCheckingAuth) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Header />
+        <main className="flex-1 container mx-auto px-4 py-24 flex items-center justify-center">
+          <Card className="w-full max-w-md shadow-elegant">
+            <CardHeader className="text-center space-y-2">
+              <Skeleton className="mx-auto w-16 h-16 rounded-full" />
+              <Skeleton className="mx-auto h-8 w-48" />
+              <Skeleton className="mx-auto h-4 w-64" />
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-16" />
+                <Skeleton className="h-11 w-full" />
+              </div>
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-20" />
+                <Skeleton className="h-11 w-full" />
+              </div>
+              <div className="flex justify-between">
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-4 w-32" />
+              </div>
+              <Skeleton className="h-11 w-full" />
+            </CardContent>
+          </Card>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
       <main className="flex-1 container mx-auto px-4 py-24 flex items-center justify-center">
-        <Card className="w-full max-w-md shadow-elegant">
+        <Card className="w-full max-w-md shadow-elegant animate-fade-in">
           <CardHeader className="text-center space-y-2">
             <div className="mx-auto w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-2">
               <Store className="w-8 h-8 text-primary" />
@@ -210,6 +250,7 @@ const BusinessLogin = () => {
                   required
                   placeholder="ristorante@email.com"
                   className="h-11"
+                  disabled={isLoading}
                 />
               </div>
               
@@ -225,6 +266,7 @@ const BusinessLogin = () => {
                   required
                   placeholder="••••••••"
                   className="h-11"
+                  disabled={isLoading}
                 />
               </div>
 
@@ -234,7 +276,8 @@ const BusinessLogin = () => {
                     id="rememberMe" 
                     checked={rememberMe}
                     onCheckedChange={(checked) => setRememberMe(checked as boolean)}
-                    className="border-2" 
+                    className="border-2"
+                    disabled={isLoading}
                   />
                   <Label htmlFor="rememberMe" className="text-sm cursor-pointer font-normal">
                     Ricordami
@@ -243,7 +286,8 @@ const BusinessLogin = () => {
                 <button
                   type="button"
                   onClick={() => setShowPasswordReset(true)}
-                  className="text-sm text-primary hover:underline"
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  disabled={isLoading}
                 >
                   Password dimenticata?
                 </button>
@@ -251,24 +295,33 @@ const BusinessLogin = () => {
               
               <Button
                 type="submit"
-                className="w-full h-11 text-base"
+                className="w-full h-11 text-base transition-all duration-200"
                 disabled={isLoading}
               >
-                {isLoading ? "Accesso in corso..." : "Accedi alla Dashboard"}
+                {isLoading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Accesso in corso...
+                  </>
+                ) : (
+                  "Accedi alla Dashboard"
+                )}
               </Button>
               
               <div className="text-center space-y-2">
                 <button
                   type="button"
                   onClick={() => setShowResendConfirmation(true)}
-                  className="text-sm text-muted-foreground hover:text-primary transition-colors block w-full"
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors block w-full"
+                  disabled={isLoading}
                 >
                   Non hai ricevuto l'email di conferma? Rinvia
                 </button>
                 <button
                   type="button"
                   onClick={() => navigate('/business-registration')}
-                  className="text-sm text-muted-foreground hover:text-primary transition-colors block w-full"
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors block w-full"
+                  disabled={isLoading}
                 >
                   Non hai un account? Registra il tuo ristorante
                 </button>
