@@ -133,8 +133,12 @@ export default {
           "50%": { boxShadow: "0 0 40px hsl(var(--primary) / 0.5)" },
         },
         "shimmer": {
-          "0%": { backgroundPosition: "-200% 0" },
-          "100%": { backgroundPosition: "200% 0" },
+          "0%": { transform: "translateX(-100%)" },
+          "100%": { transform: "translateX(200%)" },
+        },
+        "tilt-shake": {
+          "0%, 100%": { transform: "rotate(-1deg)" },
+          "50%": { transform: "rotate(1deg)" },
         },
       },
       animation: {
