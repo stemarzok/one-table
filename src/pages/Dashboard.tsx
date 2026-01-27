@@ -1,8 +1,9 @@
 import Header from "@/components/Header";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useEffect, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useBusinessRole } from "@/hooks/useBusinessRole";
@@ -327,7 +328,15 @@ const Dashboard = () => {
               </TabsTrigger>
             </TabsList>
             
-            <TabsContent value="overview">
+            <AnimatePresence mode="wait">
+              {activeTab === "overview" && (
+                <motion.div
+                  key="overview"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.3, ease: "easeInOut" }}
+                >
               <div className="space-y-8">
                 {/* Header del Ristorante */}
                 {statsLoading ? (
@@ -714,17 +723,45 @@ const Dashboard = () => {
                   </Card>
                 </section>
               </div>
-            </TabsContent>
-            
-            <TabsContent value="bookings">
-              {hasProAccess && selectedRestaurantId && <BookingsManagement restaurantId={selectedRestaurantId} />}
-            </TabsContent>
-            <TabsContent value="tables">
-              {hasProAccess && selectedRestaurantId && <TablesManagement restaurantId={selectedRestaurantId} />}
-            </TabsContent>
-            <TabsContent value="menu">
-              {hasProAccess && selectedRestaurantId && <MenuManagement restaurantId={selectedRestaurantId} />}
-            </TabsContent>
+                </motion.div>
+              )}
+              
+              {activeTab === "bookings" && (
+                <motion.div
+                  key="bookings"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.3, ease: "easeInOut" }}
+                >
+                  {hasProAccess && selectedRestaurantId && <BookingsManagement restaurantId={selectedRestaurantId} />}
+                </motion.div>
+              )}
+              
+              {activeTab === "tables" && (
+                <motion.div
+                  key="tables"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.3, ease: "easeInOut" }}
+                >
+                  {hasProAccess && selectedRestaurantId && <TablesManagement restaurantId={selectedRestaurantId} />}
+                </motion.div>
+              )}
+              
+              {activeTab === "menu" && (
+                <motion.div
+                  key="menu"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.3, ease: "easeInOut" }}
+                >
+                  {hasProAccess && selectedRestaurantId && <MenuManagement restaurantId={selectedRestaurantId} />}
+                </motion.div>
+              )}
+            </AnimatePresence>
           </Tabs>
         </div>
       </main>
