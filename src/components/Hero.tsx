@@ -26,27 +26,16 @@ const Hero = () => {
   const titleVariants = {
     hidden: { 
       opacity: 0, 
-      y: 50,
-      filter: "blur(10px)"
+      y: 80,
+      filter: "blur(12px)"
     },
     visible: { 
       opacity: 1, 
       y: 0,
       filter: "blur(0px)",
       transition: {
-        duration: 0.8,
+        duration: 1,
         ease: [0.77, 0, 0.175, 1]
-      }
-    }
-  };
-
-  const glitchVariants = {
-    hidden: { opacity: 0 },
-    visible: { 
-      opacity: 1,
-      transition: {
-        duration: 0.1,
-        delay: 0.8
       }
     }
   };
@@ -68,65 +57,63 @@ const Hero = () => {
           <source src={heroVideo} type="video/mp4" />
         </video>
         {/* Strong Dark Overlay for readability */}
-        <div className="absolute inset-0 bg-black/75" />
+        <div className="absolute inset-0 bg-black/70" />
         {/* Subtle gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/50" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/40" />
       </motion.div>
       
       <motion.div 
-        className="container mx-auto px-4 z-10 relative pt-24"
+        className="container mx-auto px-4 z-10 relative"
         style={{ y: textY }}
       >
-        <div className="max-w-5xl mx-auto">
+        <div className="max-w-7xl mx-auto">
           <div className="text-center">
-            {/* Main Heading - Space Grotesk + Reveal Animation */}
-            <div className="overflow-hidden mb-6">
+            {/* Main Heading - Bebas Neue Giant Title */}
+            <div className="overflow-hidden mb-8">
               <motion.h1 
-                className="font-display text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-white leading-[1.05] tracking-tight uppercase"
+                className="font-display text-[12vw] sm:text-[11vw] md:text-[10vw] lg:text-[9vw] xl:text-[8vw] font-normal text-white leading-[0.9] tracking-[0.02em] uppercase"
                 initial="hidden"
                 animate="visible"
                 variants={{
                   hidden: {},
                   visible: {
                     transition: {
-                      staggerChildren: 0.15
+                      staggerChildren: 0.12
                     }
                   }
                 }}
               >
                 <motion.span 
-                  className="block glitch"
-                  data-text="I Migliori Tavoli,"
+                  className="block"
                   variants={titleVariants}
                 >
-                  I Migliori Tavoli,
+                  I Migliori Tavoli
                 </motion.span>
                 <motion.span 
-                  className="block text-primary mt-1 sm:mt-2 glitch"
-                  data-text="Per Chi Se Li Merita."
+                  className="block text-primary"
                   variants={titleVariants}
                 >
-                  Per Chi Se Li Merita.
+                  Per Chi Se Li Merita
                 </motion.span>
               </motion.h1>
             </div>
             
             {/* Subtitle */}
             <motion.p 
-              className="text-sm sm:text-base md:text-lg lg:text-xl text-white/80 mb-10 leading-relaxed max-w-2xl mx-auto font-medium px-4"
+              className="text-sm sm:text-base md:text-lg text-white/70 mb-10 leading-relaxed max-w-xl mx-auto font-medium px-4"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.6 }}
+              transition={{ duration: 0.6, delay: 0.8 }}
             >
-              Con One-Table premiamo chi è puntuale e affidabile: più rispetti le prenotazioni, più sblocchi vantaggi VIP nei migliori ristoranti.
+              Più rispetti le prenotazioni, più sblocchi vantaggi VIP nei migliori ristoranti.
             </motion.p>
             
             {/* CTA Buttons */}
             <motion.div 
-              className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12"
+              className="flex flex-col sm:flex-row gap-4 justify-center items-center"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.8 }}
+              transition={{ duration: 0.6, delay: 1 }}
             >
               <Button 
                 size="lg" 
@@ -157,15 +144,14 @@ const Hero = () => {
         className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10"
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, delay: 1.2 }}
+        transition={{ duration: 0.6, delay: 1.4 }}
       >
+        <p className="text-white/50 text-xs uppercase tracking-[0.2em] mb-4">Scorri per esplorare</p>
         <motion.div
           animate={{ y: [0, 8, 0] }}
           transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-          className="w-6 h-10 border-2 border-white/30 rounded-full flex items-start justify-center p-2"
-        >
-          <motion.div className="w-1.5 h-1.5 bg-white/60 rounded-full" />
-        </motion.div>
+          className="w-px h-12 bg-white/30 mx-auto"
+        />
       </motion.div>
     </section>
   );
