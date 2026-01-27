@@ -23,6 +23,7 @@ import { RecentActivity } from "@/components/dashboard/RecentActivity";
 import { ContextualAlerts } from "@/components/dashboard/ContextualAlerts";
 import { ProfileCompletionProgress } from "@/components/dashboard/ProfileCompletionProgress";
 import { RestaurantInfoModal } from "@/components/dashboard/RestaurantInfoModal";
+import { RolesLoadingIndicator } from "@/components/dashboard/RolesLoadingIndicator";
 
 const Dashboard = () => {
   const { isLoggedIn, isBusinessMode, user } = useAuth();
@@ -213,7 +214,16 @@ const Dashboard = () => {
     setActiveTab(tab);
   };
 
-  if (loading) return <div className="min-h-screen bg-background"><Header /><main className="pt-24 pb-16"><div className="container mx-auto px-4 text-center"><p className="text-lg text-muted-foreground">{t('dashboard.loading')}</p></div></main></div>;
+  if (loading) return (
+    <div className="min-h-screen bg-background">
+      <Header />
+      <main className="pt-24 pb-16">
+        <div className="container mx-auto px-4">
+          <RolesLoadingIndicator />
+        </div>
+      </main>
+    </div>
+  );
   if (!isAdmin && !hasRole()) return <div className="min-h-screen bg-background"><Header /><main className="pt-24 pb-16"><div className="container mx-auto px-4 max-w-2xl"><Card className="p-12 text-center"><AlertCircle className="w-16 h-16 text-destructive mx-auto mb-4" /><h1 className="text-3xl font-bold mb-4">{t('dashboard.noAccess')}</h1><p className="text-muted-foreground mb-6">{t('dashboard.noAccessMsg')}</p><Button onClick={() => navigate('/business-registration')}>Registra il Tuo Ristorante</Button></Card></div></main></div>;
 
   return (
