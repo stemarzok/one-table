@@ -5,9 +5,10 @@ import { useBusinessRole } from "@/hooks/useBusinessRole";
 import { useAdminRole } from "@/hooks/useAdminRole";
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
+import ValueProposition from "@/components/ValueProposition";
 import HowItWorksEnhanced from "@/components/HowItWorksEnhanced";
 import LevelBenefits from "@/components/LevelBenefits";
-import RestaurantList from "@/components/RestaurantList";
+import FinalCTA from "@/components/FinalCTA";
 import Footer from "@/components/Footer";
 
 const Index = () => {
@@ -34,9 +35,10 @@ const Index = () => {
     <div className="min-h-screen">
       <Header />
       <Hero />
+      <ValueProposition />
       <HowItWorksEnhanced />
       <LevelBenefits />
-      <RestaurantList />
+      <FinalCTA />
       <Footer />
     </div>
   );

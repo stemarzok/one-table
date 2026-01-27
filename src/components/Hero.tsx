@@ -1,14 +1,10 @@
-import { Award } from "lucide-react";
-import SearchBar from "./SearchBar";
-import RestaurantFilters from "./RestaurantFilters";
-import { useLanguage } from "@/contexts/LanguageContext";
-import { useState, useRef } from "react";
+import { Search, ChevronDown } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import heroModern from "@/assets/hero-modern.jpg";
 
 const Hero = () => {
-  const { t } = useLanguage();
-  const [showFilters, setShowFilters] = useState(false);
   const heroRef = useRef<HTMLElement>(null);
   
   const { scrollYProgress } = useScroll({
@@ -18,11 +14,17 @@ const Hero = () => {
   
   const backgroundY = useTransform(scrollYProgress, [0, 1], ["0%", "30%"]);
   const textY = useTransform(scrollYProgress, [0, 1], ["0%", "20%"]);
-  const opacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
+
+  const scrollToHowItWorks = () => {
+    const element = document.getElementById('how-it-works');
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
 
   return (
-    <section ref={heroRef} className="relative min-h-screen flex items-center overflow-hidden pb-32">
-      {/* Video Background with Parallax */}
+    <section ref={heroRef} className="relative min-h-screen flex items-center overflow-hidden">
+      {/* Background with Parallax */}
       <motion.div 
         className="absolute inset-0 z-0"
         style={{ y: backgroundY }}
@@ -33,9 +35,9 @@ const Hero = () => {
           className="absolute inset-0 w-full h-full object-cover"
         />
         {/* Strong Dark Overlay for readability */}
-        <div className="absolute inset-0 bg-black/60" />
+        <div className="absolute inset-0 bg-black/70" />
         {/* Mesh Gradient Overlay */}
-        <div className="absolute inset-0 mesh-gradient opacity-20" />
+        <div className="absolute inset-0 mesh-gradient opacity-15" />
       </motion.div>
       
       <motion.div 
@@ -43,70 +45,75 @@ const Hero = () => {
         style={{ y: textY }}
       >
         <div className="max-w-4xl mx-auto">
-          {/* Premium Badge */}
-          <motion.div 
-            className="flex items-center gap-2 mb-8"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-          >
-            <div className="flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full border border-white/20">
-              <Award className="w-5 h-5 text-primary" />
-              <span className="text-white/90 font-medium text-sm">{t('hero.badge')}</span>
-            </div>
-          </motion.div>
-          
           <div className="text-center">
-            {/* Main Heading with Animation */}
+            {/* Main Heading */}
             <motion.h1 
-              className="text-5xl md:text-7xl lg:text-8xl font-extrabold text-white mb-8 leading-[1.1] tracking-tight"
+              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold text-white mb-6 leading-[1.1] tracking-tight"
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, delay: 0.3 }}
+              transition={{ duration: 0.7, delay: 0.2 }}
             >
-              {t('hero.title1')}
+              I migliori tavoli,
               <span className="block text-primary mt-2">
-                {t('hero.title2')}
+                per chi se li merita.
               </span>
             </motion.h1>
             
-            {/* Subtitle with Animation */}
+            {/* Subtitle */}
             <motion.p 
-              className="text-lg md:text-xl text-white/80 mb-12 leading-relaxed max-w-2xl mx-auto font-medium"
+              className="text-base sm:text-lg md:text-xl text-white/80 mb-10 leading-relaxed max-w-2xl mx-auto font-medium px-4"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.5 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
             >
-              {t('hero.description')}
+              Con One-Table premiamo chi è puntuale e affidabile: più rispetti le prenotazioni, più sblocchi vantaggi VIP nei migliori ristoranti.
             </motion.p>
             
-            {/* Search Bar with Animation */}
+            {/* CTA Buttons */}
             <motion.div 
-              className="mb-6"
+              className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.7 }}
+              transition={{ duration: 0.6, delay: 0.6 }}
             >
-              <SearchBar 
-                variant="hero"
-                showFilters={showFilters}
-                onToggleFilters={() => setShowFilters(!showFilters)}
-              />
-            </motion.div>
-            
-            {showFilters && (
-              <motion.div 
-                className="mb-8"
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "auto" }}
-                exit={{ opacity: 0, height: 0 }}
-                transition={{ duration: 0.3 }}
+              <Button 
+                size="lg" 
+                variant="premium"
+                className="text-base px-8 py-6 gap-3 w-full sm:w-auto"
+                onClick={() => window.location.href = '/auth'}
               >
-                <RestaurantFilters />
-              </motion.div>
-            )}
+                <Search className="w-5 h-5" />
+                Cerca un ristorante
+              </Button>
+              
+              <Button 
+                size="lg" 
+                variant="outline"
+                className="text-base px-8 py-6 border-white/30 text-white hover:bg-white/10 w-full sm:w-auto"
+                onClick={scrollToHowItWorks}
+              >
+                Come funziona
+                <ChevronDown className="w-5 h-5 ml-2" />
+              </Button>
+            </motion.div>
           </div>
         </div>
+      </motion.div>
+      
+      {/* Scroll indicator */}
+      <motion.div 
+        className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10"
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 1 }}
+      >
+        <motion.div
+          animate={{ y: [0, 8, 0] }}
+          transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+          className="w-6 h-10 border-2 border-white/30 rounded-full flex items-start justify-center p-2"
+        >
+          <motion.div className="w-1.5 h-1.5 bg-white/60 rounded-full" />
+        </motion.div>
       </motion.div>
     </section>
   );

@@ -1,13 +1,11 @@
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Trophy, Star, Award, Crown, ChevronLeft, ChevronRight } from "lucide-react";
-import { useLanguage } from "@/contexts/LanguageContext";
+import { Trophy, Star, Award, Crown, ChevronLeft, ChevronRight, Check } from "lucide-react";
 import { motion, useInView } from "framer-motion";
 import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 
 const LevelBenefits = () => {
-  const { t } = useLanguage();
   const ref = useRef(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
@@ -16,7 +14,8 @@ const LevelBenefits = () => {
   
   const levels = [
     {
-      name: t('levels.bronze'),
+      name: "Bronzo",
+      subtitle: "Inizia il percorso",
       icon: Star,
       bgColor: "bg-[hsl(85,100%,50%)/8]",
       borderColor: "border-primary/30",
@@ -26,13 +25,14 @@ const LevelBenefits = () => {
       accentColor: "bg-primary",
       range: "0-100",
       benefits: [
-        "Prenotazioni standard",
         "Accesso alla piattaforma",
-        "Notifiche prenotazioni"
+        "Prenotazioni standard",
+        "Notifiche e gestione semplice"
       ]
     },
     {
-      name: t('levels.silver'),
+      name: "Argento",
+      subtitle: "Inizia a distinguerti",
       icon: Award,
       bgColor: "bg-[hsl(85,100%,50%)/10]",
       borderColor: "border-primary/40",
@@ -43,12 +43,13 @@ const LevelBenefits = () => {
       range: "101-300",
       benefits: [
         "Priorità nelle prenotazioni",
-        "5% di sconto sui conti",
+        "5% di sconto",
         "Tavoli con vista migliore"
       ]
     },
     {
-      name: t('levels.gold'),
+      name: "Oro",
+      subtitle: "Accesso premium",
       icon: Crown,
       bgColor: "bg-[hsl(85,100%,50%)/12]",
       borderColor: "border-primary/50",
@@ -59,13 +60,14 @@ const LevelBenefits = () => {
       range: "301-600",
       benefits: [
         "Prenotazioni garantite",
-        "15% di sconto sui conti",
+        "15% di sconto",
         "Tavoli premium",
-        "Welcome drink gratuito"
+        "Welcome drink incluso"
       ]
     },
     {
-      name: t('levels.platinum'),
+      name: "Platino",
+      subtitle: "Trattamento VIP",
       icon: Trophy,
       bgColor: "bg-[hsl(85,100%,50%)/15]",
       borderColor: "border-primary/60",
@@ -76,7 +78,7 @@ const LevelBenefits = () => {
       range: "601+",
       benefits: [
         "Accesso VIP illimitato",
-        "25% di sconto sui conti",
+        "25% di sconto",
         "I migliori tavoli disponibili",
         "Menu degustazione omaggio",
         "Concierge personale"
@@ -128,8 +130,8 @@ const LevelBenefits = () => {
   };
 
   return (
-    <section ref={ref} className="py-16 bg-[hsl(0,0%,8%)] relative">
-      {/* Background decoration - più sottile */}
+    <section ref={ref} className="py-20 bg-[hsl(0,0%,8%)] relative">
+      {/* Background decoration */}
       <div className="absolute top-1/2 left-0 w-64 h-64 bg-primary/5 rounded-full blur-[100px] -translate-y-1/2" />
       <div className="absolute top-1/2 right-0 w-64 h-64 bg-primary/5 rounded-full blur-[100px] -translate-y-1/2" />
       
@@ -138,13 +140,13 @@ const LevelBenefits = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6 }}
-          className="text-center mb-10"
+          className="text-center mb-12"
         >
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4 tracking-tight">
-            I Tuoi Vantaggi per Livello
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4 tracking-tight">
+            Più sei affidabile, più vieni premiato
           </h2>
           <p className="text-base text-white/60 max-w-xl mx-auto">
-            Più sei affidabile, più vantaggi esclusivi ottieni
+            Ogni livello sblocca vantaggi esclusivi. Il tuo percorso inizia ora.
           </p>
         </motion.div>
         
@@ -195,7 +197,7 @@ const LevelBenefits = () => {
                     className="group"
                   >
                     <Card 
-                      className={`p-6 ${level.bgColor} border ${level.borderColor} w-[260px] h-[340px] flex flex-col transition-all duration-500 hover:shadow-xl hover:shadow-primary/15 backdrop-blur-sm relative`}
+                      className={`p-6 ${level.bgColor} border ${level.borderColor} w-[280px] h-[380px] flex flex-col transition-all duration-500 hover:shadow-xl hover:shadow-primary/15 backdrop-blur-sm relative`}
                     >
                       {/* Animated glow effect on hover */}
                       <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-t from-transparent via-transparent to-primary/5 rounded-lg" />
@@ -203,29 +205,32 @@ const LevelBenefits = () => {
                       {/* Decorative corner accent */}
                       <div className="absolute top-0 right-0 w-24 h-24 bg-primary/10 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
                       
-                      <div className={`w-12 h-12 rounded-xl ${level.iconBg} flex items-center justify-center mb-4 shadow-md relative z-10`}>
-                        <Icon className={`w-6 h-6 ${level.iconColor}`} />
+                      <div className={`w-14 h-14 rounded-xl ${level.iconBg} flex items-center justify-center mb-4 shadow-md relative z-10`}>
+                        <Icon className={`w-7 h-7 ${level.iconColor}`} />
                       </div>
                       
-                      <h3 className="text-xl font-bold text-white mb-2 relative z-10">
-                        {level.name}
-                      </h3>
+                      <div className="mb-3 relative z-10">
+                        <h3 className="text-xl font-bold text-white">
+                          {level.name}
+                        </h3>
+                        <p className="text-white/50 text-sm">{level.subtitle}</p>
+                      </div>
                       
                       <Badge className={`mb-4 ${level.badgeClass} font-semibold w-fit relative z-10 border text-xs`}>
                         {level.range} punti
                       </Badge>
                       
-                      <ul className="space-y-2 flex-1 relative z-10">
+                      <ul className="space-y-2.5 flex-1 relative z-10">
                         {level.benefits.map((benefit, i) => (
                           <motion.li 
                             key={i} 
-                            className="flex items-start gap-2 text-white/75"
+                            className="flex items-start gap-2.5 text-white/80"
                             initial={{ opacity: 0, x: -10 }}
                             animate={isInView ? { opacity: 1, x: 0 } : {}}
                             transition={{ delay: 0.5 + (index * 0.1) + (i * 0.05) }}
                           >
-                            <div className={`w-1.5 h-1.5 rounded-full ${level.accentColor} mt-1.5 flex-shrink-0`} />
-                            <span className="text-xs font-medium">{benefit}</span>
+                            <Check className={`w-4 h-4 text-primary mt-0.5 flex-shrink-0`} />
+                            <span className="text-sm font-medium">{benefit}</span>
                           </motion.li>
                         ))}
                       </ul>
