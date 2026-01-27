@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PasswordStrengthIndicator from "@/components/PasswordStrengthIndicator";
@@ -15,9 +16,11 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { emailSchema, passwordSchema, nameSchema, phoneSchema, getSafeRedirectUrl } from "@/lib/validation";
 import { supabase } from "@/integrations/supabase/client";
+import { Loader2 } from "lucide-react";
 
 const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [rememberMe, setRememberMe] = useState(false);
   const [showPasswordReset, setShowPasswordReset] = useState(false);
   const [signupPassword, setSignupPassword] = useState("");
@@ -48,13 +51,16 @@ const Auth = () => {
       const signupTab = document.querySelector('[value="signup"]') as HTMLButtonElement;
       if (signupTab) signupTab.click();
     }
+    
+    // Finish checking auth state
+    setIsCheckingAuth(false);
   }, []);
 
   useEffect(() => {
     if (isLoggedIn) {
       const redirectTo = getSafeRedirectUrl(sessionStorage.getItem('redirectTo'));
       sessionStorage.removeItem('redirectTo');
-      navigate(redirectTo === '/' ? '/restaurants' : redirectTo);
+      navigate(redirectTo === '/' ? '/restaurants' : redirectTo, { replace: true });
     }
   }, [isLoggedIn, navigate]);
 
@@ -245,6 +251,37 @@ const Auth = () => {
     setIsLoading(false);
   };
 
+  // Show skeleton while checking auth
+  if (isCheckingAuth) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Header />
+        <main className="flex-1 container mx-auto px-4 py-24 flex items-center justify-center">
+          <Card className="w-full max-w-md shadow-elegant">
+            <CardHeader className="text-center">
+              <Skeleton className="h-9 w-3/4 mx-auto mb-2" />
+              <Skeleton className="h-5 w-2/3 mx-auto" />
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <Skeleton className="h-10 w-full" />
+              <div className="space-y-3">
+                <Skeleton className="h-4 w-16" />
+                <Skeleton className="h-10 w-full" />
+              </div>
+              <div className="space-y-3">
+                <Skeleton className="h-4 w-20" />
+                <Skeleton className="h-10 w-full" />
+              </div>
+              <Skeleton className="h-11 w-full" />
+              <Skeleton className="h-11 w-full" />
+            </CardContent>
+          </Card>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
@@ -260,9 +297,9 @@ const Auth = () => {
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="login" className="w-full">
-              <TabsList className="grid w-full grid-cols-2 mb-6">
-                <TabsTrigger value="login">Accedi</TabsTrigger>
-                <TabsTrigger value="signup">Registrati</TabsTrigger>
+              <TabsList className="grid w-full grid-cols-2 mb-6 bg-muted/50 p-1 rounded-xl">
+                <TabsTrigger value="login" className="data-[state=active]:bg-background data-[state=active]:shadow-md rounded-lg transition-all duration-200">Accedi</TabsTrigger>
+                <TabsTrigger value="signup" className="data-[state=active]:bg-background data-[state=active]:shadow-md rounded-lg transition-all duration-200">Registrati</TabsTrigger>
               </TabsList>
               
               <TabsContent value="login">
@@ -304,7 +341,7 @@ const Auth = () => {
                     <button
                       type="button"
                       onClick={() => setShowPasswordReset(true)}
-                      className="text-sm text-primary hover:underline"
+                      className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                     >
                       Password dimenticata?
                     </button>
@@ -315,7 +352,12 @@ const Auth = () => {
                     className="w-full"
                     disabled={isLoading}
                   >
-                    {isLoading ? "Accesso in corso..." : "Accedi"}
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Accesso in corso...
+                      </>
+                    ) : "Accedi"}
                   </Button>
                   
                   <div className="relative my-4">
@@ -328,7 +370,7 @@ const Auth = () => {
                   <Button
                     type="button"
                     variant="outline"
-                    className="w-full"
+                    className="w-full hover:bg-muted transition-all duration-200"
                     onClick={handleGoogleLogin}
                     disabled={isLoading}
                     aria-label="Continua con Google"
@@ -357,7 +399,7 @@ const Auth = () => {
                   <Button
                     type="button"
                     variant="outline"
-                    className="w-full"
+                    className="w-full hover:bg-muted transition-all duration-200"
                     onClick={handleAppleLogin}
                     disabled={isLoading}
                     aria-label="Continua con Apple (non disponibile)"
@@ -445,7 +487,12 @@ const Auth = () => {
                     className="w-full"
                     disabled={isLoading}
                   >
-                    {isLoading ? "Registrazione in corso..." : "Registrati"}
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Registrazione in corso...
+                      </>
+                    ) : "Registrati"}
                   </Button>
                   
                   <div className="relative my-4">
@@ -458,7 +505,7 @@ const Auth = () => {
                   <Button
                     type="button"
                     variant="outline"
-                    className="w-full"
+                    className="w-full hover:bg-muted transition-all duration-200"
                     onClick={handleGoogleLogin}
                     disabled={isLoading}
                     aria-label="Continua con Google"
@@ -487,7 +534,7 @@ const Auth = () => {
                   <Button
                     type="button"
                     variant="outline"
-                    className="w-full"
+                    className="w-full hover:bg-muted transition-all duration-200"
                     onClick={handleAppleLogin}
                     disabled={isLoading}
                     aria-label="Continua con Apple (non disponibile)"
@@ -502,11 +549,11 @@ const Auth = () => {
                   
                   <p className="text-xs text-muted-foreground text-center">
                     Registrandoti, accetti i nostri{" "}
-                    <a href="/terms" className="text-primary hover:underline">
+                    <a href="/terms" className="text-muted-foreground hover:text-foreground transition-colors underline">
                       Termini di Servizio
                     </a>{" "}
                     e la nostra{" "}
-                    <a href="/privacy" className="text-primary hover:underline">
+                    <a href="/privacy" className="text-muted-foreground hover:text-foreground transition-colors underline">
                       Privacy Policy
                     </a>
                   </p>
@@ -547,7 +594,12 @@ const Auth = () => {
                 className="w-full"
                 disabled={isLoading}
               >
-                {isLoading ? "Invio in corso..." : "Invia Link di Recupero"}
+                {isLoading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Invio in corso...
+                  </>
+                ) : "Invia Link di Recupero"}
               </Button>
             </form>
           </DialogContent>
