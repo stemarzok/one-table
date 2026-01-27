@@ -90,8 +90,11 @@ const Hero = () => {
                   I Migliori Tavoli
                 </motion.span>
                 <motion.span 
-                  className="block text-primary"
+                  className="block text-primary drop-shadow-[0_0_30px_hsl(85,100%,50%,0.5)]"
                   variants={titleVariants}
+                  style={{
+                    textShadow: "0 0 40px hsl(85, 100%, 50%, 0.4), 0 0 80px hsl(85, 100%, 50%, 0.2)"
+                  }}
                 >
                   Per Chi Se Li Merita
                 </motion.span>

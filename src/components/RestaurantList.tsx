@@ -287,10 +287,27 @@ const RestaurantList = () => {
             </div>
 
             {totalPages > 1 && (
-              <div className="flex justify-center items-center gap-2 mt-12">
-                <Button variant="outline" onClick={() => setCurrentPage((p) => Math.max(1, p - 1))} disabled={currentPage === 1}>Precedente</Button>
-                <span className="text-muted-foreground mx-4">Pagina {currentPage} di {totalPages}</span>
-                <Button variant="outline" onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages}>Successiva</Button>
+              <div className="flex flex-col items-center gap-6 mt-16">
+                {/* Dot pagination */}
+                <div className="flex items-center gap-2">
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                    <button
+                      key={page}
+                      onClick={() => setCurrentPage(page)}
+                      className={`transition-all duration-300 rounded-full ${
+                        currentPage === page 
+                          ? 'w-8 h-2 bg-primary' 
+                          : 'w-2 h-2 bg-muted-foreground/30 hover:bg-muted-foreground/50'
+                      }`}
+                      aria-label={`Vai a pagina ${page}`}
+                    />
+                  ))}
+                </div>
+                
+                {/* Page counter */}
+                <p className="text-sm text-muted-foreground">
+                  {currentPage} / {totalPages}
+                </p>
               </div>
             )}
           </>
