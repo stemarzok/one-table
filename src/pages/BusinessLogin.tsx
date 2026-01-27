@@ -15,6 +15,40 @@ import { emailSchema } from "@/lib/validation";
 import { supabase } from "@/integrations/supabase/client";
 import { roleCache } from "@/lib/roleCache";
 import { Store, Lock, Mail, Loader2 } from "lucide-react";
+import { motion } from "framer-motion";
+
+// Animation variants
+const containerVariants = {
+  hidden: { opacity: 0, scale: 0.95 },
+  visible: { 
+    opacity: 1, 
+    scale: 1,
+    transition: {
+      duration: 0.4,
+      ease: "easeOut",
+      when: "beforeChildren",
+      staggerChildren: 0.1
+    }
+  }
+};
+
+const formItemVariants = {
+  hidden: { opacity: 0, y: 15 },
+  visible: { 
+    opacity: 1, 
+    y: 0,
+    transition: { type: "spring", stiffness: 300, damping: 24 }
+  }
+};
+
+const iconVariants = {
+  hidden: { scale: 0, rotate: -180 },
+  visible: { 
+    scale: 1, 
+    rotate: 0,
+    transition: { type: "spring", stiffness: 260, damping: 20, delay: 0.1 }
+  }
+};
 
 const BusinessLogin = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -238,111 +272,127 @@ const BusinessLogin = () => {
     <div className="min-h-screen flex flex-col">
       <Header />
       <main className="flex-1 container mx-auto px-4 py-24 flex items-center justify-center">
-        <Card className="w-full max-w-md shadow-elegant animate-fade-in">
-          <CardHeader className="text-center space-y-2">
-            <div className="mx-auto w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-2">
-              <Store className="w-8 h-8 text-primary" />
-            </div>
-            <CardTitle className="text-3xl font-bold bg-gradient-to-r from-primary to-primary-glow bg-clip-text text-transparent">
-              Area Ristoratori
-            </CardTitle>
-            <CardDescription className="text-base">
-              Accedi alla dashboard del tuo ristorante
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleLogin} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email">
-                  <Mail className="w-4 h-4 inline mr-2" />
-                  Email <span className="text-destructive">*</span>
-                </Label>
-                <Input
-                  id="email"
-                  name="email"
-                  type="email"
-                  required
-                  placeholder="ristorante@email.com"
-                  className="h-11"
-                  disabled={isLoading}
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="password">
-                  <Lock className="w-4 h-4 inline mr-2" />
-                  Password <span className="text-destructive">*</span>
-                </Label>
-                <Input
-                  id="password"
-                  name="password"
-                  type="password"
-                  required
-                  placeholder="••••••••"
-                  className="h-11"
-                  disabled={isLoading}
-                />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  <Checkbox 
-                    id="rememberMe" 
-                    checked={rememberMe}
-                    onCheckedChange={(checked) => setRememberMe(checked as boolean)}
-                    className="border-2"
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+          className="w-full max-w-md"
+        >
+          <Card className="shadow-elegant overflow-hidden">
+            <CardHeader className="text-center space-y-2">
+              <motion.div 
+                variants={iconVariants}
+                className="mx-auto w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-2"
+              >
+                <Store className="w-8 h-8 text-primary" />
+              </motion.div>
+              <motion.div variants={formItemVariants}>
+                <CardTitle className="text-3xl font-bold bg-gradient-to-r from-primary to-primary-glow bg-clip-text text-transparent">
+                  Area Ristoratori
+                </CardTitle>
+              </motion.div>
+              <motion.div variants={formItemVariants}>
+                <CardDescription className="text-base">
+                  Accedi alla dashboard del tuo ristorante
+                </CardDescription>
+              </motion.div>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleLogin} className="space-y-4">
+                <motion.div variants={formItemVariants} className="space-y-2">
+                  <Label htmlFor="email">
+                    <Mail className="w-4 h-4 inline mr-2" />
+                    Email <span className="text-destructive">*</span>
+                  </Label>
+                  <Input
+                    id="email"
+                    name="email"
+                    type="email"
+                    required
+                    placeholder="ristorante@email.com"
+                    className="h-11 transition-all duration-200 focus:shadow-[0_0_0_3px_hsl(var(--primary)/0.1)]"
                     disabled={isLoading}
                   />
-                  <Label htmlFor="rememberMe" className="text-sm cursor-pointer font-normal">
-                    Ricordami
+                </motion.div>
+                
+                <motion.div variants={formItemVariants} className="space-y-2">
+                  <Label htmlFor="password">
+                    <Lock className="w-4 h-4 inline mr-2" />
+                    Password <span className="text-destructive">*</span>
                   </Label>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setShowPasswordReset(true)}
-                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-                  disabled={isLoading}
-                >
-                  Password dimenticata?
-                </button>
-              </div>
-              
-              <Button
-                type="submit"
-                className="w-full h-11 text-base transition-all duration-200"
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Accesso in corso...
-                  </>
-                ) : (
-                  "Accedi alla Dashboard"
-                )}
-              </Button>
-              
-              <div className="text-center space-y-2">
-                <button
-                  type="button"
-                  onClick={() => setShowResendConfirmation(true)}
-                  className="text-sm text-muted-foreground hover:text-foreground transition-colors block w-full"
-                  disabled={isLoading}
-                >
-                  Non hai ricevuto l'email di conferma? Rinvia
-                </button>
-                <button
-                  type="button"
-                  onClick={() => navigate('/business-registration')}
-                  className="text-sm text-muted-foreground hover:text-foreground transition-colors block w-full"
-                  disabled={isLoading}
-                >
-                  Non hai un account? Registra il tuo ristorante
-                </button>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
+                  <Input
+                    id="password"
+                    name="password"
+                    type="password"
+                    required
+                    placeholder="••••••••"
+                    className="h-11 transition-all duration-200 focus:shadow-[0_0_0_3px_hsl(var(--primary)/0.1)]"
+                    disabled={isLoading}
+                  />
+                </motion.div>
+
+                <motion.div variants={formItemVariants} className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox 
+                      id="rememberMe" 
+                      checked={rememberMe}
+                      onCheckedChange={(checked) => setRememberMe(checked as boolean)}
+                      className="border-2"
+                      disabled={isLoading}
+                    />
+                    <Label htmlFor="rememberMe" className="text-sm cursor-pointer font-normal">
+                      Ricordami
+                    </Label>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setShowPasswordReset(true)}
+                    className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                    disabled={isLoading}
+                  >
+                    Password dimenticata?
+                  </button>
+                </motion.div>
+                
+                <motion.div variants={formItemVariants}>
+                  <Button
+                    type="submit"
+                    className="w-full h-11 text-base transition-all duration-200"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Accesso in corso...
+                      </>
+                    ) : (
+                      "Accedi alla Dashboard"
+                    )}
+                  </Button>
+                </motion.div>
+                
+                <motion.div variants={formItemVariants} className="text-center space-y-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowResendConfirmation(true)}
+                    className="text-sm text-muted-foreground hover:text-foreground transition-colors block w-full"
+                    disabled={isLoading}
+                  >
+                    Non hai ricevuto l'email di conferma? Rinvia
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => navigate('/business-registration')}
+                    className="text-sm text-muted-foreground hover:text-foreground transition-colors block w-full"
+                    disabled={isLoading}
+                  >
+                    Non hai un account? Registra il tuo ristorante
+                  </button>
+                </motion.div>
+              </form>
+            </CardContent>
+          </Card>
+        </motion.div>
 
         {/* Password Reset Dialog */}
         <Dialog open={showPasswordReset} onOpenChange={setShowPasswordReset}>
