@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
+import { roleCache } from "@/lib/roleCache";
 
 export type AdminRoleType = 'superadmin' | 'admin' | null;
 
@@ -22,14 +22,13 @@ export const useAdminRole = () => {
       }
 
       try {
-        // Get the admin role type
-        const { data: roleData, error } = await supabase
-          .rpc('get_admin_role', { _user_id: profile.id });
-
-        if (!error && roleData) {
-          setAdminRole(roleData as AdminRoleType);
+        // Use cached roles - this avoids repeated queries
+        const cachedRoles = await roleCache.fetchAndCache(profile.id);
+        
+        if (cachedRoles.adminRole) {
+          setAdminRole(cachedRoles.adminRole);
           setIsAdmin(true);
-          setIsSuperAdmin(roleData === 'superadmin');
+          setIsSuperAdmin(cachedRoles.adminRole === 'superadmin');
         } else {
           setIsAdmin(false);
           setIsSuperAdmin(false);
