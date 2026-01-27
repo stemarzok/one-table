@@ -24,6 +24,12 @@ import { ContextualAlerts } from "@/components/dashboard/ContextualAlerts";
 import { ProfileCompletionProgress } from "@/components/dashboard/ProfileCompletionProgress";
 import { RestaurantInfoModal } from "@/components/dashboard/RestaurantInfoModal";
 import { RolesLoadingIndicator } from "@/components/dashboard/RolesLoadingIndicator";
+import { 
+  BookingStatsGridSkeleton, 
+  StructureStatsGridSkeleton, 
+  ReviewStatsGridSkeleton,
+  RestaurantHeaderSkeleton 
+} from "@/components/dashboard/StatsCardSkeleton";
 
 const Dashboard = () => {
   const { isLoggedIn, isBusinessMode, user } = useAuth();
@@ -54,6 +60,7 @@ const Dashboard = () => {
   const [recentMenuItems, setRecentMenuItems] = useState<any[]>([]);
   const [allRestaurants, setAllRestaurants] = useState<any[]>([]);
   const [selectedRestaurantId, setSelectedRestaurantId] = useState<string>("");
+  const [statsLoading, setStatsLoading] = useState(true);
   
   const loading = businessLoading || adminLoading;
   
@@ -154,6 +161,7 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchRestaurantDetails = async () => {
       if (selectedRestaurantId) {
+        setStatsLoading(true);
         const { data } = await supabase.from('restaurants').select('*').eq('id', selectedRestaurantId).maybeSingle();
         if (data) {
           setRestaurant(data);
@@ -188,6 +196,7 @@ const Dashboard = () => {
           setRecentBookings(recentBookingsResult.data || []);
           setRecentMenuItems(recentMenuResult.data || []);
         }
+        setStatsLoading(false);
       }
     };
     fetchRestaurantDetails();
@@ -321,7 +330,9 @@ const Dashboard = () => {
             <TabsContent value="overview">
               <div className="space-y-8">
                 {/* Header del Ristorante */}
-                {restaurant && (
+                {statsLoading ? (
+                  <RestaurantHeaderSkeleton />
+                ) : restaurant && (
                   <section className="relative overflow-hidden rounded-2xl border bg-card shadow-lg">
                     <div className="relative p-6 md:p-8">
                       <div className="flex flex-col md:flex-row gap-6 items-start">
@@ -472,53 +483,57 @@ const Dashboard = () => {
                     </div>
                     <h2 className="text-xl font-semibold">Prenotazioni</h2>
                   </div>
-                  <div className="grid gap-4 md:grid-cols-3">
-                    <Card 
-                      className="group cursor-pointer transition-all hover:shadow-lg hover:border-primary/30"
-                      onClick={() => handleStatClick('bookings')}
-                    >
-                      <div className="p-6">
-                        <div className="flex items-center justify-between mb-3">
-                          <span className="text-sm text-muted-foreground">In attesa</span>
-                          {!hasProAccess ? <Lock className="w-4 h-4 text-muted-foreground" /> : <ArrowRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />}
+                  {statsLoading ? (
+                    <BookingStatsGridSkeleton />
+                  ) : (
+                    <div className="grid gap-4 md:grid-cols-3">
+                      <Card 
+                        className="group cursor-pointer transition-all hover:shadow-lg hover:border-primary/30"
+                        onClick={() => handleStatClick('bookings')}
+                      >
+                        <div className="p-6">
+                          <div className="flex items-center justify-between mb-3">
+                            <span className="text-sm text-muted-foreground">In attesa</span>
+                            {!hasProAccess ? <Lock className="w-4 h-4 text-muted-foreground" /> : <ArrowRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />}
+                          </div>
+                          <p className="text-4xl font-bold mb-3">{stats.pendingBookings}</p>
+                          {selectedRestaurantId && (
+                            <BookingsSparkline restaurantId={selectedRestaurantId} status="pending" />
+                          )}
                         </div>
-                        <p className="text-4xl font-bold mb-3">{stats.pendingBookings}</p>
-                        {selectedRestaurantId && (
-                          <BookingsSparkline restaurantId={selectedRestaurantId} status="pending" />
-                        )}
-                      </div>
-                    </Card>
-                    <Card 
-                      className="group cursor-pointer transition-all hover:shadow-lg hover:border-primary/30"
-                      onClick={() => handleStatClick('bookings')}
-                    >
-                      <div className="p-6">
-                        <div className="flex items-center justify-between mb-3">
-                          <span className="text-sm text-muted-foreground">Confermate</span>
-                          {!hasProAccess ? <Lock className="w-4 h-4 text-muted-foreground" /> : <ArrowRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />}
+                      </Card>
+                      <Card 
+                        className="group cursor-pointer transition-all hover:shadow-lg hover:border-primary/30"
+                        onClick={() => handleStatClick('bookings')}
+                      >
+                        <div className="p-6">
+                          <div className="flex items-center justify-between mb-3">
+                            <span className="text-sm text-muted-foreground">Confermate</span>
+                            {!hasProAccess ? <Lock className="w-4 h-4 text-muted-foreground" /> : <ArrowRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />}
+                          </div>
+                          <p className="text-4xl font-bold mb-3">{stats.confirmedBookings}</p>
+                          {selectedRestaurantId && (
+                            <BookingsSparkline restaurantId={selectedRestaurantId} status="confirmed" />
+                          )}
                         </div>
-                        <p className="text-4xl font-bold mb-3">{stats.confirmedBookings}</p>
-                        {selectedRestaurantId && (
-                          <BookingsSparkline restaurantId={selectedRestaurantId} status="confirmed" />
-                        )}
-                      </div>
-                    </Card>
-                    <Card 
-                      className="group cursor-pointer transition-all hover:shadow-lg hover:border-primary/30"
-                      onClick={() => handleStatClick('bookings')}
-                    >
-                      <div className="p-6">
-                        <div className="flex items-center justify-between mb-3">
-                          <span className="text-sm text-muted-foreground">Totali (7gg)</span>
-                          {!hasProAccess ? <Lock className="w-4 h-4 text-muted-foreground" /> : <ArrowRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />}
+                      </Card>
+                      <Card 
+                        className="group cursor-pointer transition-all hover:shadow-lg hover:border-primary/30"
+                        onClick={() => handleStatClick('bookings')}
+                      >
+                        <div className="p-6">
+                          <div className="flex items-center justify-between mb-3">
+                            <span className="text-sm text-muted-foreground">Totali (7gg)</span>
+                            {!hasProAccess ? <Lock className="w-4 h-4 text-muted-foreground" /> : <ArrowRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />}
+                          </div>
+                          <p className="text-4xl font-bold mb-3">{stats.totalBookings}</p>
+                          {selectedRestaurantId && (
+                            <BookingsSparkline restaurantId={selectedRestaurantId} status="all" />
+                          )}
                         </div>
-                        <p className="text-4xl font-bold mb-3">{stats.totalBookings}</p>
-                        {selectedRestaurantId && (
-                          <BookingsSparkline restaurantId={selectedRestaurantId} status="all" />
-                        )}
-                      </div>
-                    </Card>
-                  </div>
+                      </Card>
+                    </div>
+                  )}
                 </section>
 
                 {/* Attività Recenti */}
@@ -540,42 +555,46 @@ const Dashboard = () => {
                     </div>
                     <h2 className="text-xl font-semibold">Struttura</h2>
                   </div>
-                  <div className="grid gap-4 md:grid-cols-2">
-                    <Card 
-                      className="group cursor-pointer transition-all hover:shadow-lg hover:border-primary/30"
-                      onClick={() => handleStatClick('tables')}
-                    >
-                      <div className="p-6">
-                        <div className="flex items-center gap-4">
-                          <div className="p-3 rounded-xl bg-muted">
-                            <Table2 className="w-6 h-6 text-foreground" />
+                  {statsLoading ? (
+                    <StructureStatsGridSkeleton />
+                  ) : (
+                    <div className="grid gap-4 md:grid-cols-2">
+                      <Card 
+                        className="group cursor-pointer transition-all hover:shadow-lg hover:border-primary/30"
+                        onClick={() => handleStatClick('tables')}
+                      >
+                        <div className="p-6">
+                          <div className="flex items-center gap-4">
+                            <div className="p-3 rounded-xl bg-muted">
+                              <Table2 className="w-6 h-6 text-foreground" />
+                            </div>
+                            <div className="flex-1">
+                              <p className="text-sm text-muted-foreground">Tavoli configurati</p>
+                              <p className="text-3xl font-bold">{stats.tables}</p>
+                            </div>
+                            {!hasProAccess ? <Lock className="w-4 h-4 text-muted-foreground" /> : <ArrowRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />}
                           </div>
-                          <div className="flex-1">
-                            <p className="text-sm text-muted-foreground">Tavoli configurati</p>
-                            <p className="text-3xl font-bold">{stats.tables}</p>
-                          </div>
-                          {!hasProAccess ? <Lock className="w-4 h-4 text-muted-foreground" /> : <ArrowRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />}
                         </div>
-                      </div>
-                    </Card>
-                    <Card 
-                      className="group cursor-pointer transition-all hover:shadow-lg hover:border-primary/30"
-                      onClick={() => handleStatClick('menu')}
-                    >
-                      <div className="p-6">
-                        <div className="flex items-center gap-4">
-                          <div className="p-3 rounded-xl bg-muted">
-                            <UtensilsCrossed className="w-6 h-6 text-foreground" />
+                      </Card>
+                      <Card 
+                        className="group cursor-pointer transition-all hover:shadow-lg hover:border-primary/30"
+                        onClick={() => handleStatClick('menu')}
+                      >
+                        <div className="p-6">
+                          <div className="flex items-center gap-4">
+                            <div className="p-3 rounded-xl bg-muted">
+                              <UtensilsCrossed className="w-6 h-6 text-foreground" />
+                            </div>
+                            <div className="flex-1">
+                              <p className="text-sm text-muted-foreground">Piatti nel menu</p>
+                              <p className="text-3xl font-bold">{stats.menuItems}</p>
+                            </div>
+                            {!hasProAccess ? <Lock className="w-4 h-4 text-muted-foreground" /> : <ArrowRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />}
                           </div>
-                          <div className="flex-1">
-                            <p className="text-sm text-muted-foreground">Piatti nel menu</p>
-                            <p className="text-3xl font-bold">{stats.menuItems}</p>
-                          </div>
-                          {!hasProAccess ? <Lock className="w-4 h-4 text-muted-foreground" /> : <ArrowRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />}
                         </div>
-                      </div>
-                    </Card>
-                  </div>
+                      </Card>
+                    </div>
+                  )}
                 </section>
 
                 {/* Sezione Recensioni */}
@@ -586,45 +605,49 @@ const Dashboard = () => {
                     </div>
                     <h2 className="text-xl font-semibold">Recensioni</h2>
                   </div>
-                  <div className="grid gap-4 md:grid-cols-2">
-                    <Card 
-                      className="group cursor-pointer transition-all hover:shadow-lg hover:border-primary/30"
-                      onClick={() => navigate('/reviews')}
-                    >
-                      <div className="p-6">
-                        <div className="flex items-center gap-4">
-                          <div className="p-3 rounded-xl bg-muted">
-                            <Users className="w-6 h-6 text-foreground" />
-                          </div>
-                          <div className="flex-1">
-                            <p className="text-sm text-muted-foreground">Totale recensioni</p>
-                            <p className="text-3xl font-bold">{stats.totalReviews}</p>
-                          </div>
-                          <ArrowRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
-                        </div>
-                      </div>
-                    </Card>
-                    <Card 
-                      className="group cursor-pointer transition-all hover:shadow-lg hover:border-primary/30"
-                      onClick={() => navigate('/reviews')}
-                    >
-                      <div className="p-6">
-                        <div className="flex items-center gap-4">
-                          <div className="p-3 rounded-xl bg-muted">
-                            <Star className="w-6 h-6 text-foreground" />
-                          </div>
-                          <div className="flex-1">
-                            <p className="text-sm text-muted-foreground">Valutazione media</p>
-                            <div className="flex items-baseline gap-2">
-                              <p className="text-3xl font-bold">{stats.avgRating > 0 ? stats.avgRating : '-'}</p>
-                              {stats.avgRating > 0 && <span className="text-primary">/ 5</span>}
+                  {statsLoading ? (
+                    <ReviewStatsGridSkeleton />
+                  ) : (
+                    <div className="grid gap-4 md:grid-cols-2">
+                      <Card 
+                        className="group cursor-pointer transition-all hover:shadow-lg hover:border-primary/30"
+                        onClick={() => navigate('/reviews')}
+                      >
+                        <div className="p-6">
+                          <div className="flex items-center gap-4">
+                            <div className="p-3 rounded-xl bg-muted">
+                              <Users className="w-6 h-6 text-foreground" />
                             </div>
+                            <div className="flex-1">
+                              <p className="text-sm text-muted-foreground">Totale recensioni</p>
+                              <p className="text-3xl font-bold">{stats.totalReviews}</p>
+                            </div>
+                            <ArrowRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
                           </div>
-                          <ArrowRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
                         </div>
-                      </div>
-                    </Card>
-                  </div>
+                      </Card>
+                      <Card 
+                        className="group cursor-pointer transition-all hover:shadow-lg hover:border-primary/30"
+                        onClick={() => navigate('/reviews')}
+                      >
+                        <div className="p-6">
+                          <div className="flex items-center gap-4">
+                            <div className="p-3 rounded-xl bg-muted">
+                              <Star className="w-6 h-6 text-foreground" />
+                            </div>
+                            <div className="flex-1">
+                              <p className="text-sm text-muted-foreground">Valutazione media</p>
+                              <div className="flex items-baseline gap-2">
+                                <p className="text-3xl font-bold">{stats.avgRating > 0 ? stats.avgRating : '-'}</p>
+                                {stats.avgRating > 0 && <span className="text-primary">/ 5</span>}
+                              </div>
+                            </div>
+                            <ArrowRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
+                          </div>
+                        </div>
+                      </Card>
+                    </div>
+                  )}
                 </section>
 
                 {/* Sezione Account */}
