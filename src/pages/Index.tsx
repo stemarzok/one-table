@@ -8,7 +8,7 @@ import Hero from "@/components/Hero";
 import ValueProposition from "@/components/ValueProposition";
 import HowItWorksEnhanced from "@/components/HowItWorksEnhanced";
 import LevelBenefits from "@/components/LevelBenefits";
-import FinalCTA from "@/components/FinalCTA";
+import RestaurantList from "@/components/RestaurantList";
 import Footer from "@/components/Footer";
 
 const Index = () => {
@@ -38,7 +38,7 @@ const Index = () => {
       <ValueProposition />
       <HowItWorksEnhanced />
       <LevelBenefits />
-      <FinalCTA />
+      <RestaurantList />
       <Footer />
     </div>
   );
