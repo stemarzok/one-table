@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
+import { roleCache } from "@/lib/roleCache";
 
 interface BusinessRole {
   restaurant_id: string;
@@ -21,14 +21,9 @@ export const useBusinessRole = () => {
       }
 
       try {
-        const { data, error } = await supabase
-          .from('business_roles')
-          .select('restaurant_id, role')
-          .eq('user_id', profile.id);
-
-        if (!error && data) {
-          setBusinessRoles(data);
-        }
+        // Use cached roles - this avoids repeated queries
+        const cachedRoles = await roleCache.fetchAndCache(profile.id);
+        setBusinessRoles(cachedRoles.businessRoles);
       } catch (error) {
         console.error('Error fetching business roles:', error);
       } finally {

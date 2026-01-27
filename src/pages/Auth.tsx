@@ -16,6 +16,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { emailSchema, passwordSchema, nameSchema, phoneSchema, getSafeRedirectUrl } from "@/lib/validation";
 import { supabase } from "@/integrations/supabase/client";
+import { roleCache } from "@/lib/roleCache";
 import { Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -154,21 +155,15 @@ const Auth = () => {
     }
 
     if (authData.user) {
-      const { data: isAdmin } = await supabase.rpc('is_admin', { _user_id: authData.user.id });
+      // Use cache for faster role checking
+      const roles = await roleCache.fetchAndCache(authData.user.id);
       
-      if (!isAdmin) {
-        const { data: businessRole } = await supabase
-          .from('business_roles')
-          .select('id')
-          .eq('user_id', authData.user.id)
-          .maybeSingle();
-        
-        if (businessRole) {
-          await supabase.auth.signOut();
-          toast.error("Questo account è registrato come ristoratore. Usa il login business per accedere.");
-          setIsLoading(false);
-          return;
-        }
+      if (!roles.adminRole && roles.businessRoles.length > 0) {
+        await supabase.auth.signOut();
+        roleCache.clear();
+        toast.error("Questo account è registrato come ristoratore. Usa il login business per accedere.");
+        setIsLoading(false);
+        return;
       }
     }
 

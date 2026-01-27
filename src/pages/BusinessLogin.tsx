@@ -13,6 +13,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { emailSchema } from "@/lib/validation";
 import { supabase } from "@/integrations/supabase/client";
+import { roleCache } from "@/lib/roleCache";
 import { Store, Lock, Mail, Loader2 } from "lucide-react";
 
 const BusinessLogin = () => {
@@ -40,24 +41,36 @@ const BusinessLogin = () => {
     }
   }, []);
 
-  // Fast redirect if already logged in with business role
+  // Fast redirect if already logged in with business role - use cache
   useEffect(() => {
-    if (isLoggedIn && user) {
-      // Quick check - use cached query with minimal fields
-      Promise.all([
-        supabase.from('business_roles').select('id').eq('user_id', user.id).limit(1).maybeSingle(),
-        supabase.from('admin_roles').select('id').eq('user_id', user.id).limit(1).maybeSingle()
-      ]).then(([businessResult, adminResult]) => {
-        if (businessResult.data || adminResult.data) {
+    const checkRoles = async () => {
+      if (isLoggedIn && user) {
+        // Check cache first for instant response
+        const cachedAdmin = roleCache.isAdmin(user.id);
+        const cachedBusiness = roleCache.hasBusinessRole(user.id);
+        
+        if (cachedAdmin !== null || cachedBusiness !== null) {
+          if (cachedAdmin || cachedBusiness) {
+            setBusinessMode(true);
+            navigate('/dashboard', { replace: true });
+            return;
+          }
+        }
+        
+        // If no cache, fetch and cache
+        const roles = await roleCache.fetchAndCache(user.id);
+        if (roles.adminRole || roles.businessRoles.length > 0) {
           setBusinessMode(true);
           navigate('/dashboard', { replace: true });
         } else {
           setIsCheckingAuth(false);
         }
-      });
-    } else {
-      setIsCheckingAuth(false);
-    }
+      } else {
+        setIsCheckingAuth(false);
+      }
+    };
+    
+    checkRoles();
   }, [isLoggedIn, user, navigate, setBusinessMode]);
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -104,16 +117,17 @@ const BusinessLogin = () => {
       return;
     }
 
-    // Check if user is admin or has business role - optimized with minimal fields
+    // Check if user is admin or has business role - use cache for speed
     if (authData.user) {
-      const [businessRoleResult, adminRoleResult, profileResult] = await Promise.all([
-        supabase.from('business_roles').select('id').eq('user_id', authData.user.id).limit(1).maybeSingle(),
-        supabase.from('admin_roles').select('id').eq('user_id', authData.user.id).limit(1).maybeSingle(),
+      // Fetch roles and cache them for future use
+      const [roles, profileResult] = await Promise.all([
+        roleCache.fetchAndCache(authData.user.id),
         supabase.from('profiles').select('onboarding_completed').eq('id', authData.user.id).maybeSingle()
       ]);
       
-      if (!businessRoleResult.data && !adminRoleResult.data) {
+      if (!roles.businessRoles.length && !roles.adminRole) {
         await supabase.auth.signOut();
+        roleCache.clear();
         toast.error("Questo account non è associato a nessun ristorante. Completa prima la registrazione business.");
         setIsLoading(false);
         return;
@@ -125,7 +139,7 @@ const BusinessLogin = () => {
       
       // Navigate immediately without delay
       const hasCompletedOnboarding = profileResult.data?.onboarding_completed;
-      if (!hasCompletedOnboarding && businessRoleResult.data) {
+      if (!hasCompletedOnboarding && roles.businessRoles.length > 0) {
         navigate('/onboarding', { replace: true });
       } else {
         navigate('/dashboard', { replace: true });
