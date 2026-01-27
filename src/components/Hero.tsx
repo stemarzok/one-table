@@ -2,7 +2,7 @@ import { Search, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
-import heroModern from "@/assets/hero-modern.jpg";
+import heroVideo from "@/assets/hero-video.mp4";
 
 const Hero = () => {
   const heroRef = useRef<HTMLElement>(null);
@@ -24,44 +24,48 @@ const Hero = () => {
 
   return (
     <section ref={heroRef} className="relative min-h-screen flex items-center overflow-hidden">
-      {/* Background with Parallax */}
+      {/* Video Background with Parallax */}
       <motion.div 
         className="absolute inset-0 z-0"
         style={{ y: backgroundY }}
       >
-        <img 
-          src={heroModern}
-          alt="Restaurant interior"
+        <video
+          autoPlay
+          muted
+          loop
+          playsInline
           className="absolute inset-0 w-full h-full object-cover"
-        />
+        >
+          <source src={heroVideo} type="video/mp4" />
+        </video>
         {/* Strong Dark Overlay for readability */}
-        <div className="absolute inset-0 bg-black/70" />
-        {/* Mesh Gradient Overlay */}
-        <div className="absolute inset-0 mesh-gradient opacity-15" />
+        <div className="absolute inset-0 bg-black/75" />
+        {/* Subtle gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/50" />
       </motion.div>
       
       <motion.div 
         className="container mx-auto px-4 z-10 relative pt-24"
         style={{ y: textY }}
       >
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-5xl mx-auto">
           <div className="text-center">
-            {/* Main Heading */}
+            {/* Main Heading - Uppercase Modern */}
             <motion.h1 
-              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold text-white mb-6 leading-[1.1] tracking-tight"
+              className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-black text-white mb-6 leading-[1.05] tracking-tight uppercase"
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.2 }}
             >
-              I migliori tavoli,
-              <span className="block text-primary mt-2">
-                per chi se li merita.
+              I Migliori Tavoli,
+              <span className="block text-primary mt-1 sm:mt-2">
+                Per Chi Se Li Merita.
               </span>
             </motion.h1>
             
             {/* Subtitle */}
             <motion.p 
-              className="text-base sm:text-lg md:text-xl text-white/80 mb-10 leading-relaxed max-w-2xl mx-auto font-medium px-4"
+              className="text-sm sm:text-base md:text-lg lg:text-xl text-white/80 mb-10 leading-relaxed max-w-2xl mx-auto font-medium px-4"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.4 }}
@@ -79,7 +83,7 @@ const Hero = () => {
               <Button 
                 size="lg" 
                 variant="premium"
-                className="text-base px-8 py-6 gap-3 w-full sm:w-auto"
+                className="text-base px-8 py-6 gap-3 w-full sm:w-auto font-bold"
                 onClick={() => window.location.href = '/auth'}
               >
                 <Search className="w-5 h-5" />
@@ -89,7 +93,7 @@ const Hero = () => {
               <Button 
                 size="lg" 
                 variant="outline"
-                className="text-base px-8 py-6 border-white/30 text-white hover:bg-white/10 w-full sm:w-auto"
+                className="text-base px-8 py-6 border-white/30 text-white hover:bg-white/10 w-full sm:w-auto font-semibold"
                 onClick={scrollToHowItWorks}
               >
                 Come funziona
