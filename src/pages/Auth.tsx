@@ -17,6 +17,24 @@ import { useNavigate } from "react-router-dom";
 import { emailSchema, passwordSchema, nameSchema, phoneSchema, getSafeRedirectUrl } from "@/lib/validation";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+
+const staggerChildren = {
+  animate: {
+    transition: {
+      staggerChildren: 0.08
+    }
+  }
+};
+
+const formItemVariants = {
+  initial: { opacity: 0, y: 15 },
+  animate: { 
+    opacity: 1, 
+    y: 0,
+    transition: { duration: 0.3, ease: "easeOut" }
+  }
+};
 
 const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -31,28 +49,23 @@ const Auth = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
     
-    // Clean up any previously stored passwords (security fix)
     localStorage.removeItem('rememberedPassword');
     localStorage.removeItem('businessRememberedPassword');
     
-    // Load saved email only if remember me was checked (never store passwords)
     const savedEmail = localStorage.getItem('rememberedEmail');
     if (savedEmail) {
       setRememberMe(true);
-      // Wait for the form to render before setting email value
       setTimeout(() => {
         const emailInput = document.querySelector('input[name="email"]') as HTMLInputElement;
         if (emailInput) emailInput.value = savedEmail;
       }, 100);
     }
 
-    // Open signup tab if hash is #signup
     if (window.location.hash === '#signup') {
       const signupTab = document.querySelector('[value="signup"]') as HTMLButtonElement;
       if (signupTab) signupTab.click();
     }
     
-    // Finish checking auth state
     setIsCheckingAuth(false);
   }, []);
 
@@ -98,7 +111,6 @@ const Auth = () => {
     </svg>
   );
 
-
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
@@ -118,7 +130,6 @@ const Auth = () => {
       return;
     }
 
-    // Save email only if remember me is checked (never store passwords)
     if (rememberMe) {
       localStorage.setItem('rememberedEmail', email);
     } else {
@@ -142,12 +153,9 @@ const Auth = () => {
       return;
     }
 
-    // Check if this is a business-only account (admins can access everything)
     if (authData.user) {
-      // First check if user is admin
       const { data: isAdmin } = await supabase.rpc('is_admin', { _user_id: authData.user.id });
       
-      // If not admin, check if they have business role
       if (!isAdmin) {
         const { data: businessRole } = await supabase
           .from('business_roles')
@@ -156,7 +164,6 @@ const Auth = () => {
           .maybeSingle();
         
         if (businessRole) {
-          // Business users (non-admin) cannot access customer section
           await supabase.auth.signOut();
           toast.error("Questo account è registrato come ristoratore. Usa il login business per accedere.");
           setIsLoading(false);
@@ -203,10 +210,8 @@ const Auth = () => {
     const email = formData.get('email') as string;
     const password = formData.get('password') as string;
     const phone = formData.get('phone') as string;
-
     const confirmPwd = formData.get('confirmPassword') as string;
 
-    // Check password match first
     if (password !== confirmPwd) {
       toast.error("Le password non corrispondono");
       setIsLoading(false);
@@ -251,7 +256,6 @@ const Auth = () => {
     setIsLoading(false);
   };
 
-  // Show skeleton while checking auth
   if (isCheckingAuth) {
     return (
       <div className="min-h-screen flex flex-col">
@@ -286,284 +290,324 @@ const Auth = () => {
     <div className="min-h-screen flex flex-col">
       <Header />
       <main className="flex-1 container mx-auto px-4 py-24 flex items-center justify-center">
-        <Card className="w-full max-w-md shadow-elegant">
-          <CardHeader className="text-center">
-            <CardTitle className="text-3xl font-bold bg-gradient-to-r from-primary to-primary-glow bg-clip-text text-transparent">
-              Benvenuto su OneTable
-            </CardTitle>
-            <CardDescription className="text-base">
-              Accedi o registrati per prenotare il tuo tavolo
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Tabs defaultValue="login" className="w-full">
-              <TabsList className="grid w-full grid-cols-2 mb-6 bg-muted/50 p-1 rounded-xl">
-                <TabsTrigger value="login" className="data-[state=active]:bg-background data-[state=active]:shadow-md rounded-lg transition-all duration-200">Accedi</TabsTrigger>
-                <TabsTrigger value="signup" className="data-[state=active]:bg-background data-[state=active]:shadow-md rounded-lg transition-all duration-200">Registrati</TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="login">
-                <form onSubmit={handleLogin} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email <span className="text-destructive">*</span></Label>
-                    <Input
-                      id="email"
-                      name="email"
-                      type="email"
-                      required
-                      placeholder="tua@email.com"
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="password">Password <span className="text-destructive">*</span></Label>
-                    <Input
-                      id="password"
-                      name="password"
-                      type="password"
-                      required
-                      placeholder="••••••••"
-                    />
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <Checkbox 
-                        id="rememberMe" 
-                        checked={rememberMe}
-                        onCheckedChange={(checked) => setRememberMe(checked as boolean)}
-                        className="border-2" 
-                      />
-                      <Label htmlFor="rememberMe" className="text-sm cursor-pointer font-normal">
-                        Ricordami
-                      </Label>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => setShowPasswordReset(true)}
-                      className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-                    >
-                      Password dimenticata?
-                    </button>
-                  </div>
-                  
-                  <Button
-                    type="submit"
-                    className="w-full"
-                    disabled={isLoading}
+        <motion.div
+          initial={{ opacity: 0, y: 30, scale: 0.98 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+          className="w-full max-w-md"
+        >
+          <Card className="shadow-elegant overflow-hidden">
+            <CardHeader className="text-center">
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2, duration: 0.4 }}
+              >
+                <CardTitle className="text-3xl font-bold bg-gradient-to-r from-primary to-primary-glow bg-clip-text text-transparent">
+                  Benvenuto su OneTable
+                </CardTitle>
+                <CardDescription className="text-base mt-2">
+                  Accedi o registrati per prenotare il tuo tavolo
+                </CardDescription>
+              </motion.div>
+            </CardHeader>
+            <CardContent>
+              <Tabs defaultValue="login" className="w-full">
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3, duration: 0.3 }}
+                >
+                  <TabsList className="grid w-full grid-cols-2 mb-6 bg-muted/50 p-1 rounded-xl">
+                    <TabsTrigger value="login" className="data-[state=active]:bg-background data-[state=active]:shadow-md rounded-lg transition-all duration-200">Accedi</TabsTrigger>
+                    <TabsTrigger value="signup" className="data-[state=active]:bg-background data-[state=active]:shadow-md rounded-lg transition-all duration-200">Registrati</TabsTrigger>
+                  </TabsList>
+                </motion.div>
+                
+                <TabsContent value="login" className="mt-0">
+                  <motion.form 
+                    onSubmit={handleLogin} 
+                    className="space-y-4"
+                    variants={staggerChildren}
+                    initial="initial"
+                    animate="animate"
                   >
-                    {isLoading ? (
-                      <>
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        Accesso in corso...
-                      </>
-                    ) : "Accedi"}
-                  </Button>
-                  
-                  <div className="relative my-4">
-                    <Separator />
-                    <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-card px-2 text-xs text-muted-foreground">
-                      oppure
-                    </span>
-                  </div>
-                  
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="w-full hover:bg-muted transition-all duration-200"
-                    onClick={handleGoogleLogin}
-                    disabled={isLoading}
-                    aria-label="Continua con Google"
-                  >
-                    <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24" aria-hidden="true">
-                      <path
-                        fill="currentColor"
-                        d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                    <motion.div variants={formItemVariants} className="space-y-2">
+                      <Label htmlFor="email">Email <span className="text-destructive">*</span></Label>
+                      <Input
+                        id="email"
+                        name="email"
+                        type="email"
+                        required
+                        placeholder="tua@email.com"
+                        className="transition-shadow duration-200 focus:shadow-md"
                       />
-                      <path
-                        fill="currentColor"
-                        d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                    </motion.div>
+                    
+                    <motion.div variants={formItemVariants} className="space-y-2">
+                      <Label htmlFor="password">Password <span className="text-destructive">*</span></Label>
+                      <Input
+                        id="password"
+                        name="password"
+                        type="password"
+                        required
+                        placeholder="••••••••"
+                        className="transition-shadow duration-200 focus:shadow-md"
                       />
-                      <path
-                        fill="currentColor"
-                        d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-                      />
-                      <path
-                        fill="currentColor"
-                        d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                      />
-                    </svg>
-                    Continua con Google
-                  </Button>
+                    </motion.div>
+                    
+                    <motion.div variants={formItemVariants} className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        <Checkbox 
+                          id="rememberMe" 
+                          checked={rememberMe}
+                          onCheckedChange={(checked) => setRememberMe(checked as boolean)}
+                          className="border-2 transition-transform duration-150 hover:scale-105" 
+                        />
+                        <Label htmlFor="rememberMe" className="text-sm cursor-pointer font-normal">
+                          Ricordami
+                        </Label>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setShowPasswordReset(true)}
+                        className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                      >
+                        Password dimenticata?
+                      </button>
+                    </motion.div>
+                    
+                    <motion.div variants={formItemVariants}>
+                      <Button
+                        type="submit"
+                        className="w-full"
+                        disabled={isLoading}
+                      >
+                        {isLoading ? (
+                          <>
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                            Accesso in corso...
+                          </>
+                        ) : "Accedi"}
+                      </Button>
+                    </motion.div>
+                    
+                    <motion.div variants={formItemVariants} className="relative my-4">
+                      <Separator />
+                      <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-card px-2 text-xs text-muted-foreground">
+                        oppure
+                      </span>
+                    </motion.div>
+                    
+                    <motion.div variants={formItemVariants}>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="w-full hover:bg-muted transition-all duration-200"
+                        onClick={handleGoogleLogin}
+                        disabled={isLoading}
+                        aria-label="Continua con Google"
+                      >
+                        <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24" aria-hidden="true">
+                          <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                          <path fill="currentColor" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                          <path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
+                          <path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+                        </svg>
+                        Continua con Google
+                      </Button>
+                    </motion.div>
 
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="w-full hover:bg-muted transition-all duration-200"
-                    onClick={handleAppleLogin}
-                    disabled={isLoading}
-                    aria-label="Continua con Apple (non disponibile)"
+                    <motion.div variants={formItemVariants}>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="w-full hover:bg-muted transition-all duration-200"
+                        onClick={handleAppleLogin}
+                        disabled={isLoading}
+                        aria-label="Continua con Apple (non disponibile)"
+                      >
+                        <AppleIcon className="mr-2 h-4 w-4" />
+                        Continua con Apple
+                      </Button>
+                      <p className="text-xs text-muted-foreground text-center mt-1">
+                        Apple: disponibile a breve
+                      </p>
+                    </motion.div>
+                  </motion.form>
+                </TabsContent>
+                
+                <TabsContent value="signup" className="mt-0">
+                  <motion.form 
+                    onSubmit={handleSignup} 
+                    className="space-y-4"
+                    variants={staggerChildren}
+                    initial="initial"
+                    animate="animate"
                   >
-                    <AppleIcon className="mr-2 h-4 w-4" />
-                    Continua con Apple
-                  </Button>
-                  <p className="text-xs text-muted-foreground text-center -mt-2">
-                    Apple: disponibile a breve
-                  </p>
-
-                </form>
-              </TabsContent>
-              
-              <TabsContent value="signup">
-                <form onSubmit={handleSignup} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="name">Nome completo <span className="text-destructive">*</span></Label>
-                    <Input
-                      id="name"
-                      name="name"
-                      type="text"
-                      required
-                      placeholder="Mario Rossi"
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-email">Email <span className="text-destructive">*</span></Label>
-                    <Input
-                      id="signup-email"
-                      name="email"
-                      type="email"
-                      required
-                      placeholder="tua@email.com"
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-password">Password <span className="text-destructive">*</span></Label>
-                    <Input
-                      id="signup-password"
-                      name="password"
-                      type="password"
-                      required
-                      placeholder="••••••••"
-                      minLength={8}
-                      value={signupPassword}
-                      onChange={(e) => setSignupPassword(e.target.value)}
-                    />
-                    <PasswordStrengthIndicator password={signupPassword} />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="confirm-password">Conferma Password <span className="text-destructive">*</span></Label>
-                    <Input
-                      id="confirm-password"
-                      name="confirmPassword"
-                      type="password"
-                      required
-                      placeholder="••••••••"
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                    />
-                    {confirmPassword && signupPassword !== confirmPassword && (
-                      <p className="text-xs text-destructive">Le password non corrispondono</p>
-                    )}
-                    {confirmPassword && signupPassword === confirmPassword && (
-                      <p className="text-xs text-green-600 dark:text-green-500">Le password corrispondono ✓</p>
-                    )}
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="phone">Telefono <span className="text-destructive">*</span></Label>
-                    <Input
-                      id="phone"
-                      name="phone"
-                      type="tel"
-                      required
-                      placeholder="+39 123 456 7890"
-                    />
-                  </div>
-                  
-                  <Button
-                    type="submit"
-                    className="w-full"
-                    disabled={isLoading}
-                  >
-                    {isLoading ? (
-                      <>
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        Registrazione in corso...
-                      </>
-                    ) : "Registrati"}
-                  </Button>
-                  
-                  <div className="relative my-4">
-                    <Separator />
-                    <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-card px-2 text-xs text-muted-foreground">
-                      oppure
-                    </span>
-                  </div>
-                  
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="w-full hover:bg-muted transition-all duration-200"
-                    onClick={handleGoogleLogin}
-                    disabled={isLoading}
-                    aria-label="Continua con Google"
-                  >
-                    <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24" aria-hidden="true">
-                      <path
-                        fill="currentColor"
-                        d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                    <motion.div variants={formItemVariants} className="space-y-2">
+                      <Label htmlFor="name">Nome completo <span className="text-destructive">*</span></Label>
+                      <Input
+                        id="name"
+                        name="name"
+                        type="text"
+                        required
+                        placeholder="Mario Rossi"
+                        className="transition-shadow duration-200 focus:shadow-md"
                       />
-                      <path
-                        fill="currentColor"
-                        d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                    </motion.div>
+                    
+                    <motion.div variants={formItemVariants} className="space-y-2">
+                      <Label htmlFor="signup-email">Email <span className="text-destructive">*</span></Label>
+                      <Input
+                        id="signup-email"
+                        name="email"
+                        type="email"
+                        required
+                        placeholder="tua@email.com"
+                        className="transition-shadow duration-200 focus:shadow-md"
                       />
-                      <path
-                        fill="currentColor"
-                        d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                    </motion.div>
+                    
+                    <motion.div variants={formItemVariants} className="space-y-2">
+                      <Label htmlFor="signup-password">Password <span className="text-destructive">*</span></Label>
+                      <Input
+                        id="signup-password"
+                        name="password"
+                        type="password"
+                        required
+                        placeholder="••••••••"
+                        minLength={8}
+                        value={signupPassword}
+                        onChange={(e) => setSignupPassword(e.target.value)}
+                        className="transition-shadow duration-200 focus:shadow-md"
                       />
-                      <path
-                        fill="currentColor"
-                        d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                      <PasswordStrengthIndicator password={signupPassword} />
+                    </motion.div>
+                    
+                    <motion.div variants={formItemVariants} className="space-y-2">
+                      <Label htmlFor="confirm-password">Conferma Password <span className="text-destructive">*</span></Label>
+                      <Input
+                        id="confirm-password"
+                        name="confirmPassword"
+                        type="password"
+                        required
+                        placeholder="••••••••"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        className="transition-shadow duration-200 focus:shadow-md"
                       />
-                    </svg>
-                    Continua con Google
-                  </Button>
+                      <AnimatePresence mode="wait">
+                        {confirmPassword && signupPassword !== confirmPassword && (
+                          <motion.p 
+                            initial={{ opacity: 0, y: -5 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0 }}
+                            className="text-xs text-destructive"
+                          >
+                            Le password non corrispondono
+                          </motion.p>
+                        )}
+                        {confirmPassword && signupPassword === confirmPassword && (
+                          <motion.p 
+                            initial={{ opacity: 0, y: -5 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0 }}
+                            className="text-xs text-green-600 dark:text-green-500"
+                          >
+                            Le password corrispondono ✓
+                          </motion.p>
+                        )}
+                      </AnimatePresence>
+                    </motion.div>
 
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="w-full hover:bg-muted transition-all duration-200"
-                    onClick={handleAppleLogin}
-                    disabled={isLoading}
-                    aria-label="Continua con Apple (non disponibile)"
-                  >
-                    <AppleIcon className="mr-2 h-4 w-4" />
-                    Continua con Apple
-                  </Button>
-                  <p className="text-xs text-muted-foreground text-center -mt-2">
-                    Apple: disponibile a breve
-                  </p>
+                    <motion.div variants={formItemVariants} className="space-y-2">
+                      <Label htmlFor="phone">Telefono <span className="text-destructive">*</span></Label>
+                      <Input
+                        id="phone"
+                        name="phone"
+                        type="tel"
+                        required
+                        placeholder="+39 123 456 7890"
+                        className="transition-shadow duration-200 focus:shadow-md"
+                      />
+                    </motion.div>
+                    
+                    <motion.div variants={formItemVariants}>
+                      <Button
+                        type="submit"
+                        className="w-full"
+                        disabled={isLoading}
+                      >
+                        {isLoading ? (
+                          <>
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                            Registrazione in corso...
+                          </>
+                        ) : "Registrati"}
+                      </Button>
+                    </motion.div>
+                    
+                    <motion.div variants={formItemVariants} className="relative my-4">
+                      <Separator />
+                      <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-card px-2 text-xs text-muted-foreground">
+                        oppure
+                      </span>
+                    </motion.div>
+                    
+                    <motion.div variants={formItemVariants}>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="w-full hover:bg-muted transition-all duration-200"
+                        onClick={handleGoogleLogin}
+                        disabled={isLoading}
+                        aria-label="Continua con Google"
+                      >
+                        <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24" aria-hidden="true">
+                          <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                          <path fill="currentColor" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                          <path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
+                          <path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+                        </svg>
+                        Continua con Google
+                      </Button>
+                    </motion.div>
 
-                  
-                  <p className="text-xs text-muted-foreground text-center">
-                    Registrandoti, accetti i nostri{" "}
-                    <a href="/terms" className="text-muted-foreground hover:text-foreground transition-colors underline">
-                      Termini di Servizio
-                    </a>{" "}
-                    e la nostra{" "}
-                    <a href="/privacy" className="text-muted-foreground hover:text-foreground transition-colors underline">
-                      Privacy Policy
-                    </a>
-                  </p>
-                </form>
-              </TabsContent>
-            </Tabs>
-          </CardContent>
-        </Card>
+                    <motion.div variants={formItemVariants}>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="w-full hover:bg-muted transition-all duration-200"
+                        onClick={handleAppleLogin}
+                        disabled={isLoading}
+                        aria-label="Continua con Apple (non disponibile)"
+                      >
+                        <AppleIcon className="mr-2 h-4 w-4" />
+                        Continua con Apple
+                      </Button>
+                      <p className="text-xs text-muted-foreground text-center mt-1">
+                        Apple: disponibile a breve
+                      </p>
+                    </motion.div>
+                    
+                    <motion.p variants={formItemVariants} className="text-xs text-muted-foreground text-center">
+                      Registrandoti, accetti i nostri{" "}
+                      <a href="/terms" className="text-muted-foreground hover:text-foreground transition-colors underline">
+                        Termini di Servizio
+                      </a>{" "}
+                      e la nostra{" "}
+                      <a href="/privacy" className="text-muted-foreground hover:text-foreground transition-colors underline">
+                        Privacy Policy
+                      </a>
+                    </motion.p>
+                  </motion.form>
+                </TabsContent>
+              </Tabs>
+            </CardContent>
+          </Card>
+        </motion.div>
 
-        {/* Password Reset Dialog */}
         <Dialog open={showPasswordReset} onOpenChange={setShowPasswordReset}>
           <DialogContent onOpenAutoFocus={(e) => { e.preventDefault(); window.scrollTo(0, 0); }}>
             <DialogHeader>
