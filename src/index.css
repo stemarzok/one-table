@@ -267,9 +267,10 @@
     pointer-events: none;
   }
 
-  /* Display Font */
+  /* Display Font - Bebas Neue for impactful headlines */
   .font-display {
-    font-family: 'Space Grotesk', sans-serif;
+    font-family: 'Bebas Neue', 'Inter', sans-serif;
+    letter-spacing: 0.02em;
   }
 
   /* Text Reveal Animation */
