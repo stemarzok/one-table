@@ -266,6 +266,112 @@
     mask-composite: exclude;
     pointer-events: none;
   }
+
+  /* Display Font */
+  .font-display {
+    font-family: 'Space Grotesk', sans-serif;
+  }
+
+  /* Text Reveal Animation */
+  .text-reveal {
+    animation: textReveal 0.8s cubic-bezier(0.77, 0, 0.175, 1) forwards;
+    opacity: 0;
+  }
+
+  .text-reveal-delay-1 {
+    animation: textReveal 0.8s cubic-bezier(0.77, 0, 0.175, 1) 0.15s forwards;
+    opacity: 0;
+  }
+
+  /* Glitch Effect */
+  .glitch {
+    position: relative;
+  }
+
+  .glitch::before,
+  .glitch::after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+  }
+
+  .glitch::before {
+    animation: glitch-1 0.3s linear 0.8s;
+    color: hsl(var(--primary));
+    z-index: -1;
+  }
+
+  .glitch::after {
+    animation: glitch-2 0.3s linear 0.85s;
+    color: hsl(85 100% 70%);
+    z-index: -2;
+  }
+}
+
+@keyframes textReveal {
+  0% {
+    opacity: 0;
+    transform: translateY(40px) skewY(2deg);
+    filter: blur(8px);
+  }
+  60% {
+    filter: blur(0px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) skewY(0deg);
+    filter: blur(0px);
+  }
+}
+
+@keyframes glitch-1 {
+  0%, 100% {
+    opacity: 0;
+    transform: translateX(0);
+  }
+  20% {
+    opacity: 0.8;
+    transform: translateX(-3px) translateY(-2px);
+  }
+  40% {
+    opacity: 0.8;
+    transform: translateX(3px) translateY(2px);
+  }
+  60% {
+    opacity: 0.8;
+    transform: translateX(-2px) translateY(1px);
+  }
+  80% {
+    opacity: 0;
+    transform: translateX(2px) translateY(-1px);
+  }
+}
+
+@keyframes glitch-2 {
+  0%, 100% {
+    opacity: 0;
+    transform: translateX(0);
+  }
+  20% {
+    opacity: 0.6;
+    transform: translateX(3px) translateY(2px);
+  }
+  40% {
+    opacity: 0.6;
+    transform: translateX(-3px) translateY(-2px);
+  }
+  60% {
+    opacity: 0.6;
+    transform: translateX(2px) translateY(-1px);
+  }
+  80% {
+    opacity: 0;
+    transform: translateX(-2px) translateY(1px);
+  }
 }
 
 @keyframes fadeUp {
