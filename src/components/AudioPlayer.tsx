@@ -1,11 +1,14 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLocation } from "react-router-dom";
 
 const AudioPlayer = () => {
   const [isPlaying, setIsPlaying] = useState(false);
+  const isPlayingRef = useRef(false); // Ref to track state in event listeners
   const audioRef = useRef<HTMLAudioElement>(null);
+  const typewriterPoolRef = useRef<HTMLAudioElement[]>([]);
+  const poolIndexRef = useRef(0);
   const { isLoggedIn } = useAuth();
   const location = useLocation();
 
@@ -15,57 +18,95 @@ const AudioPlayer = () => {
     location.pathname === path || location.pathname.startsWith(path + '/')
   );
 
-  // Soft ambient music - very low volume for immersion
+  // Soft ambient music
   const audioSrc = "https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=lofi-study-112191.mp3";
+  
+  // Classic typewriter key sound - single key press
+  const typewriterSrc = "https://cdn.pixabay.com/download/audio/2021/08/04/audio_bb630cc098.mp3?filename=typewriter-key-1-6191.mp3";
 
+  // Keep ref in sync with state
   useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.volume = 0.08; // Very subtle ambient
-      audioRef.current.loop = true;
-    }
-  }, []);
+    isPlayingRef.current = isPlaying;
+  }, [isPlaying]);
 
-  // Create and play typewriter sound on hover
+  // Initialize audio pool for typewriter sounds (prevents overlapping issues)
   useEffect(() => {
     if (!shouldShow) return;
 
-    const playTypewriterSound = () => {
-      if (!isPlaying) return;
-      
-      // Create audio context for typewriter sound
-      try {
-        const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-        const oscillator = audioContext.createOscillator();
-        const gainNode = audioContext.createGain();
-        
-        oscillator.connect(gainNode);
-        gainNode.connect(audioContext.destination);
-        
-        // Typewriter-like click sound
-        oscillator.frequency.setValueAtTime(800 + Math.random() * 400, audioContext.currentTime);
-        oscillator.type = 'square';
-        
-        gainNode.gain.setValueAtTime(0.15, audioContext.currentTime);
-        gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.05);
-        
-        oscillator.start(audioContext.currentTime);
-        oscillator.stop(audioContext.currentTime + 0.05);
-      } catch (e) {
-        // Fallback: do nothing if audio context fails
-      }
-    };
+    // Create a pool of audio elements for rapid-fire sounds
+    const pool: HTMLAudioElement[] = [];
+    for (let i = 0; i < 5; i++) {
+      const audio = new Audio(typewriterSrc);
+      audio.volume = 0.3;
+      audio.preload = 'auto';
+      pool.push(audio);
+    }
+    typewriterPoolRef.current = pool;
 
-    const handleMouseEnter = (e: MouseEvent) => {
+    if (audioRef.current) {
+      audioRef.current.volume = 0.08;
+      audioRef.current.loop = true;
+    }
+
+    return () => {
+      pool.forEach(audio => {
+        audio.pause();
+        audio.src = '';
+      });
+    };
+  }, [shouldShow]);
+
+  // Play typewriter sound from pool
+  const playTypewriterSound = useCallback(() => {
+    if (!isPlayingRef.current) return;
+    
+    const pool = typewriterPoolRef.current;
+    if (pool.length === 0) return;
+
+    const audio = pool[poolIndexRef.current];
+    poolIndexRef.current = (poolIndexRef.current + 1) % pool.length;
+    
+    audio.currentTime = 0;
+    audio.play().catch(() => {});
+  }, []);
+
+  // Global mouseover listener for typewriter sound
+  useEffect(() => {
+    if (!shouldShow) return;
+
+    const handleMouseOver = (e: MouseEvent) => {
+      if (!isPlayingRef.current) return;
+      
       const target = e.target as HTMLElement;
-      // Trigger on buttons, links, and cards
-      if (target.closest('button, a[href], [role="button"], .group, .group\\/card, [class*="card"], .cursor-pointer, .cursor-grab')) {
+      
+      // Check if target or any parent is an interactive element
+      const isInteractive = 
+        target.tagName === 'BUTTON' ||
+        target.tagName === 'A' ||
+        target.closest('button') ||
+        target.closest('a[href]') ||
+        target.closest('[role="button"]') ||
+        target.closest('.group') ||
+        target.closest('.group\\/card') ||
+        target.closest('[class*="card"]') ||
+        target.closest('.cursor-pointer') ||
+        target.closest('.cursor-grab') ||
+        target.closest('[class*="hover:"]') ||
+        target.matches('[class*="card"]') ||
+        target.matches('.cursor-pointer');
+
+      if (isInteractive) {
         playTypewriterSound();
       }
     };
 
-    document.addEventListener('mouseover', handleMouseEnter);
-    return () => document.removeEventListener('mouseover', handleMouseEnter);
-  }, [isPlaying, shouldShow]);
+    // Use capture phase to catch events before they're handled
+    document.addEventListener('mouseover', handleMouseOver, true);
+    
+    return () => {
+      document.removeEventListener('mouseover', handleMouseOver, true);
+    };
+  }, [shouldShow, playTypewriterSound]);
 
   const togglePlay = () => {
     if (audioRef.current) {
