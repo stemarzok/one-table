@@ -159,7 +159,7 @@ const HowItWorksEnhanced = () => {
 
           <div 
             ref={scrollRef}
-            className="flex gap-4 overflow-x-auto pb-4 scroll-smooth hide-scrollbar touch-pan-x"
+            className="flex gap-4 overflow-x-auto pb-4 scroll-smooth hide-scrollbar touch-pan-x cursor-grab active:cursor-grabbing"
             style={{ 
               scrollbarWidth: 'none', 
               msOverflowStyle: 'none',

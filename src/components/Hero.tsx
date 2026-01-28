@@ -122,7 +122,12 @@ const Hero = () => {
                 size="lg" 
                 variant="premium"
                 className="text-base px-8 py-6 gap-3 w-full sm:w-auto font-bold"
-                onClick={() => window.location.href = '/auth'}
+                onClick={() => {
+                  const element = document.getElementById('restaurant-list');
+                  if (element) {
+                    element.scrollIntoView({ behavior: 'smooth' });
+                  }
+                }}
               >
                 <Search className="w-5 h-5" />
                 Cerca un ristorante

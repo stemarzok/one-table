@@ -123,10 +123,10 @@ const LevelBenefits = () => {
   };
 
   return (
-    <section ref={ref} className="py-24 bg-background relative overflow-hidden">
+    <section ref={ref} id="level-benefits" className="py-24 bg-foreground relative overflow-hidden">
       {/* Background decoration */}
-      <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-[120px]" />
-      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-primary/5 rounded-full blur-[120px]" />
+      <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-[120px]" />
+      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-primary/10 rounded-full blur-[120px]" />
       
       <div className="container mx-auto px-4 relative z-10">
         <motion.div
@@ -136,17 +136,17 @@ const LevelBenefits = () => {
           className="text-center mb-16"
         >
           <motion.span 
-            className="inline-block px-4 py-1.5 bg-primary/10 border border-primary/20 rounded-full text-primary text-sm font-medium mb-6"
+            className="inline-block px-4 py-1.5 bg-primary/20 border border-primary/30 rounded-full text-primary text-sm font-medium mb-6"
             initial={{ opacity: 0, scale: 0.9 }}
             animate={isInView ? { opacity: 1, scale: 1 } : {}}
             transition={{ delay: 0.2 }}
           >
             Sistema a livelli
           </motion.span>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-5 tracking-wide font-display uppercase">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-background mb-5 tracking-wide font-display uppercase">
             Più sei affidabile, più vieni premiato
           </h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+          <p className="text-lg text-background/70 max-w-2xl mx-auto leading-relaxed">
             Ogni livello sblocca vantaggi esclusivi. Il tuo percorso inizia ora.
           </p>
         </motion.div>
@@ -171,7 +171,7 @@ const LevelBenefits = () => {
                 className="group"
               >
                 <Card 
-                  className="p-6 bg-card border border-border h-full flex flex-col transition-all duration-300 hover:border-primary/40 hover:shadow-lg relative overflow-hidden"
+                  className="p-6 bg-background/10 backdrop-blur-sm border border-background/20 h-full flex flex-col transition-all duration-300 hover:border-primary/40 hover:shadow-lg hover:shadow-primary/10 relative overflow-hidden"
                 >
                   {/* Icon */}
                   <div className="relative z-10 mb-5">
@@ -181,13 +181,13 @@ const LevelBenefits = () => {
                   </div>
                   
                   <div className="mb-4 relative z-10">
-                    <h3 className="text-2xl font-bold text-foreground mb-1">
+                    <h3 className="text-2xl font-bold text-background mb-1">
                       {level.name}
                     </h3>
-                    <p className="text-muted-foreground text-sm">{level.subtitle}</p>
+                    <p className="text-background/60 text-sm">{level.subtitle}</p>
                   </div>
                   
-                  <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-primary/10 border border-primary/20 rounded-lg mb-5 w-fit relative z-10">
+                  <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-primary/20 border border-primary/30 rounded-lg mb-5 w-fit relative z-10">
                     <span className="text-primary font-semibold text-sm">{level.range} punti</span>
                   </div>
                   
@@ -195,12 +195,12 @@ const LevelBenefits = () => {
                     {level.benefits.map((benefit, i) => (
                       <motion.li 
                         key={i} 
-                        className="flex items-start gap-3 text-muted-foreground group-hover:text-foreground transition-colors duration-300"
+                        className="flex items-start gap-3 text-background/70 group-hover:text-background transition-colors duration-300"
                         initial={{ opacity: 0, x: -10 }}
                         animate={isInView ? { opacity: 1, x: 0 } : {}}
                         transition={{ delay: 0.5 + (index * 0.1) + (i * 0.05) }}
                       >
-                        <div className="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <div className="w-5 h-5 rounded-full bg-primary/30 flex items-center justify-center flex-shrink-0 mt-0.5">
                           <Check className="w-3 h-3 text-primary" />
                         </div>
                         <span className="text-sm">{benefit}</span>
@@ -239,7 +239,7 @@ const LevelBenefits = () => {
           
           <motion.div 
             ref={scrollContainerRef}
-            className="overflow-x-auto py-4 scroll-smooth hide-scrollbar touch-pan-x"
+            className="overflow-x-auto py-4 scroll-smooth hide-scrollbar touch-pan-x cursor-grab active:cursor-grabbing"
             style={{ 
               scrollSnapType: 'x mandatory',
               WebkitOverflowScrolling: 'touch'
@@ -259,7 +259,7 @@ const LevelBenefits = () => {
                     style={{ scrollSnapAlign: 'start' }}
                   >
                     <Card 
-                      className="p-5 bg-card border border-border w-[260px] h-[340px] flex flex-col transition-all duration-300 hover:border-primary/40 relative overflow-hidden"
+                      className="p-5 bg-background/10 backdrop-blur-sm border border-background/20 w-[260px] h-[340px] flex flex-col transition-all duration-300 hover:border-primary/40 hover:shadow-lg hover:shadow-primary/10 relative overflow-hidden"
                     >
                       {/* Icon */}
                       <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center mb-4 shadow-lg shadow-primary/20">
@@ -267,13 +267,13 @@ const LevelBenefits = () => {
                       </div>
                       
                       <div className="mb-3">
-                        <h3 className="text-xl font-bold text-foreground mb-0.5">
+                        <h3 className="text-xl font-bold text-background mb-0.5">
                           {level.name}
                         </h3>
-                        <p className="text-muted-foreground text-sm">{level.subtitle}</p>
+                        <p className="text-background/60 text-sm">{level.subtitle}</p>
                       </div>
                       
-                      <div className="inline-flex px-2.5 py-1 bg-primary/10 border border-primary/20 rounded-md mb-4 w-fit">
+                      <div className="inline-flex px-2.5 py-1 bg-primary/20 border border-primary/30 rounded-md mb-4 w-fit">
                         <span className="text-primary font-semibold text-xs">{level.range} punti</span>
                       </div>
                       
@@ -281,7 +281,7 @@ const LevelBenefits = () => {
                         {level.benefits.map((benefit, i) => (
                           <li 
                             key={i} 
-                            className="flex items-start gap-2 text-muted-foreground"
+                            className="flex items-start gap-2 text-background/70"
                           >
                             <Check className="w-3.5 h-3.5 text-primary mt-0.5 flex-shrink-0" />
                             <span className="text-xs">{benefit}</span>
@@ -304,7 +304,7 @@ const LevelBenefits = () => {
                 className={`rounded-full transition-all duration-300 ${
                   index === activeIndex 
                     ? 'w-6 h-2 bg-primary' 
-                    : 'w-2 h-2 bg-muted-foreground/30 hover:bg-muted-foreground/50'
+                    : 'w-2 h-2 bg-background/30 hover:bg-background/50'
                 }`}
                 aria-label={`Vai al livello ${index + 1}`}
               />

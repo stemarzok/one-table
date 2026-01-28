@@ -61,17 +61,38 @@ const Footer = () => {
             <h3 className="font-bold text-background mb-4">Link Utili</h3>
             <ul className="space-y-2">
               <li>
-                <a href="/#come-funziona" className="text-background/80 hover:text-primary transition-colors">
+                <a 
+                  href="#how-it-works" 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                  className="text-background/80 hover:text-primary transition-colors cursor-pointer"
+                >
                   Come Funziona
                 </a>
               </li>
               <li>
-                <a href="/#livelli" className="text-background/80 hover:text-primary transition-colors">
+                <a 
+                  href="#level-benefits" 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    document.getElementById('level-benefits')?.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                  className="text-background/80 hover:text-primary transition-colors cursor-pointer"
+                >
                   Livelli e Vantaggi
                 </a>
               </li>
               <li>
-                <a href="/#ristoranti" className="text-background/80 hover:text-primary transition-colors">
+                <a 
+                  href="#restaurant-list" 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    document.getElementById('restaurant-list')?.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                  className="text-background/80 hover:text-primary transition-colors cursor-pointer"
+                >
                   Ristoranti Partner
                 </a>
               </li>
