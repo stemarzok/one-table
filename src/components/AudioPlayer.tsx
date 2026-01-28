@@ -9,7 +9,6 @@ const AudioPlayer = () => {
   const audioRef = useRef<HTMLAudioElement>(null);
   const clickPoolRef = useRef<HTMLAudioElement[]>([]);
   const poolIndexRef = useRef(0);
-  const lastHoveredRef = useRef<Element | null>(null);
   const { isLoggedIn } = useAuth();
   const location = useLocation();
 
@@ -22,8 +21,8 @@ const AudioPlayer = () => {
   // Soft ambient music
   const audioSrc = "https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=lofi-study-112191.mp3";
   
-  // Mechanical keyboard click - gaming style
-  const clickSrc = "https://cdn.pixabay.com/download/audio/2022/03/10/audio_c8c8a73467.mp3?filename=click-21156.mp3";
+  // Mechanical keyboard click (more "thocky" / gaming)
+  const clickSrc = "https://cdn.pixabay.com/download/audio/2022/03/15/audio_7322301c25.mp3?filename=mechanical-keyboard-02-101431.mp3";
 
   // Keep ref in sync with state
   useEffect(() => {
@@ -70,64 +69,42 @@ const AudioPlayer = () => {
     audio.play().catch(() => {});
   }, []);
 
-  // Get the interactive parent element (card, button, link)
-  const getInteractiveParent = (element: HTMLElement): Element | null => {
-    // First check for card containers (highest priority - one sound per card)
-    const card = element.closest('.group, .group\\/card, [class*="card"], .cursor-grab');
-    if (card) return card;
-    
-    // Then check for buttons and links
-    const button = element.closest('button, a[href], [role="button"]');
-    if (button) return button;
-    
-    // Check if element itself is interactive
-    if (element.tagName === 'BUTTON' || element.tagName === 'A') {
-      return element;
-    }
-    
-    return null;
-  };
+  // Resolve a "hover sound root" so a card plays ONCE even when hovering its inner parts.
+  // Priority:
+  // 1) nearest ancestor with .cursor-pointer (our cards use it)
+  // 2) actual interactive controls (buttons/links)
+  const getHoverSoundRoot = useCallback((element: HTMLElement): HTMLElement | null => {
+    const cardRoot = element.closest('.cursor-pointer') as HTMLElement | null;
+    if (cardRoot) return cardRoot;
+    const controlRoot = element.closest('button, a[href], [role="button"]') as HTMLElement | null;
+    return controlRoot;
+  }, []);
 
-  // Global mouseover listener
+  // Global pointerover listener (more reliable than mouseover across scrolling / dynamic content)
   useEffect(() => {
     if (!shouldShow) return;
 
-    const handleMouseOver = (e: MouseEvent) => {
+    const handlePointerOver = (e: PointerEvent) => {
       if (!isPlayingRef.current) return;
-      
-      const target = e.target as HTMLElement;
-      const interactiveParent = getInteractiveParent(target);
-      
-      // Only play sound if we entered a NEW interactive element
-      if (interactiveParent && interactiveParent !== lastHoveredRef.current) {
-        lastHoveredRef.current = interactiveParent;
-        playClickSound();
-      }
+      const target = e.target as HTMLElement | null;
+      if (!target) return;
+
+      const root = getHoverSoundRoot(target);
+      if (!root) return;
+
+      // If we're moving within the SAME root, don't replay the sound.
+      const related = e.relatedTarget as Node | null;
+      if (related && root.contains(related)) return;
+
+      playClickSound();
     };
 
-    const handleMouseOut = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-      const relatedTarget = e.relatedTarget as HTMLElement | null;
-      
-      const currentParent = getInteractiveParent(target);
-      const nextParent = relatedTarget ? getInteractiveParent(relatedTarget) : null;
-      
-      // Clear last hovered if we left the interactive element entirely
-      if (currentParent && currentParent !== nextParent) {
-        if (lastHoveredRef.current === currentParent) {
-          lastHoveredRef.current = null;
-        }
-      }
-    };
-
-    document.addEventListener('mouseover', handleMouseOver, true);
-    document.addEventListener('mouseout', handleMouseOut, true);
+    document.addEventListener('pointerover', handlePointerOver, true);
     
     return () => {
-      document.removeEventListener('mouseover', handleMouseOver, true);
-      document.removeEventListener('mouseout', handleMouseOut, true);
+      document.removeEventListener('pointerover', handlePointerOver, true);
     };
-  }, [shouldShow, playClickSound]);
+  }, [shouldShow, getHoverSoundRoot, playClickSound]);
 
   const togglePlay = () => {
     if (audioRef.current) {
