@@ -21,8 +21,8 @@ const AudioPlayer = () => {
   // Soft ambient music
   const audioSrc = "https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=lofi-study-112191.mp3";
   
-  // Mechanical keyboard click (more "thocky" / gaming)
-  const clickSrc = "https://cdn.pixabay.com/download/audio/2022/03/15/audio_7322301c25.mp3?filename=mechanical-keyboard-02-101431.mp3";
+  // Spacebar / heavy key click - gaming keyboard
+  const clickSrc = "https://cdn.pixabay.com/download/audio/2022/03/15/audio_03460e4022.mp3?filename=spacebar-click-keyboard-101430.mp3";
 
   // Keep ref in sync with state
   useEffect(() => {
