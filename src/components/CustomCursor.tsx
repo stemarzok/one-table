@@ -56,12 +56,12 @@ const CustomCursor = () => {
 
   return (
     <>
-      {/* Main cursor - always brand green */}
+      {/* Main cursor - always brand green (no blend mode) */}
       <motion.div
-        className="fixed pointer-events-none z-[9999] mix-blend-difference"
+        className="fixed pointer-events-none z-[9999]"
         animate={{
-          x: mousePosition.x - (isHovering ? 16 : 10),
-          y: mousePosition.y - (isHovering ? 16 : 10),
+          x: mousePosition.x - (isHovering ? 12 : 8),
+          y: mousePosition.y - (isHovering ? 12 : 8),
           opacity: isVisible ? 1 : 0,
         }}
         transition={{
@@ -72,22 +72,23 @@ const CustomCursor = () => {
         }}
       >
         <div 
-          className={`rounded-full bg-primary transition-all duration-200 ${
-            isHovering ? 'w-8 h-8' : 'w-5 h-5'
+          className={`rounded-full transition-all duration-200 ${
+            isHovering ? 'w-6 h-6' : 'w-4 h-4'
           }`}
           style={{
-            boxShadow: '0 0 20px hsl(85, 100%, 50%, 0.5), 0 0 40px hsl(85, 100%, 50%, 0.3)',
+            backgroundColor: 'hsl(85, 100%, 50%)',
+            boxShadow: '0 0 15px hsl(85, 100%, 50%, 0.6), 0 0 30px hsl(85, 100%, 50%, 0.3)',
           }}
         />
       </motion.div>
       
-      {/* Outer ring */}
+      {/* Outer ring - subtle */}
       <motion.div
         className="fixed pointer-events-none z-[9998]"
         animate={{
-          x: mousePosition.x - 18,
-          y: mousePosition.y - 18,
-          opacity: isVisible ? 0.3 : 0,
+          x: mousePosition.x - 14,
+          y: mousePosition.y - 14,
+          opacity: isVisible ? 0.4 : 0,
         }}
         transition={{
           type: "spring",
@@ -97,9 +98,10 @@ const CustomCursor = () => {
         }}
       >
         <div 
-          className="w-9 h-9 rounded-full border border-primary/50"
+          className="w-7 h-7 rounded-full"
           style={{
-            boxShadow: '0 0 10px hsl(85, 100%, 50%, 0.2)',
+            border: '1px solid hsl(85, 100%, 50%, 0.5)',
+            boxShadow: '0 0 8px hsl(85, 100%, 50%, 0.15)',
           }}
         />
       </motion.div>

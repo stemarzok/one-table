@@ -26,18 +26,18 @@ const AudioPlayer = () => {
     location.pathname === path || location.pathname.startsWith(path + '/')
   );
 
-  // Ambient music URL - royalty free
-  const audioSrc = "https://cdn.pixabay.com/download/audio/2022/01/18/audio_d0a13f69d2.mp3?filename=ambient-piano-amp-strings-10711.mp3";
-  // Keyboard click sound - subtle
-  const clickSoundSrc = "https://cdn.pixabay.com/download/audio/2022/03/10/audio_c8c8a73467.mp3?filename=click-21156.mp3";
+  // Ambient music URL - soft lo-fi ambient (Wii-style immersive)
+  const audioSrc = "https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=lofi-study-112191.mp3";
+  // Typewriter click sound - more mechanical
+  const clickSoundSrc = "https://cdn.pixabay.com/download/audio/2021/08/04/audio_bb630cc098.mp3?filename=typewriter-key-1-6191.mp3";
 
   useEffect(() => {
     if (audioRef.current) {
-      audioRef.current.volume = 0.3;
+      audioRef.current.volume = 0.12; // Much lower - ambient background
       audioRef.current.loop = true;
     }
     if (clickSoundRef.current) {
-      clickSoundRef.current.volume = 0.15;
+      clickSoundRef.current.volume = 0.35; // More audible typewriter effect
     }
   }, []);
 
