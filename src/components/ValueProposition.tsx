@@ -39,7 +39,7 @@ const ValueProposition = () => {
           transition={{ duration: 0.6 }}
           className="text-center max-w-3xl mx-auto mb-12"
         >
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-6 leading-tight">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-6 leading-tight font-display uppercase tracking-wide">
             One-Table non è una semplice prenotazione.
           </h2>
           <p className="text-base sm:text-lg text-muted-foreground leading-relaxed">

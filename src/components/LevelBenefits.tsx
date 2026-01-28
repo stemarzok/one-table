@@ -1,28 +1,20 @@
 import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Trophy, Star, Award, Crown, ChevronLeft, ChevronRight, Check } from "lucide-react";
 import { motion, useInView } from "framer-motion";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 
 const LevelBenefits = () => {
   const ref = useRef(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
-  const [canScrollLeft, setCanScrollLeft] = useState(false);
-  const [canScrollRight, setCanScrollRight] = useState(true);
+  const [activeIndex, setActiveIndex] = useState(0);
   
   const levels = [
     {
       name: "Bronzo",
       subtitle: "Inizia il percorso",
       icon: Star,
-      bgColor: "bg-[hsl(85,100%,50%)/8]",
-      borderColor: "border-primary/30",
-      iconBg: "bg-primary",
-      iconColor: "text-black",
-      badgeClass: "bg-primary/20 text-primary border-primary/30",
-      accentColor: "bg-primary",
       range: "0-100",
       benefits: [
         "Accesso alla piattaforma",
@@ -34,12 +26,6 @@ const LevelBenefits = () => {
       name: "Argento",
       subtitle: "Inizia a distinguerti",
       icon: Award,
-      bgColor: "bg-[hsl(85,100%,50%)/10]",
-      borderColor: "border-primary/40",
-      iconBg: "bg-primary",
-      iconColor: "text-black",
-      badgeClass: "bg-primary/20 text-primary border-primary/30",
-      accentColor: "bg-primary",
       range: "101-300",
       benefits: [
         "Priorità nelle prenotazioni",
@@ -51,12 +37,6 @@ const LevelBenefits = () => {
       name: "Oro",
       subtitle: "Accesso premium",
       icon: Crown,
-      bgColor: "bg-[hsl(85,100%,50%)/12]",
-      borderColor: "border-primary/50",
-      iconBg: "bg-primary",
-      iconColor: "text-black",
-      badgeClass: "bg-primary/20 text-primary border-primary/30",
-      accentColor: "bg-primary",
       range: "301-600",
       benefits: [
         "Prenotazioni garantite",
@@ -69,12 +49,6 @@ const LevelBenefits = () => {
       name: "Platino",
       subtitle: "Trattamento VIP",
       icon: Trophy,
-      bgColor: "bg-[hsl(85,100%,50%)/15]",
-      borderColor: "border-primary/60",
-      iconBg: "bg-primary",
-      iconColor: "text-black",
-      badgeClass: "bg-primary/20 text-primary border-primary/30",
-      accentColor: "bg-primary",
       range: "601+",
       benefits: [
         "Accesso VIP illimitato",
@@ -110,31 +84,49 @@ const LevelBenefits = () => {
     }
   };
 
-  const checkScroll = () => {
+  const scrollToCard = (index: number) => {
     if (scrollContainerRef.current) {
-      const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current;
-      setCanScrollLeft(scrollLeft > 10);
-      setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 10);
+      const cardWidth = 280;
+      const gap = 16;
+      const scrollPosition = index * (cardWidth + gap);
+      scrollContainerRef.current.scrollTo({
+        left: scrollPosition,
+        behavior: 'smooth'
+      });
+      setActiveIndex(index);
     }
   };
 
-  const scroll = (direction: 'left' | 'right') => {
+  const handleScroll = () => {
     if (scrollContainerRef.current) {
-      const scrollAmount = 340;
-      scrollContainerRef.current.scrollBy({
-        left: direction === 'left' ? -scrollAmount : scrollAmount,
-        behavior: 'smooth'
-      });
-      setTimeout(checkScroll, 300);
+      const { scrollLeft } = scrollContainerRef.current;
+      const cardWidth = 280;
+      const gap = 16;
+      const newIndex = Math.round(scrollLeft / (cardWidth + gap));
+      setActiveIndex(Math.min(newIndex, levels.length - 1));
     }
+  };
+
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (container) {
+      container.addEventListener('scroll', handleScroll);
+      return () => container.removeEventListener('scroll', handleScroll);
+    }
+  }, []);
+
+  const scroll = (direction: 'left' | 'right') => {
+    const newIndex = direction === 'left' 
+      ? Math.max(0, activeIndex - 1) 
+      : Math.min(levels.length - 1, activeIndex + 1);
+    scrollToCard(newIndex);
   };
 
   return (
-    <section ref={ref} className="py-24 bg-gradient-to-b from-background via-[hsl(0,0%,6%)] to-background relative overflow-hidden">
-      {/* Background decoration - enhanced glow effects */}
-      <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/8 rounded-full blur-[150px]" />
-      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-primary/8 rounded-full blur-[150px]" />
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/3 rounded-full blur-[200px]" />
+    <section ref={ref} className="py-24 bg-background relative overflow-hidden">
+      {/* Background decoration */}
+      <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-[120px]" />
+      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-primary/5 rounded-full blur-[120px]" />
       
       <div className="container mx-auto px-4 relative z-10">
         <motion.div
@@ -151,10 +143,10 @@ const LevelBenefits = () => {
           >
             Sistema a livelli
           </motion.span>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-5 tracking-tight font-display">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-5 tracking-wide font-display uppercase">
             Più sei affidabile, più vieni premiato
           </h2>
-          <p className="text-lg text-white/50 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
             Ogni livello sblocca vantaggi esclusivi. Il tuo percorso inizia ora.
           </p>
         </motion.div>
@@ -173,29 +165,26 @@ const LevelBenefits = () => {
                 key={index} 
                 variants={cardVariants}
                 whileHover={{ 
-                  y: -12, 
+                  y: -8, 
                   transition: { duration: 0.3, ease: "easeOut" }
                 }}
                 className="group"
               >
                 <Card 
-                  className={`p-6 bg-white/[0.03] border border-white/10 backdrop-blur-xl h-full flex flex-col transition-all duration-500 hover:border-primary/40 hover:bg-white/[0.06] relative overflow-hidden`}
+                  className="p-6 bg-card border border-border h-full flex flex-col transition-all duration-300 hover:border-primary/40 hover:shadow-lg relative overflow-hidden"
                 >
-                  {/* Glow on hover */}
-                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-t from-primary/10 via-transparent to-transparent" />
-                  
-                  {/* Icon with glow */}
+                  {/* Icon */}
                   <div className="relative z-10 mb-5">
-                    <div className={`w-14 h-14 rounded-2xl ${level.iconBg} flex items-center justify-center shadow-lg shadow-primary/20`}>
-                      <Icon className={`w-7 h-7 ${level.iconColor}`} />
+                    <div className="w-14 h-14 rounded-2xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20">
+                      <Icon className="w-7 h-7 text-primary-foreground" />
                     </div>
                   </div>
                   
                   <div className="mb-4 relative z-10">
-                    <h3 className="text-2xl font-bold text-white mb-1">
+                    <h3 className="text-2xl font-bold text-foreground mb-1">
                       {level.name}
                     </h3>
-                    <p className="text-white/40 text-sm">{level.subtitle}</p>
+                    <p className="text-muted-foreground text-sm">{level.subtitle}</p>
                   </div>
                   
                   <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-primary/10 border border-primary/20 rounded-lg mb-5 w-fit relative z-10">
@@ -206,7 +195,7 @@ const LevelBenefits = () => {
                     {level.benefits.map((benefit, i) => (
                       <motion.li 
                         key={i} 
-                        className="flex items-start gap-3 text-white/70 group-hover:text-white/90 transition-colors duration-300"
+                        className="flex items-start gap-3 text-muted-foreground group-hover:text-foreground transition-colors duration-300"
                         initial={{ opacity: 0, x: -10 }}
                         animate={isInView ? { opacity: 1, x: 0 } : {}}
                         transition={{ delay: 0.5 + (index * 0.1) + (i * 0.05) }}
@@ -224,24 +213,24 @@ const LevelBenefits = () => {
           })}
         </motion.div>
         
-        {/* Mobile/Tablet: Horizontal scroll */}
+        {/* Mobile/Tablet: Horizontal scroll with touch support */}
         <div className="lg:hidden relative">
-          {canScrollLeft && (
+          {activeIndex > 0 && (
             <Button
               variant="ghost"
               size="icon"
-              className="absolute -left-2 top-[calc(50%-1rem)] z-20 bg-black/60 hover:bg-black/80 text-white rounded-full w-10 h-10 backdrop-blur-sm border border-white/20 hidden sm:flex hover:scale-105 transition-transform"
+              className="absolute -left-2 top-[140px] z-20 bg-background/80 hover:bg-background text-foreground rounded-full w-10 h-10 backdrop-blur-sm border border-border hidden sm:flex"
               onClick={() => scroll('left')}
             >
               <ChevronLeft className="w-5 h-5" />
             </Button>
           )}
           
-          {canScrollRight && (
+          {activeIndex < levels.length - 1 && (
             <Button
               variant="ghost"
               size="icon"
-              className="absolute -right-2 top-[calc(50%-1rem)] z-20 bg-black/60 hover:bg-black/80 text-white rounded-full w-10 h-10 backdrop-blur-sm border border-white/20 hidden sm:flex hover:scale-105 transition-transform"
+              className="absolute -right-2 top-[140px] z-20 bg-background/80 hover:bg-background text-foreground rounded-full w-10 h-10 backdrop-blur-sm border border-border hidden sm:flex"
               onClick={() => scroll('right')}
             >
               <ChevronRight className="w-5 h-5" />
@@ -250,8 +239,11 @@ const LevelBenefits = () => {
           
           <motion.div 
             ref={scrollContainerRef}
-            className="overflow-x-auto py-4 scroll-smooth hide-scrollbar"
-            onScroll={checkScroll}
+            className="overflow-x-auto py-4 scroll-smooth hide-scrollbar touch-pan-x"
+            style={{ 
+              scrollSnapType: 'x mandatory',
+              WebkitOverflowScrolling: 'touch'
+            }}
             variants={containerVariants}
             initial="hidden"
             animate={isInView ? "visible" : "hidden"}
@@ -264,20 +256,21 @@ const LevelBenefits = () => {
                     key={index} 
                     variants={cardVariants}
                     className="group"
+                    style={{ scrollSnapAlign: 'start' }}
                   >
                     <Card 
-                      className={`p-5 bg-white/[0.03] border border-white/10 backdrop-blur-xl w-[260px] h-[340px] flex flex-col transition-all duration-300 hover:border-primary/40 relative overflow-hidden`}
+                      className="p-5 bg-card border border-border w-[260px] h-[340px] flex flex-col transition-all duration-300 hover:border-primary/40 relative overflow-hidden"
                     >
                       {/* Icon */}
-                      <div className={`w-12 h-12 rounded-xl ${level.iconBg} flex items-center justify-center mb-4 shadow-lg shadow-primary/20`}>
-                        <Icon className={`w-6 h-6 ${level.iconColor}`} />
+                      <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center mb-4 shadow-lg shadow-primary/20">
+                        <Icon className="w-6 h-6 text-primary-foreground" />
                       </div>
                       
                       <div className="mb-3">
-                        <h3 className="text-xl font-bold text-white mb-0.5">
+                        <h3 className="text-xl font-bold text-foreground mb-0.5">
                           {level.name}
                         </h3>
-                        <p className="text-white/40 text-sm">{level.subtitle}</p>
+                        <p className="text-muted-foreground text-sm">{level.subtitle}</p>
                       </div>
                       
                       <div className="inline-flex px-2.5 py-1 bg-primary/10 border border-primary/20 rounded-md mb-4 w-fit">
@@ -288,7 +281,7 @@ const LevelBenefits = () => {
                         {level.benefits.map((benefit, i) => (
                           <li 
                             key={i} 
-                            className="flex items-start gap-2 text-white/70"
+                            className="flex items-start gap-2 text-muted-foreground"
                           >
                             <Check className="w-3.5 h-3.5 text-primary mt-0.5 flex-shrink-0" />
                             <span className="text-xs">{benefit}</span>
@@ -302,14 +295,18 @@ const LevelBenefits = () => {
             </div>
           </motion.div>
           
-          {/* Dot indicators for mobile */}
-          <div className="flex justify-center mt-4 gap-1.5">
+          {/* Dot indicators - clickable */}
+          <div className="flex justify-center mt-4 gap-2">
             {levels.map((_, index) => (
-              <div 
+              <button 
                 key={index}
-                className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
-                  index === 0 ? 'w-4 bg-primary' : 'bg-white/20'
+                onClick={() => scrollToCard(index)}
+                className={`rounded-full transition-all duration-300 ${
+                  index === activeIndex 
+                    ? 'w-6 h-2 bg-primary' 
+                    : 'w-2 h-2 bg-muted-foreground/30 hover:bg-muted-foreground/50'
                 }`}
+                aria-label={`Vai al livello ${index + 1}`}
               />
             ))}
           </div>

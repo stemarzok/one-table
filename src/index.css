@@ -436,6 +436,23 @@
   display: none;
 }
 
+/* Touch scroll support */
+.touch-pan-x {
+  touch-action: pan-x;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Hide default cursor when custom cursor is active */
+@media (pointer: fine) {
+  body {
+    cursor: none;
+  }
+  
+  a, button, [role="button"], input, select, textarea {
+    cursor: none;
+  }
+}
+
 /* Premium scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
