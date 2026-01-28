@@ -1,17 +1,7 @@
-import { useState, useRef, useEffect, useCallback, createContext, useContext } from "react";
+import { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLocation } from "react-router-dom";
-
-// Create context for audio state
-interface AudioContextType {
-  isPlaying: boolean;
-  playClickSound: () => void;
-}
-
-const AudioContext = createContext<AudioContextType>({ isPlaying: false, playClickSound: () => {} });
-
-export const useAudioContext = () => useContext(AudioContext);
 
 const AudioPlayer = () => {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -26,36 +16,39 @@ const AudioPlayer = () => {
     location.pathname === path || location.pathname.startsWith(path + '/')
   );
 
-  // Ambient music URL - soft lo-fi ambient (Wii-style immersive)
+  // Soft ambient music - very low volume for immersion
   const audioSrc = "https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=lofi-study-112191.mp3";
-  // Typewriter click sound - more mechanical
-  const clickSoundSrc = "https://cdn.pixabay.com/download/audio/2021/08/04/audio_bb630cc098.mp3?filename=typewriter-key-1-6191.mp3";
+  
+  // Typewriter key press sound - mechanical click
+  const typewriterSoundSrc = "https://cdn.pixabay.com/download/audio/2022/03/24/audio_7a9010a0f8.mp3?filename=keyboard-typing-fast-103044.mp3";
 
   useEffect(() => {
     if (audioRef.current) {
-      audioRef.current.volume = 0.12; // Much lower - ambient background
+      audioRef.current.volume = 0.08; // Very subtle ambient
       audioRef.current.loop = true;
     }
     if (clickSoundRef.current) {
-      clickSoundRef.current.volume = 0.35; // More audible typewriter effect
+      clickSoundRef.current.volume = 0.4; // More audible typewriter
     }
   }, []);
 
-  // Add hover sound to buttons when audio is playing
+  // Add typewriter sound to interactive elements when audio is playing
   useEffect(() => {
     if (!shouldShow) return;
 
-    const playClickSound = () => {
+    const playTypewriterSound = () => {
       if (isPlaying && clickSoundRef.current) {
-        clickSoundRef.current.currentTime = 0;
+        // Reset and play from a random position to simulate different keys
+        clickSoundRef.current.currentTime = Math.random() * 0.3;
         clickSoundRef.current.play().catch(() => {});
       }
     };
 
     const handleMouseEnter = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
-      if (target.closest('button, a[href], [role="button"]')) {
-        playClickSound();
+      // Trigger on buttons, links, and cards
+      if (target.closest('button, a[href], [role="button"], .group, .group\\/card, [class*="card"], .cursor-pointer')) {
+        playTypewriterSound();
       }
     };
 
@@ -87,7 +80,7 @@ const AudioPlayer = () => {
       className="fixed bottom-6 right-6 z-50"
     >
       <audio ref={audioRef} src={audioSrc} preload="none" />
-      <audio ref={clickSoundRef} src={clickSoundSrc} preload="auto" />
+      <audio ref={clickSoundRef} src={typewriterSoundSrc} preload="auto" />
       
       <button
         onClick={togglePlay}
