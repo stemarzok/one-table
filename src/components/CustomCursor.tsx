@@ -31,22 +31,12 @@ const CustomCursor = () => {
         setIsHovering(!!isInteractive);
         
         // Check if hovering over green/primary elements
-        const element = target.closest('.bg-primary, .text-primary, [class*="bg-primary"]');
-        const computedStyle = window.getComputedStyle(target);
-        const bgColor = computedStyle.backgroundColor;
-        const textColor = computedStyle.color;
+        const isPrimaryElement = target.classList.contains('bg-primary') ||
+                                 target.closest('.bg-primary') !== null ||
+                                 target.classList.contains('text-primary') ||
+                                 target.closest('.text-primary') !== null;
         
-        // Check for green background (HSL 85° or similar green tones)
-        const isGreenBg = bgColor.includes('rgb(195') || bgColor.includes('rgb(16') || 
-                          target.classList.contains('bg-primary') ||
-                          target.closest('.bg-primary') !== null ||
-                          target.closest('[class*="bg-primary"]') !== null;
-        
-        // Check for green text
-        const isGreenText = target.classList.contains('text-primary') ||
-                            target.closest('.text-primary') !== null;
-        
-        setIsOverGreen(!!element || isGreenBg || isGreenText);
+        setIsOverGreen(isPrimaryElement);
       };
 
       const handleMouseLeave = () => {
@@ -73,10 +63,10 @@ const CustomCursor = () => {
 
   if (!shouldShow || !isVisible) return null;
 
-  // When over green elements, use black/white for legibility
-  const cursorColor = isOverGreen ? 'hsl(0, 0%, 10%)' : 'hsl(85, 100%, 50%)';
-  const glowColor = isOverGreen ? 'rgba(255,255,255,0.4)' : 'hsl(85, 100%, 50%, 0.6)';
-  const ringColor = isOverGreen ? 'rgba(255,255,255,0.5)' : 'hsl(85, 100%, 50%, 0.5)';
+  // When over green elements, use semi-transparent dark for legibility
+  const cursorColor = isOverGreen ? 'rgba(0, 0, 0, 0.5)' : 'hsl(85, 100%, 50%)';
+  const glowColor = isOverGreen ? 'rgba(255, 255, 255, 0.3)' : 'hsl(85, 100%, 50%, 0.6)';
+  const ringColor = isOverGreen ? 'rgba(255, 255, 255, 0.4)' : 'hsl(85, 100%, 50%, 0.5)';
 
   return (
     <>
@@ -101,7 +91,7 @@ const CustomCursor = () => {
           }`}
           style={{
             backgroundColor: cursorColor,
-            boxShadow: `0 0 15px ${glowColor}, 0 0 30px ${glowColor.replace('0.6', '0.3').replace('0.4', '0.2')}`,
+            boxShadow: `0 0 15px ${glowColor}, 0 0 30px ${glowColor.replace('0.6', '0.3').replace('0.3', '0.15')}`,
           }}
         />
       </motion.div>
@@ -125,7 +115,7 @@ const CustomCursor = () => {
           className="w-7 h-7 rounded-full"
           style={{
             border: `1px solid ${ringColor}`,
-            boxShadow: `0 0 8px ${ringColor.replace('0.5', '0.15')}`,
+            boxShadow: `0 0 8px ${ringColor.replace('0.5', '0.15').replace('0.4', '0.1')}`,
           }}
         />
       </motion.div>
