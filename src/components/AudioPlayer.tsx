@@ -7,8 +7,8 @@ const AudioPlayer = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const isPlayingRef = useRef(false);
   const audioRef = useRef<HTMLAudioElement>(null);
-  const clickPoolRef = useRef<HTMLAudioElement[]>([]);
-  const poolIndexRef = useRef(0);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const audioBufferRef = useRef<AudioBuffer | null>(null);
   const lastRootRef = useRef<HTMLElement | null>(null);
   const { isLoggedIn } = useAuth();
   const location = useLocation();
@@ -22,7 +22,7 @@ const AudioPlayer = () => {
   // Soft ambient music
   const audioSrc = "https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=lofi-study-112191.mp3";
   
-  // User-provided typing track; we play only ~1s as a hover SFX
+  // User-provided typing track; we play only ~0.5s as a hover SFX
   const clickSrc = "/sounds/typewriter-hover.mp3";
 
   // Keep ref in sync with state
@@ -30,18 +30,25 @@ const AudioPlayer = () => {
     isPlayingRef.current = isPlaying;
   }, [isPlaying]);
 
-  // Initialize audio pool
+  // Initialize Web Audio API for loud click sounds
   useEffect(() => {
     if (!shouldShow) return;
 
-    const pool: HTMLAudioElement[] = [];
-    for (let i = 0; i < 5; i++) {
-      const audio = new Audio(clickSrc);
-      audio.volume = 0.85; // Much louder
-      audio.preload = 'auto';
-      pool.push(audio);
-    }
-    clickPoolRef.current = pool;
+    const initAudio = async () => {
+      try {
+        const context = new (window.AudioContext || (window as any).webkitAudioContext)();
+        audioContextRef.current = context;
+        
+        const response = await fetch(clickSrc);
+        const arrayBuffer = await response.arrayBuffer();
+        const audioBuffer = await context.decodeAudioData(arrayBuffer);
+        audioBufferRef.current = audioBuffer;
+      } catch (e) {
+        console.error('Failed to init audio:', e);
+      }
+    };
+
+    initAudio();
 
     if (audioRef.current) {
       audioRef.current.volume = 0.08;
@@ -49,45 +56,42 @@ const AudioPlayer = () => {
     }
 
     return () => {
-      pool.forEach(audio => {
-        audio.pause();
-        audio.src = '';
-      });
+      if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
+        audioContextRef.current.close();
+      }
     };
   }, [shouldShow]);
 
-  // Play click sound from pool
+  // Play click sound with Web Audio API (allows volume > 1.0)
   const playClickSound = useCallback(() => {
     if (!isPlayingRef.current) return;
     
-    const pool = clickPoolRef.current;
-    if (pool.length === 0) return;
+    const context = audioContextRef.current;
+    const buffer = audioBufferRef.current;
+    if (!context || !buffer) return;
 
-    const audio = pool[poolIndexRef.current];
-    poolIndexRef.current = (poolIndexRef.current + 1) % pool.length;
-
-    // Play a short slice (~0.5s) - cleaner single keystroke
-    const sliceStart = 1.2; // Better keystroke in the track
-    const sliceDurationMs = 500;
-
-    const anyAudio = audio as any;
-    if (anyAudio.__hoverStopTimer) clearTimeout(anyAudio.__hoverStopTimer);
-
-    try {
-      audio.currentTime = sliceStart;
-    } catch {
-      // ignore
+    // Resume context if suspended (browser autoplay policy)
+    if (context.state === 'suspended') {
+      context.resume();
     }
-    audio.play().catch(() => {});
 
-    anyAudio.__hoverStopTimer = setTimeout(() => {
-      audio.pause();
-      try {
-        audio.currentTime = sliceStart;
-      } catch {
-        // ignore
-      }
-    }, sliceDurationMs);
+    // Create source and gain nodes
+    const source = context.createBufferSource();
+    const gainNode = context.createGain();
+    
+    source.buffer = buffer;
+    
+    // Set VERY LOUD volume (3.0 = 3x normal volume)
+    gainNode.gain.value = 3.0;
+    
+    source.connect(gainNode);
+    gainNode.connect(context.destination);
+
+    // Play a short slice - keystroke at ~2.5s in the track
+    const sliceStart = 2.5;
+    const sliceDuration = 0.4;
+    
+    source.start(0, sliceStart, sliceDuration);
   }, []);
 
   // Resolve a "hover sound root" so a card plays ONCE even when hovering its inner parts.
