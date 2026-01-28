@@ -86,7 +86,7 @@ const HowItWorksEnhanced = () => {
         </motion.div>
 
         {/* Desktop: grid 4 columns centered */}
-        <div className="hidden lg:grid lg:grid-cols-4 lg:gap-6 lg:max-w-5xl lg:mx-auto">
+        <div className="hidden lg:grid lg:grid-cols-4 lg:gap-6 lg:max-w-5xl lg:mx-auto py-4">
           {steps.map((step, index) => {
             const Icon = step.icon;
             return (
@@ -102,7 +102,7 @@ const HowItWorksEnhanced = () => {
                 }}
                 className="group/card"
               >
-                <div className="relative rounded-xl overflow-hidden shadow-sm hover:shadow-elegant transition-all duration-300 hover:-translate-y-2 h-72">
+                <div className="relative rounded-xl overflow-hidden shadow-sm hover:shadow-elegant transition-shadow duration-300 h-72">
                   <img
                     src={step.image}
                     alt={step.title}
@@ -142,7 +142,7 @@ const HowItWorksEnhanced = () => {
             size="icon"
             onClick={() => scroll('left')}
             disabled={!canScrollLeft}
-            className={`absolute left-0 top-1/2 -translate-y-1/2 z-10 rounded-full shadow-lg bg-background/95 backdrop-blur-sm border border-border/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${!canScrollLeft ? 'hidden' : ''}`}
+            className={`absolute -left-2 top-[calc(50%-1rem)] z-10 rounded-full shadow-lg bg-background/95 backdrop-blur-sm border border-border/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:scale-105 ${!canScrollLeft ? 'hidden' : ''}`}
           >
             <ChevronLeft className="w-5 h-5" />
           </Button>
@@ -152,7 +152,7 @@ const HowItWorksEnhanced = () => {
             size="icon"
             onClick={() => scroll('right')}
             disabled={!canScrollRight}
-            className={`absolute right-0 top-1/2 -translate-y-1/2 z-10 rounded-full shadow-lg bg-background/95 backdrop-blur-sm border border-border/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${!canScrollRight ? 'hidden' : ''}`}
+            className={`absolute -right-2 top-[calc(50%-1rem)] z-10 rounded-full shadow-lg bg-background/95 backdrop-blur-sm border border-border/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:scale-105 ${!canScrollRight ? 'hidden' : ''}`}
           >
             <ChevronRight className="w-5 h-5" />
           </Button>

@@ -72,7 +72,7 @@ const RestaurantCard = ({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
-      className="cursor-pointer group/card"
+      className="cursor-pointer group/card w-full"
       onClick={handleCardClick}
     >
       {/* Card verticale con effetto 3D tilt */}
@@ -80,7 +80,7 @@ const RestaurantCard = ({
         ref={ref}
         style={style}
         {...handlers}
-        className="relative rounded-xl overflow-hidden bg-card border border-border/30 shadow-sm hover:shadow-2xl will-change-transform"
+        className="relative rounded-xl overflow-hidden bg-card border border-border/30 shadow-sm hover:shadow-2xl will-change-transform w-full"
       >
         {/* Glow effect on hover */}
         <div className="absolute inset-0 opacity-0 group-hover/card:opacity-100 transition-opacity duration-500 pointer-events-none">

@@ -130,33 +130,107 @@ const LevelBenefits = () => {
   };
 
   return (
-    <section ref={ref} className="py-20 bg-[hsl(0,0%,8%)] relative">
-      {/* Background decoration */}
-      <div className="absolute top-1/2 left-0 w-64 h-64 bg-primary/5 rounded-full blur-[100px] -translate-y-1/2" />
-      <div className="absolute top-1/2 right-0 w-64 h-64 bg-primary/5 rounded-full blur-[100px] -translate-y-1/2" />
+    <section ref={ref} className="py-24 bg-gradient-to-b from-background via-[hsl(0,0%,6%)] to-background relative overflow-hidden">
+      {/* Background decoration - enhanced glow effects */}
+      <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/8 rounded-full blur-[150px]" />
+      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-primary/8 rounded-full blur-[150px]" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/3 rounded-full blur-[200px]" />
       
       <div className="container mx-auto px-4 relative z-10">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 30 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-12"
+          transition={{ duration: 0.7 }}
+          className="text-center mb-16"
         >
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4 tracking-tight">
+          <motion.span 
+            className="inline-block px-4 py-1.5 bg-primary/10 border border-primary/20 rounded-full text-primary text-sm font-medium mb-6"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={isInView ? { opacity: 1, scale: 1 } : {}}
+            transition={{ delay: 0.2 }}
+          >
+            Sistema a livelli
+          </motion.span>
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-5 tracking-tight font-display">
             Più sei affidabile, più vieni premiato
           </h2>
-          <p className="text-base text-white/60 max-w-xl mx-auto">
+          <p className="text-lg text-white/50 max-w-2xl mx-auto leading-relaxed">
             Ogni livello sblocca vantaggi esclusivi. Il tuo percorso inizia ora.
           </p>
         </motion.div>
         
-        {/* Scroll controls */}
-        <div className="relative py-4">
+        {/* Desktop: 4 column grid */}
+        <motion.div 
+          className="hidden lg:grid lg:grid-cols-4 lg:gap-6 lg:max-w-6xl lg:mx-auto"
+          variants={containerVariants}
+          initial="hidden"
+          animate={isInView ? "visible" : "hidden"}
+        >
+          {levels.map((level, index) => {
+            const Icon = level.icon;
+            return (
+              <motion.div 
+                key={index} 
+                variants={cardVariants}
+                whileHover={{ 
+                  y: -12, 
+                  transition: { duration: 0.3, ease: "easeOut" }
+                }}
+                className="group"
+              >
+                <Card 
+                  className={`p-6 bg-white/[0.03] border border-white/10 backdrop-blur-xl h-full flex flex-col transition-all duration-500 hover:border-primary/40 hover:bg-white/[0.06] relative overflow-hidden`}
+                >
+                  {/* Glow on hover */}
+                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-t from-primary/10 via-transparent to-transparent" />
+                  
+                  {/* Icon with glow */}
+                  <div className="relative z-10 mb-5">
+                    <div className={`w-14 h-14 rounded-2xl ${level.iconBg} flex items-center justify-center shadow-lg shadow-primary/20`}>
+                      <Icon className={`w-7 h-7 ${level.iconColor}`} />
+                    </div>
+                  </div>
+                  
+                  <div className="mb-4 relative z-10">
+                    <h3 className="text-2xl font-bold text-white mb-1">
+                      {level.name}
+                    </h3>
+                    <p className="text-white/40 text-sm">{level.subtitle}</p>
+                  </div>
+                  
+                  <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-primary/10 border border-primary/20 rounded-lg mb-5 w-fit relative z-10">
+                    <span className="text-primary font-semibold text-sm">{level.range} punti</span>
+                  </div>
+                  
+                  <ul className="space-y-3 flex-1 relative z-10">
+                    {level.benefits.map((benefit, i) => (
+                      <motion.li 
+                        key={i} 
+                        className="flex items-start gap-3 text-white/70 group-hover:text-white/90 transition-colors duration-300"
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={isInView ? { opacity: 1, x: 0 } : {}}
+                        transition={{ delay: 0.5 + (index * 0.1) + (i * 0.05) }}
+                      >
+                        <div className="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                          <Check className="w-3 h-3 text-primary" />
+                        </div>
+                        <span className="text-sm">{benefit}</span>
+                      </motion.li>
+                    ))}
+                  </ul>
+                </Card>
+              </motion.div>
+            );
+          })}
+        </motion.div>
+        
+        {/* Mobile/Tablet: Horizontal scroll */}
+        <div className="lg:hidden relative">
           {canScrollLeft && (
             <Button
               variant="ghost"
               size="icon"
-              className="absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-black/60 hover:bg-black/80 text-white rounded-full w-10 h-10 backdrop-blur-sm border border-white/20 hidden md:flex"
+              className="absolute -left-2 top-[calc(50%-1rem)] z-20 bg-black/60 hover:bg-black/80 text-white rounded-full w-10 h-10 backdrop-blur-sm border border-white/20 hidden sm:flex hover:scale-105 transition-transform"
               onClick={() => scroll('left')}
             >
               <ChevronLeft className="w-5 h-5" />
@@ -167,7 +241,7 @@ const LevelBenefits = () => {
             <Button
               variant="ghost"
               size="icon"
-              className="absolute right-0 top-1/2 -translate-y-1/2 z-20 bg-black/60 hover:bg-black/80 text-white rounded-full w-10 h-10 backdrop-blur-sm border border-white/20 hidden md:flex"
+              className="absolute -right-2 top-[calc(50%-1rem)] z-20 bg-black/60 hover:bg-black/80 text-white rounded-full w-10 h-10 backdrop-blur-sm border border-white/20 hidden sm:flex hover:scale-105 transition-transform"
               onClick={() => scroll('right')}
             >
               <ChevronRight className="w-5 h-5" />
@@ -176,62 +250,49 @@ const LevelBenefits = () => {
           
           <motion.div 
             ref={scrollContainerRef}
-            className="overflow-x-auto py-6 -mx-4 px-4 scroll-smooth cursor-grab active:cursor-grabbing hide-scrollbar"
+            className="overflow-x-auto py-4 scroll-smooth hide-scrollbar"
             onScroll={checkScroll}
             variants={containerVariants}
             initial="hidden"
             animate={isInView ? "visible" : "hidden"}
           >
-            <div className="flex gap-5 min-w-max px-2">
+            <div className="flex gap-4 min-w-max px-1">
               {levels.map((level, index) => {
                 const Icon = level.icon;
                 return (
                   <motion.div 
                     key={index} 
                     variants={cardVariants}
-                    whileHover={{ 
-                      y: -8, 
-                      scale: 1.02,
-                      transition: { duration: 0.3, ease: "easeOut" }
-                    }}
                     className="group"
                   >
                     <Card 
-                      className={`p-6 ${level.bgColor} border ${level.borderColor} w-[280px] h-[380px] flex flex-col transition-all duration-500 hover:shadow-xl hover:shadow-primary/15 backdrop-blur-sm relative`}
+                      className={`p-5 bg-white/[0.03] border border-white/10 backdrop-blur-xl w-[260px] h-[340px] flex flex-col transition-all duration-300 hover:border-primary/40 relative overflow-hidden`}
                     >
-                      {/* Animated glow effect on hover */}
-                      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-t from-transparent via-transparent to-primary/5 rounded-lg" />
-                      
-                      {/* Decorative corner accent */}
-                      <div className="absolute top-0 right-0 w-24 h-24 bg-primary/10 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
-                      
-                      <div className={`w-14 h-14 rounded-xl ${level.iconBg} flex items-center justify-center mb-4 shadow-md relative z-10`}>
-                        <Icon className={`w-7 h-7 ${level.iconColor}`} />
+                      {/* Icon */}
+                      <div className={`w-12 h-12 rounded-xl ${level.iconBg} flex items-center justify-center mb-4 shadow-lg shadow-primary/20`}>
+                        <Icon className={`w-6 h-6 ${level.iconColor}`} />
                       </div>
                       
-                      <div className="mb-3 relative z-10">
-                        <h3 className="text-xl font-bold text-white">
+                      <div className="mb-3">
+                        <h3 className="text-xl font-bold text-white mb-0.5">
                           {level.name}
                         </h3>
-                        <p className="text-white/50 text-sm">{level.subtitle}</p>
+                        <p className="text-white/40 text-sm">{level.subtitle}</p>
                       </div>
                       
-                      <Badge className={`mb-4 ${level.badgeClass} font-semibold w-fit relative z-10 border text-xs`}>
-                        {level.range} punti
-                      </Badge>
+                      <div className="inline-flex px-2.5 py-1 bg-primary/10 border border-primary/20 rounded-md mb-4 w-fit">
+                        <span className="text-primary font-semibold text-xs">{level.range} punti</span>
+                      </div>
                       
-                      <ul className="space-y-2.5 flex-1 relative z-10">
+                      <ul className="space-y-2 flex-1">
                         {level.benefits.map((benefit, i) => (
-                          <motion.li 
+                          <li 
                             key={i} 
-                            className="flex items-start gap-2.5 text-white/80"
-                            initial={{ opacity: 0, x: -10 }}
-                            animate={isInView ? { opacity: 1, x: 0 } : {}}
-                            transition={{ delay: 0.5 + (index * 0.1) + (i * 0.05) }}
+                            className="flex items-start gap-2 text-white/70"
                           >
-                            <Check className={`w-4 h-4 text-primary mt-0.5 flex-shrink-0`} />
-                            <span className="text-sm font-medium">{benefit}</span>
-                          </motion.li>
+                            <Check className="w-3.5 h-3.5 text-primary mt-0.5 flex-shrink-0" />
+                            <span className="text-xs">{benefit}</span>
+                          </li>
                         ))}
                       </ul>
                     </Card>
@@ -241,9 +302,16 @@ const LevelBenefits = () => {
             </div>
           </motion.div>
           
-          {/* Scroll indicator hint */}
-          <div className="flex justify-center mt-2 gap-2 md:hidden">
-            <span className="text-white/40 text-xs">← Scorri per vedere tutti →</span>
+          {/* Dot indicators for mobile */}
+          <div className="flex justify-center mt-4 gap-1.5">
+            {levels.map((_, index) => (
+              <div 
+                key={index}
+                className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
+                  index === 0 ? 'w-4 bg-primary' : 'bg-white/20'
+                }`}
+              />
+            ))}
           </div>
         </div>
       </div>
