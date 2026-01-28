@@ -37,7 +37,7 @@ const AudioPlayer = () => {
     const pool: HTMLAudioElement[] = [];
     for (let i = 0; i < 5; i++) {
       const audio = new Audio(clickSrc);
-      audio.volume = 0.35;
+      audio.volume = 0.85; // Much louder
       audio.preload = 'auto';
       pool.push(audio);
     }
@@ -66,9 +66,9 @@ const AudioPlayer = () => {
     const audio = pool[poolIndexRef.current];
     poolIndexRef.current = (poolIndexRef.current + 1) % pool.length;
 
-    // Play a short slice (~1s) so it feels like a single "hover click".
-    const sliceStart = 0.12;
-    const sliceDurationMs = 1000;
+    // Play a short slice (~0.5s) - cleaner single keystroke
+    const sliceStart = 1.2; // Better keystroke in the track
+    const sliceDurationMs = 500;
 
     const anyAudio = audio as any;
     if (anyAudio.__hoverStopTimer) clearTimeout(anyAudio.__hoverStopTimer);
