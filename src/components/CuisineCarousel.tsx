@@ -75,14 +75,14 @@ const CuisineCarousel = ({ onCategorySelect }: CuisineCarouselProps) => {
         <p className="text-sm text-muted-foreground">Scopri ristoranti per tipo di cucina</p>
       </div>
 
-      <div className="relative group">
-        {/* Navigation Arrows */}
+      <div className="relative group py-2">
+        {/* Navigation Arrows - positioned with fixed calc to prevent movement */}
         <Button
           variant="secondary"
           size="icon"
           onClick={() => scroll('left')}
           disabled={!canScrollLeft}
-          className={`absolute left-0 top-1/2 -translate-y-1/2 z-10 rounded-full shadow-lg bg-background/95 backdrop-blur-sm border border-border/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${!canScrollLeft ? 'hidden' : ''}`}
+          className={`absolute -left-2 top-[calc(50%-0.5rem)] z-10 rounded-full shadow-lg bg-background/95 backdrop-blur-sm border border-border/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:scale-105 ${!canScrollLeft ? 'hidden' : ''}`}
         >
           <ChevronLeft className="w-5 h-5" />
         </Button>
@@ -92,14 +92,14 @@ const CuisineCarousel = ({ onCategorySelect }: CuisineCarouselProps) => {
           size="icon"
           onClick={() => scroll('right')}
           disabled={!canScrollRight}
-          className={`absolute right-0 top-1/2 -translate-y-1/2 z-10 rounded-full shadow-lg bg-background/95 backdrop-blur-sm border border-border/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${!canScrollRight ? 'hidden' : ''}`}
+          className={`absolute -right-2 top-[calc(50%-0.5rem)] z-10 rounded-full shadow-lg bg-background/95 backdrop-blur-sm border border-border/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:scale-105 ${!canScrollRight ? 'hidden' : ''}`}
         >
           <ChevronRight className="w-5 h-5" />
         </Button>
 
         <div 
           ref={scrollRef}
-          className="flex gap-4 overflow-x-auto overflow-y-hidden scrollbar-hide pb-4 scroll-smooth touch-pan-x px-1 -mx-1"
+          className="flex gap-4 overflow-x-auto overflow-y-visible scrollbar-hide py-2 scroll-smooth touch-pan-x"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch', overscrollBehaviorX: 'contain' }}
         >
           {CUISINE_CATEGORIES.map((category, index) => (
@@ -108,11 +108,11 @@ const CuisineCarousel = ({ onCategorySelect }: CuisineCarouselProps) => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: index * 0.05 }}
-              className="flex-shrink-0 w-[180px] cursor-pointer group/card"
+              className="flex-shrink-0 w-[160px] sm:w-[180px] cursor-pointer group/card"
               onClick={() => handleCategoryClick(category.name)}
             >
               {/* Card categoria stile TripAdvisor verticale */}
-              <div className="relative rounded-xl overflow-hidden shadow-sm hover:shadow-elegant transition-all duration-300 hover:-translate-y-1 h-56">
+              <div className="relative rounded-xl overflow-hidden shadow-sm hover:shadow-elegant transition-shadow duration-300 h-48 sm:h-56">
                 {/* Immagine */}
                 <img
                   src={category.image}
