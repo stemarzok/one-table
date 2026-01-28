@@ -99,7 +99,7 @@ const CuisineCarousel = ({ onCategorySelect }: CuisineCarouselProps) => {
 
         <div 
           ref={scrollRef}
-          className="flex gap-4 overflow-x-auto overflow-y-visible scrollbar-hide py-2 scroll-smooth touch-pan-x"
+          className="flex gap-4 overflow-x-auto overflow-y-visible scrollbar-hide py-2 scroll-smooth touch-pan-x cursor-grab active:cursor-grabbing"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch', overscrollBehaviorX: 'contain' }}
         >
           {CUISINE_CATEGORIES.map((category, index) => (

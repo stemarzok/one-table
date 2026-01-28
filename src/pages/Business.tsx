@@ -95,13 +95,15 @@ const Business = () => {
         >
           <div className="max-w-3xl">
             <motion.h1 
-              className="text-5xl md:text-7xl lg:text-8xl font-extrabold text-white mb-8 leading-[1.1] tracking-tight"
+              className="text-5xl md:text-7xl lg:text-8xl font-bold text-white mb-8 leading-[0.95] tracking-wide font-display uppercase"
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.2 }}
             >
               Aumenta i Ricavi
-              <span className="block text-primary mt-2">
+              <span className="block text-primary mt-2 drop-shadow-[0_0_30px_hsl(85,100%,50%,0.5)]" style={{
+                textShadow: "0 0 40px hsl(85, 100%, 50%, 0.4), 0 0 80px hsl(85, 100%, 50%, 0.2)"
+              }}>
                 Riduci i No-Show
               </span>
             </motion.h1>
@@ -188,7 +190,7 @@ const Business = () => {
             animate={benefitsInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.6 }}
           >
-            <h2 className="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-4 tracking-tight">
+            <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 tracking-wide font-display uppercase">
               Perché Scegliere OneTable
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
@@ -232,7 +234,7 @@ const Business = () => {
             animate={howItWorksInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.6 }}
           >
-            <h2 className="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-4 tracking-tight">
+            <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 tracking-wide font-display uppercase">
               Come Funziona
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
@@ -286,7 +288,7 @@ const Business = () => {
           animate={ctaInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6 }}
         >
-          <h2 className="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-6 text-white tracking-tight">
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-white tracking-wide font-display uppercase">
             Inizia a Ridurre i No-Show Oggi
           </h2>
           <p className="text-lg md:text-xl mb-10 text-white/80 max-w-2xl mx-auto leading-relaxed font-medium">
