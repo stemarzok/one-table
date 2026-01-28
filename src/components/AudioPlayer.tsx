@@ -5,10 +5,11 @@ import { useLocation } from "react-router-dom";
 
 const AudioPlayer = () => {
   const [isPlaying, setIsPlaying] = useState(false);
-  const isPlayingRef = useRef(false); // Ref to track state in event listeners
+  const isPlayingRef = useRef(false);
   const audioRef = useRef<HTMLAudioElement>(null);
-  const typewriterPoolRef = useRef<HTMLAudioElement[]>([]);
+  const clickPoolRef = useRef<HTMLAudioElement[]>([]);
   const poolIndexRef = useRef(0);
+  const lastHoveredRef = useRef<Element | null>(null);
   const { isLoggedIn } = useAuth();
   const location = useLocation();
 
@@ -21,27 +22,26 @@ const AudioPlayer = () => {
   // Soft ambient music
   const audioSrc = "https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=lofi-study-112191.mp3";
   
-  // Classic typewriter key sound - single key press
-  const typewriterSrc = "https://cdn.pixabay.com/download/audio/2021/08/04/audio_bb630cc098.mp3?filename=typewriter-key-1-6191.mp3";
+  // Mechanical keyboard click - gaming style
+  const clickSrc = "https://cdn.pixabay.com/download/audio/2022/03/10/audio_c8c8a73467.mp3?filename=click-21156.mp3";
 
   // Keep ref in sync with state
   useEffect(() => {
     isPlayingRef.current = isPlaying;
   }, [isPlaying]);
 
-  // Initialize audio pool for typewriter sounds (prevents overlapping issues)
+  // Initialize audio pool
   useEffect(() => {
     if (!shouldShow) return;
 
-    // Create a pool of audio elements for rapid-fire sounds
     const pool: HTMLAudioElement[] = [];
     for (let i = 0; i < 5; i++) {
-      const audio = new Audio(typewriterSrc);
-      audio.volume = 0.3;
+      const audio = new Audio(clickSrc);
+      audio.volume = 0.25;
       audio.preload = 'auto';
       pool.push(audio);
     }
-    typewriterPoolRef.current = pool;
+    clickPoolRef.current = pool;
 
     if (audioRef.current) {
       audioRef.current.volume = 0.08;
@@ -56,11 +56,11 @@ const AudioPlayer = () => {
     };
   }, [shouldShow]);
 
-  // Play typewriter sound from pool
-  const playTypewriterSound = useCallback(() => {
+  // Play click sound from pool
+  const playClickSound = useCallback(() => {
     if (!isPlayingRef.current) return;
     
-    const pool = typewriterPoolRef.current;
+    const pool = clickPoolRef.current;
     if (pool.length === 0) return;
 
     const audio = pool[poolIndexRef.current];
@@ -70,7 +70,25 @@ const AudioPlayer = () => {
     audio.play().catch(() => {});
   }, []);
 
-  // Global mouseover listener for typewriter sound
+  // Get the interactive parent element (card, button, link)
+  const getInteractiveParent = (element: HTMLElement): Element | null => {
+    // First check for card containers (highest priority - one sound per card)
+    const card = element.closest('.group, .group\\/card, [class*="card"], .cursor-grab');
+    if (card) return card;
+    
+    // Then check for buttons and links
+    const button = element.closest('button, a[href], [role="button"]');
+    if (button) return button;
+    
+    // Check if element itself is interactive
+    if (element.tagName === 'BUTTON' || element.tagName === 'A') {
+      return element;
+    }
+    
+    return null;
+  };
+
+  // Global mouseover listener
   useEffect(() => {
     if (!shouldShow) return;
 
@@ -78,35 +96,38 @@ const AudioPlayer = () => {
       if (!isPlayingRef.current) return;
       
       const target = e.target as HTMLElement;
+      const interactiveParent = getInteractiveParent(target);
       
-      // Check if target or any parent is an interactive element
-      const isInteractive = 
-        target.tagName === 'BUTTON' ||
-        target.tagName === 'A' ||
-        target.closest('button') ||
-        target.closest('a[href]') ||
-        target.closest('[role="button"]') ||
-        target.closest('.group') ||
-        target.closest('.group\\/card') ||
-        target.closest('[class*="card"]') ||
-        target.closest('.cursor-pointer') ||
-        target.closest('.cursor-grab') ||
-        target.closest('[class*="hover:"]') ||
-        target.matches('[class*="card"]') ||
-        target.matches('.cursor-pointer');
-
-      if (isInteractive) {
-        playTypewriterSound();
+      // Only play sound if we entered a NEW interactive element
+      if (interactiveParent && interactiveParent !== lastHoveredRef.current) {
+        lastHoveredRef.current = interactiveParent;
+        playClickSound();
       }
     };
 
-    // Use capture phase to catch events before they're handled
+    const handleMouseOut = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      const relatedTarget = e.relatedTarget as HTMLElement | null;
+      
+      const currentParent = getInteractiveParent(target);
+      const nextParent = relatedTarget ? getInteractiveParent(relatedTarget) : null;
+      
+      // Clear last hovered if we left the interactive element entirely
+      if (currentParent && currentParent !== nextParent) {
+        if (lastHoveredRef.current === currentParent) {
+          lastHoveredRef.current = null;
+        }
+      }
+    };
+
     document.addEventListener('mouseover', handleMouseOver, true);
+    document.addEventListener('mouseout', handleMouseOut, true);
     
     return () => {
       document.removeEventListener('mouseover', handleMouseOver, true);
+      document.removeEventListener('mouseout', handleMouseOut, true);
     };
-  }, [shouldShow, playTypewriterSound]);
+  }, [shouldShow, playClickSound]);
 
   const togglePlay = () => {
     if (audioRef.current) {
@@ -121,7 +142,6 @@ const AudioPlayer = () => {
 
   if (!shouldShow) return null;
 
-  // Sound wave bars animation
   const bars = [0, 1, 2, 3, 4];
   
   return (
