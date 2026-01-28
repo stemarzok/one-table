@@ -6,6 +6,7 @@ import { useLocation } from "react-router-dom";
 const CustomCursor = () => {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [isHovering, setIsHovering] = useState(false);
+  const [isOverGreen, setIsOverGreen] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const { isLoggedIn } = useAuth();
   const location = useLocation();
@@ -28,6 +29,24 @@ const CustomCursor = () => {
         const target = e.target as HTMLElement;
         const isInteractive = target.closest('button, a, [role="button"], input, textarea, select, .cursor-pointer');
         setIsHovering(!!isInteractive);
+        
+        // Check if hovering over green/primary elements
+        const element = target.closest('.bg-primary, .text-primary, [class*="bg-primary"]');
+        const computedStyle = window.getComputedStyle(target);
+        const bgColor = computedStyle.backgroundColor;
+        const textColor = computedStyle.color;
+        
+        // Check for green background (HSL 85° or similar green tones)
+        const isGreenBg = bgColor.includes('rgb(195') || bgColor.includes('rgb(16') || 
+                          target.classList.contains('bg-primary') ||
+                          target.closest('.bg-primary') !== null ||
+                          target.closest('[class*="bg-primary"]') !== null;
+        
+        // Check for green text
+        const isGreenText = target.classList.contains('text-primary') ||
+                            target.closest('.text-primary') !== null;
+        
+        setIsOverGreen(!!element || isGreenBg || isGreenText);
       };
 
       const handleMouseLeave = () => {
@@ -54,9 +73,14 @@ const CustomCursor = () => {
 
   if (!shouldShow || !isVisible) return null;
 
+  // When over green elements, use black/white for legibility
+  const cursorColor = isOverGreen ? 'hsl(0, 0%, 10%)' : 'hsl(85, 100%, 50%)';
+  const glowColor = isOverGreen ? 'rgba(255,255,255,0.4)' : 'hsl(85, 100%, 50%, 0.6)';
+  const ringColor = isOverGreen ? 'rgba(255,255,255,0.5)' : 'hsl(85, 100%, 50%, 0.5)';
+
   return (
     <>
-      {/* Main cursor - always brand green (no blend mode) */}
+      {/* Main cursor */}
       <motion.div
         className="fixed pointer-events-none z-[9999]"
         animate={{
@@ -76,8 +100,8 @@ const CustomCursor = () => {
             isHovering ? 'w-6 h-6' : 'w-4 h-4'
           }`}
           style={{
-            backgroundColor: 'hsl(85, 100%, 50%)',
-            boxShadow: '0 0 15px hsl(85, 100%, 50%, 0.6), 0 0 30px hsl(85, 100%, 50%, 0.3)',
+            backgroundColor: cursorColor,
+            boxShadow: `0 0 15px ${glowColor}, 0 0 30px ${glowColor.replace('0.6', '0.3').replace('0.4', '0.2')}`,
           }}
         />
       </motion.div>
@@ -100,8 +124,8 @@ const CustomCursor = () => {
         <div 
           className="w-7 h-7 rounded-full"
           style={{
-            border: '1px solid hsl(85, 100%, 50%, 0.5)',
-            boxShadow: '0 0 8px hsl(85, 100%, 50%, 0.15)',
+            border: `1px solid ${ringColor}`,
+            boxShadow: `0 0 8px ${ringColor.replace('0.5', '0.15')}`,
           }}
         />
       </motion.div>

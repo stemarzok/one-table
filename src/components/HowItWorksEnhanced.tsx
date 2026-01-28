@@ -86,7 +86,7 @@ const HowItWorksEnhanced = () => {
         </motion.div>
 
         {/* Desktop: grid 4 columns centered */}
-        <div className="hidden lg:grid lg:grid-cols-4 lg:gap-6 lg:max-w-5xl lg:mx-auto py-4">
+        <div className="hidden lg:grid lg:grid-cols-4 lg:gap-6 lg:max-w-5xl lg:mx-auto pt-4 pb-4">
           {steps.map((step, index) => {
             const Icon = step.icon;
             return (
@@ -100,28 +100,30 @@ const HowItWorksEnhanced = () => {
                   delay: index * 0.1,
                   ease: [0.25, 0.46, 0.45, 0.94]
                 }}
-                className="group/card"
+                className="group/card pt-2"
               >
-                <div className="relative rounded-xl overflow-hidden shadow-sm hover:shadow-elegant transition-shadow duration-300 h-72">
-                  <img
-                    src={step.image}
-                    alt={step.title}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover/card:scale-105"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-black/20" />
+                <div className="relative rounded-xl overflow-visible shadow-sm hover:shadow-elegant transition-shadow duration-300 h-72">
+                  <div className="absolute inset-0 rounded-xl overflow-hidden">
+                    <img
+                      src={step.image}
+                      alt={step.title}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover/card:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-black/20" />
+                  </div>
                   
                   {/* Step number badge */}
-                  <div className="absolute top-4 left-4 w-10 h-10 rounded-full bg-primary flex items-center justify-center">
+                  <div className="absolute top-4 left-4 w-10 h-10 rounded-full bg-primary flex items-center justify-center z-10">
                     <span className="text-primary-foreground font-bold text-lg">{step.number}</span>
                   </div>
                   
                   {/* Icon */}
-                  <div className="absolute top-4 right-4 w-10 h-10 rounded-xl bg-white/10 backdrop-blur-sm flex items-center justify-center">
+                  <div className="absolute top-4 right-4 w-10 h-10 rounded-xl bg-white/10 backdrop-blur-sm flex items-center justify-center z-10">
                     <Icon className="w-5 h-5 text-white" />
                   </div>
                   
                   {/* Content */}
-                  <div className="absolute bottom-0 left-0 right-0 p-5">
+                  <div className="absolute bottom-0 left-0 right-0 p-5 z-10">
                     <h4 className="font-bold text-white text-base leading-tight mb-2">
                       {step.title}
                     </h4>
@@ -159,7 +161,7 @@ const HowItWorksEnhanced = () => {
 
           <div 
             ref={scrollRef}
-            className="flex gap-4 overflow-x-auto pb-4 scroll-smooth hide-scrollbar touch-pan-x cursor-grab active:cursor-grabbing"
+            className="flex gap-4 overflow-x-auto pt-2 pb-4 scroll-smooth hide-scrollbar touch-pan-x cursor-grab active:cursor-grabbing"
             style={{ 
               scrollbarWidth: 'none', 
               msOverflowStyle: 'none',
@@ -180,29 +182,31 @@ const HowItWorksEnhanced = () => {
                     delay: index * 0.1,
                     ease: [0.25, 0.46, 0.45, 0.94]
                   }}
-                  className="flex-shrink-0 w-[260px] group/card"
+                  className="flex-shrink-0 w-[260px] group/card pt-2"
                   style={{ scrollSnapAlign: 'start' }}
                 >
-                  <div className="relative rounded-xl overflow-hidden shadow-sm hover:shadow-elegant transition-all duration-300 h-72">
-                    <img
-                      src={step.image}
-                      alt={step.title}
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover/card:scale-105"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-black/20" />
+                  <div className="relative rounded-xl overflow-visible shadow-sm hover:shadow-elegant transition-all duration-300 h-72">
+                    <div className="absolute inset-0 rounded-xl overflow-hidden">
+                      <img
+                        src={step.image}
+                        alt={step.title}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover/card:scale-105"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-black/20" />
+                    </div>
                     
                     {/* Step number badge */}
-                    <div className="absolute top-4 left-4 w-10 h-10 rounded-full bg-primary flex items-center justify-center">
+                    <div className="absolute top-4 left-4 w-10 h-10 rounded-full bg-primary flex items-center justify-center z-10">
                       <span className="text-primary-foreground font-bold text-lg">{step.number}</span>
                     </div>
                     
                     {/* Icon */}
-                    <div className="absolute top-4 right-4 w-10 h-10 rounded-xl bg-white/10 backdrop-blur-sm flex items-center justify-center">
+                    <div className="absolute top-4 right-4 w-10 h-10 rounded-xl bg-white/10 backdrop-blur-sm flex items-center justify-center z-10">
                       <Icon className="w-5 h-5 text-white" />
                     </div>
                     
                     {/* Content */}
-                    <div className="absolute bottom-0 left-0 right-0 p-5">
+                    <div className="absolute bottom-0 left-0 right-0 p-5 z-10">
                       <h4 className="font-bold text-white text-base leading-tight mb-2">
                         {step.title}
                       </h4>
