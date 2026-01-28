@@ -9,7 +9,6 @@ import { AuthProvider } from "./contexts/AuthContext";
 import CookieConsent from "./components/CookieConsent";
 import CustomCursor from "./components/CustomCursor";
 import AudioPlayer from "./components/AudioPlayer";
-import FloatingCTA from "./components/FloatingCTA";
 import PageTransition from "./components/PageTransition";
 import { Suspense, lazy } from "react";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
@@ -125,7 +124,6 @@ const App = () => (
             <AnalyticsWrapper>
               <CustomCursor />
               <AudioPlayer />
-              <FloatingCTA />
               <CookieConsent />
               <AnimatedRoutes />
             </AnalyticsWrapper>
