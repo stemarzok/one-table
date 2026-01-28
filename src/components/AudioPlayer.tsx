@@ -9,6 +9,7 @@ const AudioPlayer = () => {
   const audioRef = useRef<HTMLAudioElement>(null);
   const clickPoolRef = useRef<HTMLAudioElement[]>([]);
   const poolIndexRef = useRef(0);
+  const lastRootRef = useRef<HTMLElement | null>(null);
   const { isLoggedIn } = useAuth();
   const location = useLocation();
 
@@ -21,8 +22,8 @@ const AudioPlayer = () => {
   // Soft ambient music
   const audioSrc = "https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=lofi-study-112191.mp3";
   
-  // Mechanical keyboard click sound (local file for reliability)
-  const clickSrc = "/sounds/click.mp3";
+  // User-provided typing track; we play only ~1s as a hover SFX
+  const clickSrc = "/sounds/typewriter-hover.mp3";
 
   // Keep ref in sync with state
   useEffect(() => {
@@ -36,7 +37,7 @@ const AudioPlayer = () => {
     const pool: HTMLAudioElement[] = [];
     for (let i = 0; i < 5; i++) {
       const audio = new Audio(clickSrc);
-      audio.volume = 0.25;
+      audio.volume = 0.35;
       audio.preload = 'auto';
       pool.push(audio);
     }
@@ -64,25 +65,49 @@ const AudioPlayer = () => {
 
     const audio = pool[poolIndexRef.current];
     poolIndexRef.current = (poolIndexRef.current + 1) % pool.length;
-    
-    audio.currentTime = 0;
+
+    // Play a short slice (~1s) so it feels like a single "hover click".
+    const sliceStart = 0.12;
+    const sliceDurationMs = 1000;
+
+    const anyAudio = audio as any;
+    if (anyAudio.__hoverStopTimer) clearTimeout(anyAudio.__hoverStopTimer);
+
+    try {
+      audio.currentTime = sliceStart;
+    } catch {
+      // ignore
+    }
     audio.play().catch(() => {});
+
+    anyAudio.__hoverStopTimer = setTimeout(() => {
+      audio.pause();
+      try {
+        audio.currentTime = sliceStart;
+      } catch {
+        // ignore
+      }
+    }, sliceDurationMs);
   }, []);
 
   // Resolve a "hover sound root" so a card plays ONCE even when hovering its inner parts.
   // Priority:
-  // 1) nearest ancestor with .cursor-pointer (our cards use it)
+  // 1) cards (.group/card or .cursor-pointer)
   // 2) actual interactive controls (buttons/links)
   const getHoverSoundRoot = useCallback((element: HTMLElement): HTMLElement | null => {
-    const cardRoot = element.closest('.cursor-pointer') as HTMLElement | null;
+    const cardRoot = element.closest('.group\\/card, .cursor-pointer') as HTMLElement | null;
     if (cardRoot) return cardRoot;
     const controlRoot = element.closest('button, a[href], [role="button"]') as HTMLElement | null;
     return controlRoot;
   }, []);
 
-  // Global pointerover listener (more reliable than mouseover across scrolling / dynamic content)
+  // Global pointer listeners (reliable across scrolling / dynamic content)
   useEffect(() => {
     if (!shouldShow) return;
+
+    const resetLastRoot = () => {
+      lastRootRef.current = null;
+    };
 
     const handlePointerOver = (e: PointerEvent) => {
       if (!isPlayingRef.current) return;
@@ -92,17 +117,42 @@ const AudioPlayer = () => {
       const root = getHoverSoundRoot(target);
       if (!root) return;
 
+      // Don't replay while moving within the same root
+      if (lastRootRef.current === root) return;
+
       // If we're moving within the SAME root, don't replay the sound.
       const related = e.relatedTarget as Node | null;
       if (related && root.contains(related)) return;
 
+      lastRootRef.current = root;
       playClickSound();
     };
 
+    const handlePointerOut = (e: PointerEvent) => {
+      const target = e.target as HTMLElement | null;
+      const relatedTarget = e.relatedTarget as HTMLElement | null;
+      if (!target) return;
+
+      const currentRoot = getHoverSoundRoot(target);
+      const nextRoot = relatedTarget ? getHoverSoundRoot(relatedTarget) : null;
+
+      if (currentRoot && currentRoot !== nextRoot && lastRootRef.current === currentRoot) {
+        lastRootRef.current = null;
+      }
+    };
+
     document.addEventListener('pointerover', handlePointerOver, true);
+    document.addEventListener('pointerout', handlePointerOut, true);
+    window.addEventListener('scroll', resetLastRoot, { passive: true });
+    window.addEventListener('blur', resetLastRoot);
+    document.addEventListener('visibilitychange', resetLastRoot);
     
     return () => {
       document.removeEventListener('pointerover', handlePointerOver, true);
+      document.removeEventListener('pointerout', handlePointerOut, true);
+      window.removeEventListener('scroll', resetLastRoot);
+      window.removeEventListener('blur', resetLastRoot);
+      document.removeEventListener('visibilitychange', resetLastRoot);
     };
   }, [shouldShow, getHoverSoundRoot, playClickSound]);
 
