@@ -1,6 +1,6 @@
 import { Mail, Phone, MapPin, Facebook, Instagram, Linkedin, Twitter } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 const BUILD_VERSION = `v${new Date().toISOString().slice(0, 16).replace('T', '-')}`;
@@ -8,7 +8,11 @@ const BUILD_VERSION = `v${new Date().toISOString().slice(0, 16).replace('T', '-'
 const Footer = () => {
   const { isLoggedIn, isBusinessMode } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
   const isMobile = useIsMobile();
+  
+  // Determine if we're on business section
+  const isBusinessSection = location.pathname === '/business' || location.pathname === '/pricing';
   
   // Hide footer on mobile when logged in on /restaurants
   // Hide footer completely on /dashboard
@@ -22,6 +26,20 @@ const Footer = () => {
   if (isMobile && isLoggedIn && isRestaurantsPage) {
     return null;
   }
+
+  // Handle scroll to section - navigate to home first if on business page
+  const handleScrollToSection = (e: React.MouseEvent, sectionId: string) => {
+    e.preventDefault();
+    if (isBusinessSection) {
+      // Navigate to home page first, then scroll
+      navigate('/');
+      setTimeout(() => {
+        document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+    } else {
+      document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
 
   return (
     <footer className="bg-foreground border-t border-border">
@@ -63,10 +81,7 @@ const Footer = () => {
               <li>
                 <a 
                   href="#how-it-works" 
-                  onClick={(e) => {
-                    e.preventDefault();
-                    document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' });
-                  }}
+                  onClick={(e) => handleScrollToSection(e, 'how-it-works')}
                   className="text-background/80 hover:text-primary transition-colors cursor-pointer"
                 >
                   Come Funziona
@@ -75,10 +90,7 @@ const Footer = () => {
               <li>
                 <a 
                   href="#level-benefits" 
-                  onClick={(e) => {
-                    e.preventDefault();
-                    document.getElementById('level-benefits')?.scrollIntoView({ behavior: 'smooth' });
-                  }}
+                  onClick={(e) => handleScrollToSection(e, 'level-benefits')}
                   className="text-background/80 hover:text-primary transition-colors cursor-pointer"
                 >
                   Livelli e Vantaggi
@@ -87,10 +99,7 @@ const Footer = () => {
               <li>
                 <a 
                   href="#restaurant-list" 
-                  onClick={(e) => {
-                    e.preventDefault();
-                    document.getElementById('restaurant-list')?.scrollIntoView({ behavior: 'smooth' });
-                  }}
+                  onClick={(e) => handleScrollToSection(e, 'restaurant-list')}
                   className="text-background/80 hover:text-primary transition-colors cursor-pointer"
                 >
                   Ristoranti Partner

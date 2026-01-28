@@ -81,7 +81,7 @@ const Header = () => {
               {isInBusinessSection && (
                 <>
                   <Link to="/" className={`text-sm font-semibold ${textColorClass} hover:text-primary transition-colors`}>
-                    Home
+                    Sei un Cliente?
                   </Link>
                   <Link to="/pricing" className={`text-sm font-semibold ${textColorClass} hover:text-primary transition-colors mr-2`}>
                     Prezzi
@@ -148,7 +148,7 @@ const Header = () => {
             {isInBusinessSection ? (
               <>
                 <Link to="/" className={`py-2 font-medium ${isLandingPage ? 'text-white' : 'text-foreground'}`} onClick={() => setMobileMenuOpen(false)}>
-                  Home
+                  Sei un Cliente?
                 </Link>
                 <Link to="/pricing" className={`py-2 font-medium ${isLandingPage ? 'text-white' : 'text-foreground'}`} onClick={() => setMobileMenuOpen(false)}>
                   Prezzi
