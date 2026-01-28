@@ -7,6 +7,8 @@ import { useAnalytics } from "./hooks/useAnalytics";
 import { LanguageProvider } from "./contexts/LanguageContext";
 import { AuthProvider } from "./contexts/AuthContext";
 import CookieConsent from "./components/CookieConsent";
+import CustomCursor from "./components/CustomCursor";
+import AudioPlayer from "./components/AudioPlayer";
 import { Suspense, lazy } from "react";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
@@ -64,6 +66,8 @@ const App = () => (
           <Sonner />
           <BrowserRouter>
             <AnalyticsWrapper>
+              <CustomCursor />
+              <AudioPlayer />
               <CookieConsent />
               <Suspense fallback={<PageLoader />}>
                 <Routes>

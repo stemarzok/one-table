@@ -77,7 +77,7 @@ const HowItWorksEnhanced = () => {
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
         >
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-4">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-4 font-display uppercase tracking-wide">
             Il tuo comportamento diventa valore
           </h2>
           <p className="text-muted-foreground max-w-xl mx-auto">
@@ -159,8 +159,13 @@ const HowItWorksEnhanced = () => {
 
           <div 
             ref={scrollRef}
-            className="flex gap-4 overflow-x-auto scrollbar-hide pb-4 scroll-smooth"
-            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+            className="flex gap-4 overflow-x-auto pb-4 scroll-smooth hide-scrollbar touch-pan-x"
+            style={{ 
+              scrollbarWidth: 'none', 
+              msOverflowStyle: 'none',
+              scrollSnapType: 'x mandatory',
+              WebkitOverflowScrolling: 'touch'
+            }}
           >
             {steps.map((step, index) => {
               const Icon = step.icon;
@@ -176,8 +181,9 @@ const HowItWorksEnhanced = () => {
                     ease: [0.25, 0.46, 0.45, 0.94]
                   }}
                   className="flex-shrink-0 w-[260px] group/card"
+                  style={{ scrollSnapAlign: 'start' }}
                 >
-                  <div className="relative rounded-xl overflow-hidden shadow-sm hover:shadow-elegant transition-all duration-300 hover:-translate-y-1 h-72">
+                  <div className="relative rounded-xl overflow-hidden shadow-sm hover:shadow-elegant transition-all duration-300 h-72">
                     <img
                       src={step.image}
                       alt={step.title}
