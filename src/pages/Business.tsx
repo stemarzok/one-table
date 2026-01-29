@@ -290,8 +290,8 @@ const Business = () => {
                 
                 <Button 
                   size="lg" 
-                  variant="outline"
-                  className="text-base px-8 py-6 border-white/30 text-white hover:bg-white/10 w-full sm:w-auto font-semibold"
+                  variant="outline-hero"
+                  className="text-base px-8 py-6 w-full sm:w-auto font-semibold"
                   onClick={scrollToContent}
                 >
                   Scopri come funziona
