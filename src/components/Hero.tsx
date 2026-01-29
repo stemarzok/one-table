@@ -123,7 +123,7 @@ const Hero = () => {
                 variant="premium"
                 className="text-base px-8 py-6 gap-3 w-full sm:w-auto font-bold"
                 onClick={() => {
-                  const element = document.getElementById('restaurant-list');
+                  const element = document.getElementById('cuisine-carousel');
                   if (element) {
                     element.scrollIntoView({ behavior: 'smooth' });
                   }

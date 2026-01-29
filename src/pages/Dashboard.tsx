@@ -11,7 +11,7 @@ import { useAdminRole } from "@/hooks/useAdminRole";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
-import { LayoutDashboard, Store, Table2, UtensilsCrossed, Calendar, AlertCircle, Lock, ArrowRight, Users, HelpCircle, CreditCard, Crown, Star, Bell, Settings, Pencil } from "lucide-react";
+import { LayoutDashboard, Store, Table2, UtensilsCrossed, Calendar, AlertCircle, Lock, ArrowRight, Users, HelpCircle, CreditCard, Crown, Star, Bell, Settings, Pencil, Clock, CheckCircle } from "lucide-react";
 import { TablesManagement } from "@/components/dashboard/TablesManagement";
 import { MenuManagement } from "@/components/dashboard/MenuManagement";
 import { BookingsManagement } from "@/components/dashboard/BookingsManagement";
@@ -497,12 +497,18 @@ const Dashboard = () => {
                   ) : (
                     <div className="grid gap-4 md:grid-cols-3">
                       <Card 
-                        className="group cursor-pointer transition-all hover:shadow-lg hover:border-primary/30"
+                        className="group cursor-pointer transition-all duration-300 hover:shadow-xl hover:shadow-primary/5 hover:border-primary/40 hover:-translate-y-0.5 border-0 shadow-lg bg-gradient-to-br from-card to-card/80 overflow-hidden"
                         onClick={() => handleStatClick('bookings')}
                       >
-                        <div className="p-6">
-                          <div className="flex items-center justify-between mb-3">
-                            <span className="text-sm text-muted-foreground">In attesa</span>
+                        <div className="p-6 relative">
+                          <div className="absolute top-0 right-0 w-24 h-24 bg-amber-500/5 rounded-full blur-2xl -mr-8 -mt-8" />
+                          <div className="flex items-center justify-between mb-4">
+                            <div className="flex items-center gap-3">
+                              <div className="p-2.5 rounded-xl bg-amber-500/10">
+                                <Clock className="w-5 h-5 text-amber-500" />
+                              </div>
+                              <span className="text-sm font-medium text-muted-foreground">In attesa</span>
+                            </div>
                             {!hasProAccess ? <Lock className="w-4 h-4 text-muted-foreground" /> : <ArrowRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />}
                           </div>
                           <p className="text-4xl font-bold mb-3">{stats.pendingBookings}</p>
@@ -512,12 +518,18 @@ const Dashboard = () => {
                         </div>
                       </Card>
                       <Card 
-                        className="group cursor-pointer transition-all hover:shadow-lg hover:border-primary/30"
+                        className="group cursor-pointer transition-all duration-300 hover:shadow-xl hover:shadow-primary/5 hover:border-primary/40 hover:-translate-y-0.5 border-0 shadow-lg bg-gradient-to-br from-card to-card/80 overflow-hidden"
                         onClick={() => handleStatClick('bookings')}
                       >
-                        <div className="p-6">
-                          <div className="flex items-center justify-between mb-3">
-                            <span className="text-sm text-muted-foreground">Confermate</span>
+                        <div className="p-6 relative">
+                          <div className="absolute top-0 right-0 w-24 h-24 bg-primary/5 rounded-full blur-2xl -mr-8 -mt-8" />
+                          <div className="flex items-center justify-between mb-4">
+                            <div className="flex items-center gap-3">
+                              <div className="p-2.5 rounded-xl bg-primary/10">
+                                <CheckCircle className="w-5 h-5 text-primary" />
+                              </div>
+                              <span className="text-sm font-medium text-muted-foreground">Confermate</span>
+                            </div>
                             {!hasProAccess ? <Lock className="w-4 h-4 text-muted-foreground" /> : <ArrowRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />}
                           </div>
                           <p className="text-4xl font-bold mb-3">{stats.confirmedBookings}</p>
@@ -527,12 +539,18 @@ const Dashboard = () => {
                         </div>
                       </Card>
                       <Card 
-                        className="group cursor-pointer transition-all hover:shadow-lg hover:border-primary/30"
+                        className="group cursor-pointer transition-all duration-300 hover:shadow-xl hover:shadow-primary/5 hover:border-primary/40 hover:-translate-y-0.5 border-0 shadow-lg bg-gradient-to-br from-card to-card/80 overflow-hidden"
                         onClick={() => handleStatClick('bookings')}
                       >
-                        <div className="p-6">
-                          <div className="flex items-center justify-between mb-3">
-                            <span className="text-sm text-muted-foreground">Totali (7gg)</span>
+                        <div className="p-6 relative">
+                          <div className="absolute top-0 right-0 w-24 h-24 bg-muted/30 rounded-full blur-2xl -mr-8 -mt-8" />
+                          <div className="flex items-center justify-between mb-4">
+                            <div className="flex items-center gap-3">
+                              <div className="p-2.5 rounded-xl bg-muted">
+                                <Calendar className="w-5 h-5 text-foreground" />
+                              </div>
+                              <span className="text-sm font-medium text-muted-foreground">Totali (7gg)</span>
+                            </div>
                             {!hasProAccess ? <Lock className="w-4 h-4 text-muted-foreground" /> : <ArrowRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />}
                           </div>
                           <p className="text-4xl font-bold mb-3">{stats.totalBookings}</p>
@@ -569,16 +587,17 @@ const Dashboard = () => {
                   ) : (
                     <div className="grid gap-4 md:grid-cols-2">
                       <Card 
-                        className="group cursor-pointer transition-all hover:shadow-lg hover:border-primary/30"
+                        className="group cursor-pointer transition-all duration-300 hover:shadow-xl hover:shadow-primary/5 hover:border-primary/40 hover:-translate-y-0.5 border-0 shadow-lg bg-gradient-to-br from-card to-card/80 overflow-hidden"
                         onClick={() => handleStatClick('tables')}
                       >
-                        <div className="p-6">
+                        <div className="p-6 relative">
+                          <div className="absolute top-0 right-0 w-20 h-20 bg-primary/5 rounded-full blur-2xl -mr-6 -mt-6" />
                           <div className="flex items-center gap-4">
-                            <div className="p-3 rounded-xl bg-muted">
-                              <Table2 className="w-6 h-6 text-foreground" />
+                            <div className="p-3.5 rounded-2xl bg-gradient-to-br from-primary/10 to-primary/5">
+                              <Table2 className="w-6 h-6 text-primary" />
                             </div>
                             <div className="flex-1">
-                              <p className="text-sm text-muted-foreground">Tavoli configurati</p>
+                              <p className="text-sm font-medium text-muted-foreground">Tavoli configurati</p>
                               <p className="text-3xl font-bold">{stats.tables}</p>
                             </div>
                             {!hasProAccess ? <Lock className="w-4 h-4 text-muted-foreground" /> : <ArrowRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />}
@@ -586,16 +605,17 @@ const Dashboard = () => {
                         </div>
                       </Card>
                       <Card 
-                        className="group cursor-pointer transition-all hover:shadow-lg hover:border-primary/30"
+                        className="group cursor-pointer transition-all duration-300 hover:shadow-xl hover:shadow-primary/5 hover:border-primary/40 hover:-translate-y-0.5 border-0 shadow-lg bg-gradient-to-br from-card to-card/80 overflow-hidden"
                         onClick={() => handleStatClick('menu')}
                       >
-                        <div className="p-6">
+                        <div className="p-6 relative">
+                          <div className="absolute top-0 right-0 w-20 h-20 bg-amber-500/5 rounded-full blur-2xl -mr-6 -mt-6" />
                           <div className="flex items-center gap-4">
-                            <div className="p-3 rounded-xl bg-muted">
-                              <UtensilsCrossed className="w-6 h-6 text-foreground" />
+                            <div className="p-3.5 rounded-2xl bg-gradient-to-br from-amber-500/10 to-amber-500/5">
+                              <UtensilsCrossed className="w-6 h-6 text-amber-500" />
                             </div>
                             <div className="flex-1">
-                              <p className="text-sm text-muted-foreground">Piatti nel menu</p>
+                              <p className="text-sm font-medium text-muted-foreground">Piatti nel menu</p>
                               <p className="text-3xl font-bold">{stats.menuItems}</p>
                             </div>
                             {!hasProAccess ? <Lock className="w-4 h-4 text-muted-foreground" /> : <ArrowRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />}
@@ -619,16 +639,17 @@ const Dashboard = () => {
                   ) : (
                     <div className="grid gap-4 md:grid-cols-2">
                       <Card 
-                        className="group cursor-pointer transition-all hover:shadow-lg hover:border-primary/30"
+                        className="group cursor-pointer transition-all duration-300 hover:shadow-xl hover:shadow-primary/5 hover:border-primary/40 hover:-translate-y-0.5 border-0 shadow-lg bg-gradient-to-br from-card to-card/80 overflow-hidden"
                         onClick={() => navigate('/reviews')}
                       >
-                        <div className="p-6">
+                        <div className="p-6 relative">
+                          <div className="absolute top-0 right-0 w-20 h-20 bg-blue-500/5 rounded-full blur-2xl -mr-6 -mt-6" />
                           <div className="flex items-center gap-4">
-                            <div className="p-3 rounded-xl bg-muted">
-                              <Users className="w-6 h-6 text-foreground" />
+                            <div className="p-3.5 rounded-2xl bg-gradient-to-br from-blue-500/10 to-blue-500/5">
+                              <Users className="w-6 h-6 text-blue-500" />
                             </div>
                             <div className="flex-1">
-                              <p className="text-sm text-muted-foreground">Totale recensioni</p>
+                              <p className="text-sm font-medium text-muted-foreground">Totale recensioni</p>
                               <p className="text-3xl font-bold">{stats.totalReviews}</p>
                             </div>
                             <ArrowRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
@@ -636,19 +657,20 @@ const Dashboard = () => {
                         </div>
                       </Card>
                       <Card 
-                        className="group cursor-pointer transition-all hover:shadow-lg hover:border-primary/30"
+                        className="group cursor-pointer transition-all duration-300 hover:shadow-xl hover:shadow-primary/5 hover:border-primary/40 hover:-translate-y-0.5 border-0 shadow-lg bg-gradient-to-br from-card to-card/80 overflow-hidden"
                         onClick={() => navigate('/reviews')}
                       >
-                        <div className="p-6">
+                        <div className="p-6 relative">
+                          <div className="absolute top-0 right-0 w-20 h-20 bg-primary/5 rounded-full blur-2xl -mr-6 -mt-6" />
                           <div className="flex items-center gap-4">
-                            <div className="p-3 rounded-xl bg-muted">
-                              <Star className="w-6 h-6 text-foreground" />
+                            <div className="p-3.5 rounded-2xl bg-gradient-to-br from-primary/10 to-primary/5">
+                              <Star className="w-6 h-6 text-primary" />
                             </div>
                             <div className="flex-1">
-                              <p className="text-sm text-muted-foreground">Valutazione media</p>
+                              <p className="text-sm font-medium text-muted-foreground">Valutazione media</p>
                               <div className="flex items-baseline gap-2">
                                 <p className="text-3xl font-bold">{stats.avgRating > 0 ? stats.avgRating : '-'}</p>
-                                {stats.avgRating > 0 && <span className="text-primary">/ 5</span>}
+                                {stats.avgRating > 0 && <span className="text-primary font-medium">/ 5</span>}
                               </div>
                             </div>
                             <ArrowRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
@@ -667,27 +689,28 @@ const Dashboard = () => {
                     </div>
                     <h2 className="text-xl font-semibold">Account</h2>
                   </div>
-                  <Card>
-                    <div className="p-6">
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <Card className="border-0 shadow-lg bg-gradient-to-br from-card to-card/80 overflow-hidden">
+                    <div className="p-6 relative">
+                      <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl -mr-12 -mt-12" />
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative">
                         <div className="flex items-center gap-4">
-                          <div className={`p-4 rounded-xl ${
+                          <div className={`p-4 rounded-2xl ${
                             subscription.subscribed 
-                              ? 'bg-primary/10' 
+                              ? 'bg-gradient-to-br from-primary/20 to-primary/10' 
                               : subscription.inTrial 
-                                ? 'bg-muted'
-                                : 'bg-destructive/10'
+                                ? 'bg-gradient-to-br from-amber-500/20 to-amber-500/10'
+                                : 'bg-gradient-to-br from-destructive/20 to-destructive/10'
                           }`}>
                             <CreditCard className={`w-6 h-6 ${
                               subscription.subscribed 
                                 ? 'text-primary' 
                                 : subscription.inTrial 
-                                  ? 'text-foreground'
+                                  ? 'text-amber-500'
                                   : 'text-destructive'
                             }`} />
                           </div>
                           <div>
-                            <p className="text-sm text-muted-foreground">Abbonamento</p>
+                            <p className="text-sm font-medium text-muted-foreground">Abbonamento</p>
                             <p className="text-xl font-bold">
                               {subscription.subscribed ? (
                                 subscription.planType === 'promo_speciale' ? 'Promo Speciale' : 
@@ -713,7 +736,7 @@ const Dashboard = () => {
                         <Button 
                           variant={subscription.subscribed ? "outline" : "default"}
                           onClick={() => navigate('/billing')}
-                          className="gap-2"
+                          className="gap-2 rounded-xl shadow-md hover:shadow-lg transition-all"
                         >
                           {subscription.subscribed ? 'Gestisci' : 'Attiva abbonamento'}
                           <ArrowRight className="w-4 h-4" />
