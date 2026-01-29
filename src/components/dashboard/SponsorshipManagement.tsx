@@ -287,9 +287,9 @@ export const SponsorshipManagement = ({ restaurantId }: SponsorshipManagementPro
       </div>
 
       {/* Current Status Card */}
-      <Card className="p-6">
+      <Card className="p-6 bg-gradient-to-br from-card to-muted/20 border-border/50">
         <div className="flex items-center gap-4 mb-6">
-          <div className={`p-3 rounded-full ${isActive ? 'bg-green-500/10' : isExpired ? 'bg-destructive/10' : 'bg-muted'}`}>
+          <div className={`p-3 rounded-xl ${isActive ? 'bg-green-500/10' : isExpired ? 'bg-destructive/10' : 'bg-muted/50'}`}>
             {isActive ? (
               <CheckCircle className="w-6 h-6 text-green-500" />
             ) : isExpired ? (
@@ -302,11 +302,11 @@ export const SponsorshipManagement = ({ restaurantId }: SponsorshipManagementPro
             <h3 className="font-semibold text-lg">Stato Sponsorizzazione</h3>
             <div className="flex items-center gap-2 mt-1">
               {isActive ? (
-                <Badge className="bg-green-500 text-white">Attivo</Badge>
+                <Badge className="bg-green-500 text-white shadow-sm">Attivo</Badge>
               ) : isExpired ? (
-                <Badge variant="destructive">Scaduto</Badge>
+                <Badge variant="destructive" className="shadow-sm">Scaduto</Badge>
               ) : (
-                <Badge variant="secondary">Non attivo</Badge>
+                <Badge variant="secondary" className="shadow-sm">Non attivo</Badge>
               )}
               {isActive && (
                 <span className="text-sm text-muted-foreground">
@@ -319,14 +319,16 @@ export const SponsorshipManagement = ({ restaurantId }: SponsorshipManagementPro
       </Card>
 
       {/* Code Activation Card */}
-      <Card className="p-6">
+      <Card className="p-6 bg-gradient-to-br from-card to-muted/20 border-border/50">
         <div className="flex items-center gap-3 mb-4">
-          <Ticket className="w-5 h-5 text-primary" />
+          <div className="p-2 rounded-xl bg-primary/10">
+            <Ticket className="w-5 h-5 text-primary" />
+          </div>
           <h3 className="font-semibold">Attiva con Codice</h3>
         </div>
         
         {availableCodes.length > 0 && (
-          <div className="mb-4 p-4 bg-green-500/10 border border-green-500/20 rounded-lg">
+          <div className="mb-4 p-4 bg-green-500/10 border border-green-500/20 rounded-xl">
             <p className="text-sm text-green-700 dark:text-green-400 font-medium mb-2">
               Hai {availableCodes.length} codice/i disponibile/i:
             </p>
@@ -346,9 +348,9 @@ export const SponsorshipManagement = ({ restaurantId }: SponsorshipManagementPro
             value={promoCode}
             onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
             maxLength={6}
-            className="font-mono uppercase"
+            className="font-mono uppercase h-11"
           />
-          <Button onClick={handleActivateCode} disabled={activating || !promoCode.trim()}>
+          <Button onClick={handleActivateCode} disabled={activating || !promoCode.trim()} className="shadow-lg">
             {activating ? <Loader2 className="w-4 h-4 animate-spin" /> : "Attiva"}
           </Button>
         </div>
@@ -358,14 +360,16 @@ export const SponsorshipManagement = ({ restaurantId }: SponsorshipManagementPro
       </Card>
 
       {/* Request Code Card */}
-      <Card className="p-6">
+      <Card className="p-6 bg-gradient-to-br from-card to-muted/20 border-border/50">
         <div className="flex items-center gap-3 mb-4">
-          <Send className="w-5 h-5 text-primary" />
+          <div className="p-2 rounded-xl bg-primary/10">
+            <Send className="w-5 h-5 text-primary" />
+          </div>
           <h3 className="font-semibold">Richiedi Codice</h3>
         </div>
         
         {pendingRequest ? (
-          <div className="p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
+          <div className="p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-xl">
             <p className="text-sm text-yellow-700 dark:text-yellow-400">
               <Clock className="w-4 h-4 inline mr-1" />
               Hai già una richiesta in attesa dal {format(new Date(pendingRequest.created_at), 'dd MMM yyyy', { locale: it })}. 
@@ -397,11 +401,13 @@ export const SponsorshipManagement = ({ restaurantId }: SponsorshipManagementPro
       {/* Benefits Card */}
       <Card className="p-6 bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
         <div className="flex items-center gap-3 mb-4">
-          <Sparkles className="w-5 h-5 text-primary" />
+          <div className="p-2 rounded-xl bg-primary/10">
+            <Sparkles className="w-5 h-5 text-primary" />
+          </div>
           <h3 className="font-semibold">Vantaggi della Sponsorizzazione</h3>
         </div>
         <div className="grid md:grid-cols-3 gap-4">
-          <div className="flex items-start gap-3">
+          <div className="flex items-start gap-3 p-3 rounded-xl bg-background/50">
             <div className="p-2 rounded-lg bg-primary/10">
               <Eye className="w-4 h-4 text-primary" />
             </div>
@@ -412,7 +418,7 @@ export const SponsorshipManagement = ({ restaurantId }: SponsorshipManagementPro
               </p>
             </div>
           </div>
-          <div className="flex items-start gap-3">
+          <div className="flex items-start gap-3 p-3 rounded-xl bg-background/50">
             <div className="p-2 rounded-lg bg-primary/10">
               <TrendingUp className="w-4 h-4 text-primary" />
             </div>
@@ -423,7 +429,7 @@ export const SponsorshipManagement = ({ restaurantId }: SponsorshipManagementPro
               </p>
             </div>
           </div>
-          <div className="flex items-start gap-3">
+          <div className="flex items-start gap-3 p-3 rounded-xl bg-background/50">
             <div className="p-2 rounded-lg bg-primary/10">
               <Megaphone className="w-4 h-4 text-primary" />
             </div>
@@ -438,23 +444,23 @@ export const SponsorshipManagement = ({ restaurantId }: SponsorshipManagementPro
       </Card>
 
       {/* Pricing Info */}
-      <Card className="p-6">
+      <Card className="p-6 bg-gradient-to-br from-card to-muted/20 border-border/50">
         <h3 className="font-semibold mb-4">Piani Disponibili</h3>
         <div className="grid md:grid-cols-3 gap-4">
-          <div className="p-4 rounded-lg border border-border hover:border-primary/50 transition-colors">
+          <div className="p-4 rounded-xl border border-border hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 bg-gradient-to-br from-card to-muted/30">
             <p className="font-medium">7 Giorni</p>
             <p className="text-2xl font-bold text-primary mt-1">€29</p>
             <p className="text-xs text-muted-foreground mt-2">Ideale per eventi speciali</p>
           </div>
-          <div className="p-4 rounded-lg border-2 border-primary bg-primary/5 relative">
-            <Badge className="absolute -top-2 right-2 bg-primary text-primary-foreground text-xs">
+          <div className="p-4 rounded-xl border-2 border-primary bg-primary/5 relative shadow-lg">
+            <Badge className="absolute -top-2 right-2 bg-primary text-primary-foreground text-xs shadow-sm">
               Popolare
             </Badge>
             <p className="font-medium">30 Giorni</p>
             <p className="text-2xl font-bold text-primary mt-1">€79</p>
             <p className="text-xs text-muted-foreground mt-2">Miglior rapporto qualità-prezzo</p>
           </div>
-          <div className="p-4 rounded-lg border border-border hover:border-primary/50 transition-colors">
+          <div className="p-4 rounded-xl border border-border hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 bg-gradient-to-br from-card to-muted/30">
             <p className="font-medium">90 Giorni</p>
             <p className="text-2xl font-bold text-primary mt-1">€199</p>
             <p className="text-xs text-muted-foreground mt-2">Massima esposizione</p>
