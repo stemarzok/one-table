@@ -196,22 +196,55 @@ export const RestaurantInfo = ({ restaurant, onUpdate }: RestaurantInfoProps) =>
 
   return (
     <div className="space-y-6">
-      <Card className="p-6">
+      {/* Header */}
+      <div>
+        <h2 className="text-2xl font-bold flex items-center gap-2">
+          <ImageIcon className="w-6 h-6 text-primary" />
+          Info & Immagini Ristorante
+        </h2>
+        <p className="text-muted-foreground mt-1">
+          Gestisci le informazioni e le immagini del tuo ristorante
+        </p>
+      </div>
+
+      <Card className="p-6 bg-gradient-to-br from-card to-muted/20 border-border/50">
         <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
-          <ImageIcon className="w-5 h-5" />
+          <ImageIcon className="w-5 h-5 text-primary" />
           Immagini del Ristorante
         </h3>
         
         <div className="grid md:grid-cols-2 gap-6">
           {/* Cover Image */}
           <div className="space-y-3">
-            <Label>Immagine di Copertina</Label>
-            {restaurant?.cover_image_url && (
-              <img 
-                src={restaurant.cover_image_url} 
-                alt="Cover" 
-                className="w-full h-48 object-cover rounded-lg border border-border"
-              />
+            <Label className="text-base font-medium">Immagine di Copertina</Label>
+            {restaurant?.cover_image_url ? (
+              <div className="relative group">
+                <img 
+                  src={restaurant.cover_image_url} 
+                  alt="Cover" 
+                  className="w-full h-48 object-cover rounded-xl border border-border shadow-sm"
+                />
+                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity rounded-xl flex items-center justify-center">
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={() => coverInputRef.current?.click()}
+                    disabled={uploading}
+                    size="sm"
+                  >
+                    <Upload className="w-4 h-4 mr-2" />
+                    Cambia
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div 
+                className="w-full h-48 rounded-xl border-2 border-dashed border-border hover:border-primary/50 transition-colors flex flex-col items-center justify-center cursor-pointer bg-muted/30"
+                onClick={() => coverInputRef.current?.click()}
+              >
+                <Upload className="w-8 h-8 text-muted-foreground mb-2" />
+                <span className="text-sm text-muted-foreground">Clicca per caricare</span>
+              </div>
             )}
             <input
               type="file"
@@ -220,27 +253,51 @@ export const RestaurantInfo = ({ restaurant, onUpdate }: RestaurantInfoProps) =>
               accept="image/*"
               className="hidden"
             />
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => coverInputRef.current?.click()}
-              disabled={uploading}
-              className="w-full"
-            >
-              <Upload className="w-4 h-4 mr-2" />
-              {uploading ? "Caricamento..." : "Carica Copertina"}
-            </Button>
+            {!restaurant?.cover_image_url && (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => coverInputRef.current?.click()}
+                disabled={uploading}
+                className="w-full"
+              >
+                <Upload className="w-4 h-4 mr-2" />
+                {uploading ? "Caricamento..." : "Carica Copertina"}
+              </Button>
+            )}
           </div>
 
           {/* Logo */}
           <div className="space-y-3">
-            <Label>Logo Ristorante</Label>
-            {restaurant?.logo_url && (
-              <img 
-                src={restaurant.logo_url} 
-                alt="Logo" 
-                className="w-full h-48 object-contain rounded-lg border border-border bg-muted"
-              />
+            <Label className="text-base font-medium">Logo Ristorante</Label>
+            {restaurant?.logo_url ? (
+              <div className="relative group">
+                <img 
+                  src={restaurant.logo_url} 
+                  alt="Logo" 
+                  className="w-full h-48 object-contain rounded-xl border border-border bg-muted/30 p-4 shadow-sm"
+                />
+                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity rounded-xl flex items-center justify-center">
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={() => logoInputRef.current?.click()}
+                    disabled={uploading}
+                    size="sm"
+                  >
+                    <Upload className="w-4 h-4 mr-2" />
+                    Cambia
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div 
+                className="w-full h-48 rounded-xl border-2 border-dashed border-border hover:border-primary/50 transition-colors flex flex-col items-center justify-center cursor-pointer bg-muted/30"
+                onClick={() => logoInputRef.current?.click()}
+              >
+                <Upload className="w-8 h-8 text-muted-foreground mb-2" />
+                <span className="text-sm text-muted-foreground">Clicca per caricare</span>
+              </div>
             )}
             <input
               type="file"
@@ -249,47 +306,48 @@ export const RestaurantInfo = ({ restaurant, onUpdate }: RestaurantInfoProps) =>
               accept="image/*"
               className="hidden"
             />
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => logoInputRef.current?.click()}
-              disabled={uploading}
-              className="w-full"
-            >
-              <Upload className="w-4 h-4 mr-2" />
-              {uploading ? "Caricamento..." : "Carica Logo"}
-            </Button>
+            {!restaurant?.logo_url && (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => logoInputRef.current?.click()}
+                disabled={uploading}
+                className="w-full"
+              >
+                <Upload className="w-4 h-4 mr-2" />
+                {uploading ? "Caricamento..." : "Carica Logo"}
+              </Button>
+            )}
           </div>
         </div>
       </Card>
 
-      {/* Gallery Images Card */}
-      <Card className="p-6">
+      <Card className="p-6 bg-gradient-to-br from-card to-muted/20 border-border/50">
         <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
-          <Images className="w-5 h-5" />
+          <Images className="w-5 h-5 text-primary" />
           Galleria Immagini (Carosello)
         </h3>
         <p className="text-sm text-muted-foreground mb-4">
-          Carica fino a 10 immagini che verranno mostrate come carosello sulla card del ristorante. Se caricate, sostituiranno l'immagine di copertina sulla card.
+          Carica fino a 10 immagini che verranno mostrate come carosello sulla card del ristorante.
         </p>
         
         {/* Gallery Grid */}
         <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-4">
           {galleryImages.map((img, index) => (
-            <div key={index} className="relative group">
+            <div key={index} className="relative group aspect-square">
               <img 
                 src={img} 
                 alt={`Gallery ${index + 1}`}
-                className="w-full h-24 object-cover rounded-lg border border-border"
+                className="w-full h-full object-cover rounded-xl border border-border shadow-sm"
               />
               <button
                 type="button"
                 onClick={() => removeGalleryImage(index)}
-                className="absolute -top-2 -right-2 p-1 rounded-full bg-destructive text-destructive-foreground opacity-0 group-hover:opacity-100 transition-opacity"
+                className="absolute -top-2 -right-2 p-1.5 rounded-full bg-destructive text-destructive-foreground opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
               >
                 <X className="w-3 h-3" />
               </button>
-              <span className="absolute bottom-1 left-1 text-xs bg-black/60 text-white px-1.5 py-0.5 rounded">
+              <span className="absolute bottom-1 left-1 text-xs bg-black/60 text-white px-2 py-0.5 rounded-lg">
                 {index + 1}
               </span>
             </div>
@@ -300,7 +358,7 @@ export const RestaurantInfo = ({ restaurant, onUpdate }: RestaurantInfoProps) =>
               type="button"
               onClick={() => galleryInputRef.current?.click()}
               disabled={uploadingGallery}
-              className="w-full h-24 border-2 border-dashed border-border rounded-lg flex flex-col items-center justify-center text-muted-foreground hover:border-primary hover:text-primary transition-colors"
+              className="aspect-square border-2 border-dashed border-border rounded-xl flex flex-col items-center justify-center text-muted-foreground hover:border-primary hover:text-primary transition-colors bg-muted/30"
             >
               <Upload className="w-5 h-5 mb-1" />
               <span className="text-xs">Aggiungi</span>
@@ -317,7 +375,7 @@ export const RestaurantInfo = ({ restaurant, onUpdate }: RestaurantInfoProps) =>
           className="hidden"
         />
         
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between pt-4 border-t border-border/50">
           <span className="text-sm text-muted-foreground">
             {galleryImages.length}/10 immagini
           </span>
@@ -333,28 +391,29 @@ export const RestaurantInfo = ({ restaurant, onUpdate }: RestaurantInfoProps) =>
         </div>
       </Card>
 
-      <Card className="p-6">
+      <Card className="p-6 bg-gradient-to-br from-card to-muted/20 border-border/50">
         <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
-          <Save className="w-5 h-5" />
+          <Save className="w-5 h-5 text-primary" />
           Informazioni Ristorante
         </h3>
         
         <form onSubmit={handleInfoUpdate} className="space-y-6">
           <div className="grid md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="name">Nome Ristorante *</Label>
+              <Label htmlFor="name" className="text-sm font-medium">Nome Ristorante *</Label>
               <Input
                 id="name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
+                className="h-11"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="priceRange">Fascia di Prezzo</Label>
+              <Label htmlFor="priceRange" className="text-sm font-medium">Fascia di Prezzo</Label>
               <Select value={priceRange} onValueChange={setPriceRange}>
-                <SelectTrigger>
+                <SelectTrigger className="h-11">
                   <SelectValue placeholder="Seleziona fascia" />
                 </SelectTrigger>
                 <SelectContent>
@@ -367,50 +426,54 @@ export const RestaurantInfo = ({ restaurant, onUpdate }: RestaurantInfoProps) =>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="phone">Telefono *</Label>
+              <Label htmlFor="phone" className="text-sm font-medium">Telefono *</Label>
               <Input
                 id="phone"
                 type="tel"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 required
+                className="h-11"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="email">Email *</Label>
+              <Label htmlFor="email" className="text-sm font-medium">Email *</Label>
               <Input
                 id="email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                className="h-11"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="city">Città *</Label>
+              <Label htmlFor="city" className="text-sm font-medium">Città *</Label>
               <Input
                 id="city"
                 value={city}
                 onChange={(e) => setCity(e.target.value)}
                 required
+                className="h-11"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="address">Indirizzo Completo *</Label>
+              <Label htmlFor="address" className="text-sm font-medium">Indirizzo Completo *</Label>
               <Input
                 id="address"
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
                 required
+                className="h-11"
               />
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description">Descrizione</Label>
+            <Label htmlFor="description" className="text-sm font-medium">Descrizione</Label>
             <Textarea
               id="description"
               value={description}
@@ -421,17 +484,17 @@ export const RestaurantInfo = ({ restaurant, onUpdate }: RestaurantInfoProps) =>
           </div>
 
           {/* Categorie Selezionabili */}
-          <div className="space-y-6 pt-4 border-t border-border">
+          <div className="space-y-6 pt-6 border-t border-border/50">
             <div>
               <h4 className="text-lg font-semibold mb-2">Categorie e Tag</h4>
               <p className="text-sm text-muted-foreground">
-                Seleziona le categorie che descrivono meglio il tuo ristorante. Questi tag aiuteranno i clienti a trovarti.
+                Seleziona le categorie che descrivono meglio il tuo ristorante.
               </p>
             </div>
 
             {/* Tipo di Cucina */}
             <div className="space-y-3">
-              <Label className="flex items-center gap-2 text-base">
+              <Label className="flex items-center gap-2 text-base font-medium">
                 <ChefHat className="w-4 h-4 text-primary" />
                 Tipo di Cucina
               </Label>
@@ -440,7 +503,7 @@ export const RestaurantInfo = ({ restaurant, onUpdate }: RestaurantInfoProps) =>
                   <Badge
                     key={type}
                     variant={cuisineTypes.includes(type) ? "default" : "outline"}
-                    className="cursor-pointer hover:bg-primary/80 transition-colors py-1.5 px-3"
+                    className="cursor-pointer hover:bg-primary/80 transition-all duration-200 py-1.5 px-3 text-sm"
                     onClick={() => toggleCategory(type, cuisineTypes, setCuisineTypes)}
                   >
                     {type}
@@ -456,7 +519,7 @@ export const RestaurantInfo = ({ restaurant, onUpdate }: RestaurantInfoProps) =>
 
             {/* Specializzazione */}
             <div className="space-y-3">
-              <Label className="flex items-center gap-2 text-base">
+              <Label className="flex items-center gap-2 text-base font-medium">
                 <Utensils className="w-4 h-4 text-primary" />
                 Specializzazione / Format
               </Label>
@@ -465,7 +528,7 @@ export const RestaurantInfo = ({ restaurant, onUpdate }: RestaurantInfoProps) =>
                   <Badge
                     key={spec}
                     variant={specializations.includes(spec) ? "default" : "outline"}
-                    className="cursor-pointer hover:bg-primary/80 transition-colors py-1.5 px-3"
+                    className="cursor-pointer hover:bg-primary/80 transition-all duration-200 py-1.5 px-3 text-sm"
                     onClick={() => toggleCategory(spec, specializations, setSpecializations)}
                   >
                     {spec}
@@ -481,7 +544,7 @@ export const RestaurantInfo = ({ restaurant, onUpdate }: RestaurantInfoProps) =>
 
             {/* Occasioni */}
             <div className="space-y-3">
-              <Label className="flex items-center gap-2 text-base">
+              <Label className="flex items-center gap-2 text-base font-medium">
                 <Calendar className="w-4 h-4 text-primary" />
                 Occasione e Contesto
               </Label>
@@ -530,7 +593,7 @@ export const RestaurantInfo = ({ restaurant, onUpdate }: RestaurantInfoProps) =>
             </div>
           </div>
 
-          <Button type="submit" className="w-full" size="lg">
+          <Button type="submit" className="w-full shadow-lg" size="lg">
             <Save className="w-4 h-4 mr-2" />
             Salva Modifiche
           </Button>
