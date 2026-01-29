@@ -2,25 +2,36 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { CheckCircle, TrendingDown, Users, Calendar, BarChart3, Shield, ArrowRight, TrendingUp, ChevronDown, DollarSign, Star, ClipboardCheck, UserCheck, Award } from "lucide-react";
+import { 
+  CheckCircle, TrendingDown, Users, Calendar, BarChart3, Shield, ArrowRight, 
+  ChevronDown, DollarSign, Star, ClipboardCheck, UserCheck, Award, 
+  XCircle, AlertTriangle, Clock, Ban, Percent, TrendingUp, Check,
+  Utensils, Sparkles, Table, LineChart
+} from "lucide-react";
 import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, useInView, useScroll, useTransform } from "framer-motion";
 import businessHeroVideo from "@/assets/business-hero-video.mp4";
+import businessCtaVideo from "@/assets/business-cta-video.mp4";
+import LogoScroller from "@/components/LogoScroller";
 
 const Business = () => {
   const navigate = useNavigate();
   const heroRef = useRef<HTMLElement>(null);
   const problemRef = useRef(null);
+  const comparisonRef = useRef(null);
   const solutionRef = useRef(null);
   const benefitsRef = useRef(null);
   const howItWorksRef = useRef(null);
+  const tableRef = useRef(null);
   const ctaRef = useRef(null);
   
   const problemInView = useInView(problemRef, { once: true, margin: "-100px" });
+  const comparisonInView = useInView(comparisonRef, { once: true, margin: "-100px" });
   const solutionInView = useInView(solutionRef, { once: true, margin: "-100px" });
   const benefitsInView = useInView(benefitsRef, { once: true, margin: "-100px" });
   const howItWorksInView = useInView(howItWorksRef, { once: true, margin: "-100px" });
+  const tableInView = useInView(tableRef, { once: true, margin: "-100px" });
   const ctaInView = useInView(ctaRef, { once: true, margin: "-100px" });
   
   const { scrollYProgress } = useScroll({
@@ -56,6 +67,48 @@ const Business = () => {
       }
     }
   };
+
+  const problemStats = [
+    { 
+      icon: AlertTriangle, 
+      value: "€16 Mld", 
+      label: "perdite annuali in Europa",
+      color: "text-destructive"
+    },
+    { 
+      icon: Percent, 
+      value: "15-20%", 
+      label: "prenotazioni non rispettate",
+      color: "text-destructive"
+    },
+    { 
+      icon: Ban, 
+      value: "€150+", 
+      label: "perdita media per no-show",
+      color: "text-destructive"
+    },
+  ];
+
+  const solutionStats = [
+    { 
+      icon: TrendingDown, 
+      value: "-60%", 
+      label: "riduzione no-show",
+      color: "text-primary"
+    },
+    { 
+      icon: TrendingUp, 
+      value: "+35%", 
+      label: "clienti più affidabili",
+      color: "text-primary"
+    },
+    { 
+      icon: DollarSign, 
+      value: "+25%", 
+      label: "aumento ricavi medi",
+      color: "text-primary"
+    },
+  ];
 
   const benefits = [
     { 
@@ -115,6 +168,16 @@ const Business = () => {
       title: "Fidelizzazione intelligente", 
       desc: "Premia i clienti migliori e costruisci una base di utenti affidabili." 
     },
+  ];
+
+  const comparisonData = [
+    { feature: "Sistema di reputazione clienti", traditional: false, onetable: true },
+    { feature: "Riduzione no-show automatica", traditional: false, onetable: true },
+    { feature: "Analytics in tempo reale", traditional: false, onetable: true },
+    { feature: "Filtro clienti affidabili", traditional: false, onetable: true },
+    { feature: "Depositi e garanzie", traditional: false, onetable: true },
+    { feature: "Notifiche e reminder", traditional: true, onetable: true },
+    { feature: "Gestione tavoli", traditional: true, onetable: true },
   ];
 
   const containerVariants = {
@@ -256,109 +319,226 @@ const Business = () => {
         </motion.div>
       </section>
 
-      {/* Problem Section */}
+      {/* Problem Section - Redesigned */}
       <section ref={problemRef} id="problema" className="py-24 bg-background relative overflow-hidden">
         <div className="absolute top-0 right-1/4 w-96 h-96 bg-destructive/5 rounded-full blur-3xl" />
         
         <div className="container mx-auto px-4 relative z-10">
           <motion.div 
-            className="max-w-4xl mx-auto text-center"
+            className="max-w-5xl mx-auto"
             initial={{ opacity: 0, y: 30 }}
             animate={problemInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.6 }}
           >
-            <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-8 tracking-wide font-display uppercase">
-              I no-show costano miliardi
-              <span className="block text-primary mt-2">ai ristoranti</span>
-            </h2>
-            
-            <p className="text-lg md:text-xl text-muted-foreground mb-12 leading-relaxed">
-              In Europa, i no-show causano oltre <span className="text-foreground font-bold">16 miliardi di euro</span> di perdite ogni anno.
-              <br />Tavoli vuoti, personale sprecato, ricavi persi.
-              <br />OneTable nasce per risolvere questo problema alla radice.
-            </p>
+            <div className="text-center mb-16">
+              <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-8 tracking-wide font-display uppercase">
+                I no-show costano miliardi
+                <span className="block text-primary mt-2">ai ristoranti</span>
+              </h2>
+              
+              <p className="text-lg md:text-xl text-muted-foreground mb-12 leading-relaxed max-w-3xl mx-auto">
+                In Europa, i no-show causano perdite enormi ogni anno.
+                <br />Tavoli vuoti, personale sprecato, ricavi persi.
+                <br />OneTable nasce per risolvere questo problema alla radice.
+              </p>
+            </div>
 
-            {/* Stats Cards */}
-            <div className="grid md:grid-cols-3 gap-6">
+            {/* Problem vs Solution Comparison */}
+            <div className="grid lg:grid-cols-2 gap-8">
+              {/* Problem Column */}
               <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={problemInView ? { opacity: 1, y: 0 } : {}}
+                initial={{ opacity: 0, x: -30 }}
+                animate={problemInView ? { opacity: 1, x: 0 } : {}}
                 transition={{ duration: 0.5, delay: 0.2 }}
               >
-                <Card className="p-6 bg-card border-destructive/20 hover:border-destructive/40 transition-all">
-                  <div className="text-4xl md:text-5xl font-bold text-destructive mb-2">€16 Mld</div>
-                  <p className="text-muted-foreground text-sm">perdite annuali in Europa</p>
-                </Card>
+                <div className="text-center mb-6">
+                  <div className="inline-flex items-center gap-2 px-4 py-2 bg-destructive/10 rounded-full mb-4">
+                    <XCircle className="w-5 h-5 text-destructive" />
+                    <span className="text-sm font-semibold text-destructive uppercase tracking-wide">Il Problema</span>
+                  </div>
+                </div>
+                <div className="space-y-4">
+                  {problemStats.map((stat, index) => (
+                    <motion.div
+                      key={index}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={problemInView ? { opacity: 1, y: 0 } : {}}
+                      transition={{ duration: 0.5, delay: 0.3 + index * 0.1 }}
+                    >
+                      <Card className="p-5 bg-card border-border/50 hover:border-destructive/30 transition-all">
+                        <div className="flex items-center gap-4">
+                          <div className="w-12 h-12 rounded-xl bg-destructive/10 flex items-center justify-center flex-shrink-0">
+                            <stat.icon className="w-6 h-6 text-destructive" />
+                          </div>
+                          <div>
+                            <div className="text-2xl md:text-3xl font-bold text-foreground">{stat.value}</div>
+                            <p className="text-muted-foreground text-sm">{stat.label}</p>
+                          </div>
+                        </div>
+                      </Card>
+                    </motion.div>
+                  ))}
+                </div>
               </motion.div>
-              
+
+              {/* Solution Column */}
               <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={problemInView ? { opacity: 1, y: 0 } : {}}
-                transition={{ duration: 0.5, delay: 0.3 }}
-              >
-                <Card className="p-6 bg-card border-destructive/20 hover:border-destructive/40 transition-all">
-                  <div className="text-4xl md:text-5xl font-bold text-destructive mb-2">15-20%</div>
-                  <p className="text-muted-foreground text-sm">prenotazioni non rispettate</p>
-                </Card>
-              </motion.div>
-              
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={problemInView ? { opacity: 1, y: 0 } : {}}
+                initial={{ opacity: 0, x: 30 }}
+                animate={problemInView ? { opacity: 1, x: 0 } : {}}
                 transition={{ duration: 0.5, delay: 0.4 }}
               >
-                <Card className="p-6 bg-card border-destructive/20 hover:border-destructive/40 transition-all">
-                  <div className="text-4xl md:text-5xl font-bold text-destructive mb-2">€150+</div>
-                  <p className="text-muted-foreground text-sm">perdita media per no-show</p>
-                </Card>
+                <div className="text-center mb-6">
+                  <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full mb-4">
+                    <CheckCircle className="w-5 h-5 text-primary" />
+                    <span className="text-sm font-semibold text-primary uppercase tracking-wide">Con OneTable</span>
+                  </div>
+                </div>
+                <div className="space-y-4">
+                  {solutionStats.map((stat, index) => (
+                    <motion.div
+                      key={index}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={problemInView ? { opacity: 1, y: 0 } : {}}
+                      transition={{ duration: 0.5, delay: 0.5 + index * 0.1 }}
+                    >
+                      <Card className="p-5 bg-card border-primary/20 hover:border-primary/40 transition-all">
+                        <div className="flex items-center gap-4">
+                          <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                            <stat.icon className="w-6 h-6 text-primary" />
+                          </div>
+                          <div>
+                            <div className="text-2xl md:text-3xl font-bold text-foreground">{stat.value}</div>
+                            <p className="text-muted-foreground text-sm">{stat.label}</p>
+                          </div>
+                        </div>
+                      </Card>
+                    </motion.div>
+                  ))}
+                </div>
               </motion.div>
             </div>
           </motion.div>
         </div>
       </section>
 
-      {/* Solution Section */}
+      {/* Logo Scroller - Social Proof */}
+      <LogoScroller />
+
+      {/* Solution Section with Images */}
       <section ref={solutionRef} className="py-24 bg-muted/30 relative overflow-hidden">
         <div className="absolute bottom-0 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
         
         <div className="container mx-auto px-4 relative z-10">
           <motion.div 
-            className="max-w-4xl mx-auto text-center"
+            className="max-w-6xl mx-auto"
             initial={{ opacity: 0, y: 30 }}
             animate={solutionInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.6 }}
           >
-            <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-8 tracking-wide font-display uppercase">
-              Prenotazioni più intelligenti
-              <span className="block text-primary mt-2">Clienti migliori</span>
-            </h2>
-            
-            <p className="text-lg md:text-xl text-muted-foreground mb-12 leading-relaxed max-w-3xl mx-auto">
-              Il nostro sistema di reputazione incentiva i clienti puntuali e penalizza chi non rispetta le prenotazioni.
-              <br />Il risultato? <span className="text-foreground font-bold">Meno no-show, più affidabilità, più valore per ogni tavolo.</span>
-            </p>
+            <div className="text-center mb-16">
+              <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-8 tracking-wide font-display uppercase">
+                Prenotazioni più intelligenti
+                <span className="block text-primary mt-2">Clienti migliori</span>
+              </h2>
+              
+              <p className="text-lg md:text-xl text-muted-foreground mb-12 leading-relaxed max-w-3xl mx-auto">
+                Il nostro sistema di reputazione incentiva i clienti puntuali e penalizza chi non rispetta le prenotazioni.
+                <br />Il risultato? <span className="text-foreground font-bold">Meno no-show, più affidabilità, più valore per ogni tavolo.</span>
+              </p>
+            </div>
 
-            {/* Social Proof */}
+            {/* Feature Cards with Icons */}
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {[
+                { icon: Utensils, title: "Ristorante Verificato", desc: "Profilo professionale con tutte le informazioni del tuo locale" },
+                { icon: Users, title: "Clienti Qualificati", desc: "Vedi la reputazione di ogni cliente prima di confermare" },
+                { icon: Table, title: "Gestione Tavoli", desc: "Organizza sale e disponibilità in modo semplice" },
+                { icon: LineChart, title: "Dati e Insight", desc: "Monitora performance e trend del tuo ristorante" },
+              ].map((feature, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={solutionInView ? { opacity: 1, y: 0 } : {}}
+                  transition={{ duration: 0.5, delay: 0.2 + index * 0.1 }}
+                >
+                  <Card className="group/card h-full bg-card border-border/50 hover:border-primary/30 transition-all duration-300 hover-lift cursor-pointer overflow-hidden">
+                    <div className="aspect-video bg-gradient-to-br from-primary/20 via-primary/10 to-transparent flex items-center justify-center">
+                      <feature.icon className="w-16 h-16 text-primary/60 group-hover/card:text-primary group-hover/card:scale-110 transition-all duration-300" />
+                    </div>
+                    <CardHeader className="p-5">
+                      <CardTitle className="text-lg font-bold">{feature.title}</CardTitle>
+                      <CardDescription className="text-muted-foreground text-sm leading-relaxed">
+                        {feature.desc}
+                      </CardDescription>
+                    </CardHeader>
+                  </Card>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Comparison Table Section */}
+      <section ref={tableRef} className="py-24 bg-background relative overflow-hidden">
+        <div className="container mx-auto px-4 relative z-10">
+          <motion.div 
+            className="max-w-4xl mx-auto"
+            initial={{ opacity: 0, y: 30 }}
+            animate={tableInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.6 }}
+          >
+            <div className="text-center mb-12">
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 tracking-wide font-display uppercase">
+                Perché scegliere OneTable?
+              </h2>
+              <p className="text-lg text-muted-foreground">
+                Confronta le funzionalità con i sistemi tradizionali
+              </p>
+            </div>
+
             <motion.div
-              className="inline-flex items-center gap-4 px-8 py-6 bg-card/90 backdrop-blur-md rounded-2xl border border-primary/20 shadow-xl"
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={solutionInView ? { opacity: 1, scale: 1 } : {}}
-              transition={{ duration: 0.5, delay: 0.3 }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={tableInView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="rounded-2xl border border-border/50 overflow-hidden bg-card"
             >
-              <div className="w-16 h-16 rounded-xl bg-primary/20 flex items-center justify-center flex-shrink-0">
-                <TrendingUp className="w-8 h-8 text-primary" />
+              {/* Table Header */}
+              <div className="grid grid-cols-3 bg-muted/50 border-b border-border/50">
+                <div className="p-4 md:p-6 font-semibold text-foreground">Funzionalità</div>
+                <div className="p-4 md:p-6 text-center font-semibold text-muted-foreground">Tradizionale</div>
+                <div className="p-4 md:p-6 text-center font-semibold text-primary">OneTable</div>
               </div>
-              <div className="text-left">
-                <div className="text-4xl font-extrabold text-foreground">500+</div>
-                <p className="text-muted-foreground font-medium">Ristoranti partner hanno già scelto OneTable</p>
-              </div>
+              
+              {/* Table Rows */}
+              {comparisonData.map((row, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={tableInView ? { opacity: 1, x: 0 } : {}}
+                  transition={{ duration: 0.3, delay: 0.3 + index * 0.05 }}
+                  className={`grid grid-cols-3 border-b border-border/30 last:border-0 ${index % 2 === 0 ? 'bg-transparent' : 'bg-muted/20'}`}
+                >
+                  <div className="p-4 md:p-6 text-sm md:text-base text-foreground">{row.feature}</div>
+                  <div className="p-4 md:p-6 flex items-center justify-center">
+                    {row.traditional ? (
+                      <Check className="w-5 h-5 text-muted-foreground" />
+                    ) : (
+                      <XCircle className="w-5 h-5 text-destructive/60" />
+                    )}
+                  </div>
+                  <div className="p-4 md:p-6 flex items-center justify-center">
+                    <CheckCircle className="w-5 h-5 text-primary" />
+                  </div>
+                </motion.div>
+              ))}
             </motion.div>
           </motion.div>
         </div>
       </section>
 
       {/* Benefits Section */}
-      <section ref={benefitsRef} id="benefits" className="py-24 bg-background relative overflow-hidden">
+      <section ref={benefitsRef} id="benefits" className="py-24 bg-muted/30 relative overflow-hidden">
         <div className="absolute top-0 right-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
         
         <div className="container mx-auto px-4 relative z-10">
@@ -369,7 +549,7 @@ const Business = () => {
             transition={{ duration: 0.6 }}
           >
             <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 tracking-wide font-display uppercase">
-              Perché Scegliere OneTable
+              Tutti i Vantaggi
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               Una soluzione completa per gestire le prenotazioni e premiare i clienti migliori
@@ -402,7 +582,7 @@ const Business = () => {
       </section>
 
       {/* How It Works Section */}
-      <section ref={howItWorksRef} id="come-funziona" className="py-24 bg-muted/30 relative overflow-hidden z-10">
+      <section ref={howItWorksRef} id="come-funziona" className="py-24 bg-background relative overflow-hidden z-10">
         <div className="absolute bottom-0 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
         
         <div className="container mx-auto px-4 relative z-10">
@@ -450,7 +630,7 @@ const Business = () => {
         </div>
       </section>
 
-      {/* Final CTA Section */}
+      {/* Final CTA Section with New Video */}
       <section ref={ctaRef} className="relative py-32 overflow-hidden">
         <div className="absolute inset-0 z-0">
           <video 
@@ -460,7 +640,7 @@ const Business = () => {
             playsInline
             className="absolute inset-0 w-full h-full object-cover"
           >
-            <source src={businessHeroVideo} type="video/mp4" />
+            <source src={businessCtaVideo} type="video/mp4" />
           </video>
           <div className="absolute inset-0 bg-black/80" />
         </div>

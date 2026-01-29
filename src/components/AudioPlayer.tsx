@@ -13,11 +13,21 @@ const AudioPlayer = () => {
   const { isLoggedIn } = useAuth();
   const location = useLocation();
 
-  // Only show on specific pages when NOT logged in
-  const allowedPaths = ['/', '/business', '/pricing'];
-  const shouldShow = !isLoggedIn && allowedPaths.some(path => 
+  // Show on landing pages for non-logged-in users AND on user pages (not business dashboard)
+  const publicPaths = ['/', '/business', '/pricing'];
+  const userPaths = ['/restaurant/', '/profile', '/settings', '/my-bookings', '/reviews', '/favorites'];
+  const businessDashboardPaths = ['/dashboard', '/analytics', '/billing', '/promo'];
+  
+  const isPublicPage = publicPaths.some(path => 
     location.pathname === path || location.pathname.startsWith(path + '/')
   );
+  const isUserPage = userPaths.some(path => location.pathname.startsWith(path));
+  const isBusinessDashboard = businessDashboardPaths.some(path => 
+    location.pathname === path || location.pathname.startsWith(path + '/')
+  );
+  
+  // Show for: non-logged-in on public pages, OR logged-in users NOT on business dashboard
+  const shouldShow = (!isLoggedIn && isPublicPage) || (isLoggedIn && isUserPage && !isBusinessDashboard);
 
   // Soft ambient music
   const audioSrc = "https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=lofi-study-112191.mp3";
@@ -186,7 +196,7 @@ const AudioPlayer = () => {
       
       <button
         onClick={togglePlay}
-        className="w-14 h-14 rounded-full bg-black/80 backdrop-blur-sm border border-white/20 flex items-center justify-center gap-[3px] hover:bg-black/90 hover:border-primary/50 transition-all duration-300 group"
+        className="w-14 h-14 rounded-full bg-black/40 backdrop-blur-md border border-white/20 flex items-center justify-center gap-[3px] hover:bg-black/60 hover:border-primary/50 transition-all duration-300 group"
         aria-label={isPlaying ? "Pause music" : "Play music"}
       >
         {bars.map((i) => (
