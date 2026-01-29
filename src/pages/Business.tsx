@@ -253,11 +253,8 @@ const Business = () => {
                     Meno no-show.
                   </motion.span>
                   <motion.span 
-                    className="block text-[hsl(85,80%,55%)] font-bold"
+                    className="block text-white"
                     variants={titleVariants}
-                    style={{
-                      textShadow: "0 2px 4px rgba(0,0,0,0.8), 0 0 40px hsl(85, 100%, 50%, 0.3)"
-                    }}
                   >
                     Più clienti affidabili.
                   </motion.span>
@@ -322,9 +319,9 @@ const Business = () => {
         </motion.div>
       </section>
 
-      {/* Problem Section - Redesigned */}
-      <section ref={problemRef} id="problema" className="py-24 bg-background relative overflow-hidden">
-        <div className="absolute top-0 right-1/4 w-96 h-96 bg-destructive/5 rounded-full blur-3xl" />
+      {/* Problem Section - Dark Background for Green Contrast */}
+      <section ref={problemRef} id="problema" className="py-24 bg-black relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-black via-zinc-950 to-black" />
         
         <div className="container mx-auto px-4 relative z-10">
           <motion.div 
@@ -334,12 +331,11 @@ const Business = () => {
             transition={{ duration: 0.6 }}
           >
             <div className="text-center mb-16">
-              <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-8 tracking-wide font-display uppercase">
-                I no-show costano miliardi
-                <span className="block text-[hsl(85,80%,55%)] mt-2" style={{ textShadow: "0 2px 4px rgba(0,0,0,0.3)" }}>ai ristoranti</span>
+              <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-8 tracking-wide font-display uppercase text-white">
+                I no-show costano miliardi ai ristoranti
               </h2>
               
-              <p className="text-lg md:text-xl text-muted-foreground mb-12 leading-relaxed max-w-3xl mx-auto">
+              <p className="text-lg md:text-xl text-white/60 mb-12 leading-relaxed max-w-3xl mx-auto">
                 In Europa, i no-show causano perdite enormi ogni anno.
                 <br />Tavoli vuoti, personale sprecato, ricavi persi.
                 <br />OneTable nasce per risolvere questo problema alla radice.
@@ -355,9 +351,9 @@ const Business = () => {
                 transition={{ duration: 0.5, delay: 0.2 }}
               >
                 <div className="text-center mb-6">
-                  <div className="inline-flex items-center gap-2 px-4 py-2 bg-destructive/10 rounded-full mb-4">
-                    <XCircle className="w-5 h-5 text-destructive" />
-                    <span className="text-sm font-semibold text-destructive uppercase tracking-wide">Il Problema</span>
+                  <div className="inline-flex items-center gap-2 px-4 py-2 bg-red-500/10 rounded-full mb-4 border border-red-500/20">
+                    <XCircle className="w-5 h-5 text-red-400" />
+                    <span className="text-sm font-semibold text-red-400 uppercase tracking-wide">Il Problema</span>
                   </div>
                 </div>
                 <div className="space-y-4">
@@ -368,17 +364,17 @@ const Business = () => {
                       animate={problemInView ? { opacity: 1, y: 0 } : {}}
                       transition={{ duration: 0.5, delay: 0.3 + index * 0.1 }}
                     >
-                      <Card className="p-5 bg-card border-border/50 hover:border-destructive/30 transition-all">
+                      <div className="p-5 bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 hover:border-red-500/30 transition-all">
                         <div className="flex items-center gap-4">
-                          <div className="w-12 h-12 rounded-xl bg-destructive/10 flex items-center justify-center flex-shrink-0">
-                            <stat.icon className="w-6 h-6 text-destructive" />
+                          <div className="w-12 h-12 rounded-xl bg-red-500/10 flex items-center justify-center flex-shrink-0">
+                            <stat.icon className="w-6 h-6 text-red-400" />
                           </div>
                           <div>
-                            <div className="text-2xl md:text-3xl font-bold text-foreground">{stat.value}</div>
-                            <p className="text-muted-foreground text-sm">{stat.label}</p>
+                            <div className="text-2xl md:text-3xl font-bold text-white">{stat.value}</div>
+                            <p className="text-white/50 text-sm">{stat.label}</p>
                           </div>
                         </div>
-                      </Card>
+                      </div>
                     </motion.div>
                   ))}
                 </div>
@@ -391,7 +387,7 @@ const Business = () => {
                 transition={{ duration: 0.5, delay: 0.4 }}
               >
                 <div className="text-center mb-6">
-                  <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full mb-4">
+                  <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full mb-4 border border-primary/20">
                     <CheckCircle className="w-5 h-5 text-primary" />
                     <span className="text-sm font-semibold text-primary uppercase tracking-wide">Con OneTable</span>
                   </div>
@@ -404,17 +400,17 @@ const Business = () => {
                       animate={problemInView ? { opacity: 1, y: 0 } : {}}
                       transition={{ duration: 0.5, delay: 0.5 + index * 0.1 }}
                     >
-                      <Card className="p-5 bg-card border-primary/20 hover:border-primary/40 transition-all">
+                      <div className="p-5 bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 hover:border-primary/30 transition-all">
                         <div className="flex items-center gap-4">
                           <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
                             <stat.icon className="w-6 h-6 text-primary" />
                           </div>
                           <div>
-                            <div className="text-2xl md:text-3xl font-bold text-foreground">{stat.value}</div>
-                            <p className="text-muted-foreground text-sm">{stat.label}</p>
+                            <div className="text-2xl md:text-3xl font-bold text-white">{stat.value}</div>
+                            <p className="text-white/50 text-sm">{stat.label}</p>
                           </div>
                         </div>
-                      </Card>
+                      </div>
                     </motion.div>
                   ))}
                 </div>
@@ -439,9 +435,8 @@ const Business = () => {
             transition={{ duration: 0.6 }}
           >
             <div className="text-center mb-16">
-              <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-8 tracking-wide font-display uppercase">
-                Prenotazioni più intelligenti
-                <span className="block text-[hsl(85,80%,55%)] mt-2" style={{ textShadow: "0 2px 4px rgba(0,0,0,0.3)" }}>Clienti migliori</span>
+              <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-8 tracking-wide font-display uppercase text-foreground">
+                Prenotazioni più intelligenti, clienti migliori
               </h2>
               
               <p className="text-lg md:text-xl text-muted-foreground mb-12 leading-relaxed max-w-3xl mx-auto">
@@ -544,10 +539,8 @@ const Business = () => {
         </div>
       </section>
 
-      {/* Benefits Section */}
-      <section ref={benefitsRef} id="benefits" className="py-24 bg-muted/30 relative overflow-hidden">
-        <div className="absolute top-0 right-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
-        
+      {/* Benefits Section - Dark for Green Contrast */}
+      <section ref={benefitsRef} id="benefits" className="py-24 bg-zinc-950 relative overflow-hidden">
         <div className="container mx-auto px-4 relative z-10">
           <motion.div 
             className="text-center mb-16"
@@ -555,10 +548,10 @@ const Business = () => {
             animate={benefitsInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.6 }}
           >
-            <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 tracking-wide font-display uppercase">
+            <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 tracking-wide font-display uppercase text-white">
               Tutti i Vantaggi
             </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-lg text-white/60 max-w-2xl mx-auto">
               Una soluzione completa per gestire le prenotazioni e premiare i clienti migliori
             </p>
           </motion.div>
@@ -571,17 +564,15 @@ const Business = () => {
           >
             {benefits.map((benefit, index) => (
               <motion.div key={index} variants={itemVariants}>
-                <Card className="group/card h-full bg-card border-border/50 hover:border-primary/30 transition-all duration-300 hover-lift cursor-pointer">
-                  <CardHeader>
-                    <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center mb-4 group-hover/card:bg-primary/20 transition-colors">
-                      <benefit.icon className="w-7 h-7 text-primary" />
-                    </div>
-                    <CardTitle className="text-xl font-bold">{benefit.title}</CardTitle>
-                    <CardDescription className="text-muted-foreground leading-relaxed">
-                      {benefit.desc}
-                    </CardDescription>
-                  </CardHeader>
-                </Card>
+                <div className="group/card h-full bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 hover:border-primary/30 transition-all duration-300 hover-lift cursor-pointer p-6">
+                  <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center mb-4 group-hover/card:bg-primary/20 transition-colors">
+                    <benefit.icon className="w-7 h-7 text-primary" />
+                  </div>
+                  <h3 className="text-xl font-bold text-white mb-2">{benefit.title}</h3>
+                  <p className="text-white/60 leading-relaxed">
+                    {benefit.desc}
+                  </p>
+                </div>
               </motion.div>
             ))}
           </motion.div>
@@ -589,9 +580,7 @@ const Business = () => {
       </section>
 
       {/* How It Works Section */}
-      <section ref={howItWorksRef} id="come-funziona" className="py-24 bg-background relative overflow-hidden z-10">
-        <div className="absolute bottom-0 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
-        
+      <section ref={howItWorksRef} id="come-funziona" className="py-24 bg-muted/30 relative overflow-hidden z-10">
         <div className="container mx-auto px-4 relative z-10">
           <motion.div 
             className="text-center mb-16"
@@ -615,14 +604,14 @@ const Business = () => {
           >
             {steps.map((step, index) => (
               <motion.div key={index} variants={itemVariants}>
-                <Card className="group/card h-full bg-card border-border/50 hover:border-primary/30 transition-all duration-300 hover-lift cursor-pointer">
+                <Card className="group/card h-full bg-card border-border/50 hover:border-border transition-all duration-300 hover-lift cursor-pointer">
                   <CardHeader>
                     <div className="flex items-start gap-4">
-                      <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center flex-shrink-0 group-hover/card:bg-primary/20 transition-colors">
-                        <step.icon className="w-7 h-7 text-primary" />
+                      <div className="w-14 h-14 rounded-2xl bg-muted flex items-center justify-center flex-shrink-0 group-hover/card:bg-muted/80 transition-colors">
+                        <step.icon className="w-7 h-7 text-foreground" />
                       </div>
                       <div>
-                        <div className="text-sm font-bold text-primary mb-1">STEP {step.num}</div>
+                        <div className="text-sm font-bold text-muted-foreground mb-1">STEP {step.num}</div>
                         <CardTitle className="text-xl font-bold mb-2">{step.title}</CardTitle>
                         <CardDescription className="text-muted-foreground leading-relaxed">
                           {step.desc}
@@ -659,8 +648,7 @@ const Business = () => {
           transition={{ duration: 0.6 }}
         >
           <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-white tracking-wide font-display uppercase">
-            Trasforma le prenotazioni
-            <span className="block text-[hsl(85,80%,55%)] mt-2" style={{ textShadow: "0 2px 4px rgba(0,0,0,0.8)" }}>in valore</span>
+            Trasforma le prenotazioni in valore
           </h2>
           <p className="text-lg md:text-xl mb-10 text-white/80 max-w-2xl mx-auto leading-relaxed font-medium">
             Unisciti ai ristoranti che stanno riducendo i no-show e aumentando i ricavi con OneTable.

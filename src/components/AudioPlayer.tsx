@@ -196,17 +196,20 @@ const AudioPlayer = () => {
       
       <button
         onClick={togglePlay}
-        className="w-14 h-14 rounded-full bg-black/40 backdrop-blur-md border border-white/20 flex items-center justify-center gap-[3px] hover:bg-black/60 hover:border-primary/50 transition-all duration-300 group"
+        className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 flex items-center justify-center gap-[2px] hover:bg-white/20 hover:border-white/40 transition-all duration-300 group shadow-lg"
+        style={{ 
+          background: 'rgba(255, 255, 255, 0.08)',
+        }}
         aria-label={isPlaying ? "Pause music" : "Play music"}
       >
         {bars.map((i) => (
           <motion.div
             key={i}
-            className="w-[3px] bg-primary rounded-full"
+            className="w-[2px] bg-white/80 rounded-full"
             animate={isPlaying ? {
-              height: [8, 20, 12, 24, 8],
+              height: [6, 16, 10, 20, 6],
             } : {
-              height: 3,
+              height: 2,
             }}
             transition={isPlaying ? {
               duration: 0.8,
@@ -218,7 +221,7 @@ const AudioPlayer = () => {
               duration: 0.3,
             }}
             style={{
-              height: isPlaying ? undefined : 3,
+              height: isPlaying ? undefined : 2,
             }}
           />
         ))}
