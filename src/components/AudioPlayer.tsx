@@ -91,8 +91,8 @@ const AudioPlayer = () => {
     
     source.buffer = buffer;
     
-    // Set VERY LOUD volume (3.0 = 3x normal volume)
-    gainNode.gain.value = 3.0;
+    // Set moderate volume (1.2 = slightly louder than normal)
+    gainNode.gain.value = 1.2;
     
     source.connect(gainNode);
     gainNode.connect(context.destination);
