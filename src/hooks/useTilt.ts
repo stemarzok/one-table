@@ -32,6 +32,11 @@ export const useTilt = (options: UseTiltOptions = {}) => {
     setTilt({ rotateX, rotateY, scale });
   };
 
+  const handleMouseEnter = () => {
+    // Reset to base state on re-entry to prevent corner snapping
+    setTilt({ rotateX: 0, rotateY: 0, scale });
+  };
+
   const handleMouseLeave = () => {
     setTilt({ rotateX: 0, rotateY: 0, scale: 1 });
   };
@@ -41,10 +46,17 @@ export const useTilt = (options: UseTiltOptions = {}) => {
     transition: `transform ${speed}ms cubic-bezier(0.03, 0.98, 0.52, 0.99)`,
   };
 
+  const transitionStyle = {
+    transform: `perspective(1000px) rotateX(${tilt.rotateX}deg) rotateY(${tilt.rotateY}deg) scale(${tilt.scale})`,
+    transition: `transform ${speed}ms cubic-bezier(0.03, 0.98, 0.52, 0.99)`,
+    borderRadius: 'inherit',
+  };
+
   return {
     ref,
-    style,
+    style: transitionStyle,
     handlers: {
+      onMouseEnter: handleMouseEnter,
       onMouseMove: handleMouseMove,
       onMouseLeave: handleMouseLeave,
     },
