@@ -108,7 +108,7 @@ const Header = () => {
                   variant="outline" 
                   className={`rounded-full font-semibold transition-all duration-200 ${
                     isLandingPage 
-                      ? 'border-white/30 text-white hover:bg-white/10 hover:border-white/50' 
+                      ? 'border-white/40 text-white bg-transparent hover:bg-white/10 hover:border-white/60' 
                       : 'border-foreground/30 text-foreground hover:bg-foreground/5 hover:border-foreground/50'
                   }`}
                 >
@@ -161,7 +161,7 @@ const Header = () => {
             )}
             <div className="flex flex-col gap-2 pt-2 border-t border-white/10 mt-2">
             <Link to={isInBusinessSection ? '/business-login' : '/auth'} onClick={() => setMobileMenuOpen(false)}>
-              <Button variant="outline" className={`w-full font-semibold ${isLandingPage ? 'border-white/30 text-white hover:bg-white/10' : 'border-foreground/30 text-foreground hover:bg-foreground/5'}`}>
+              <Button variant="outline" className={`w-full font-semibold ${isLandingPage ? 'border-white/40 text-white bg-transparent hover:bg-white/10' : 'border-foreground/30 text-foreground hover:bg-foreground/5'}`}>
                 {t('nav.login')}
               </Button>
             </Link>
