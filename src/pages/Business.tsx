@@ -5,8 +5,7 @@ import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/ca
 import { 
   CheckCircle, TrendingDown, Users, Calendar, BarChart3, Shield, ArrowRight, 
   ChevronDown, DollarSign, Star, ClipboardCheck, UserCheck, Award, 
-  XCircle, AlertTriangle, Clock, Ban, Percent, TrendingUp, Check,
-  Utensils, Sparkles, Table, LineChart
+  XCircle, AlertTriangle, Ban, Percent, TrendingUp, Check
 } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
@@ -14,6 +13,10 @@ import { motion, useInView, useScroll, useTransform } from "framer-motion";
 import businessHeroVideo from "@/assets/business-hero-video.mp4";
 import businessCtaVideo from "@/assets/business-cta-video.mp4";
 import LogoScroller from "@/components/LogoScroller";
+import featureRestaurant from "@/assets/business-feature-restaurant.jpg";
+import featureCustomers from "@/assets/business-feature-customers.jpg";
+import featureTables from "@/assets/business-feature-tables.jpg";
+import featureAnalytics from "@/assets/business-feature-analytics.jpg";
 
 const Business = () => {
   const navigate = useNavigate();
@@ -250,10 +253,10 @@ const Business = () => {
                     Meno no-show.
                   </motion.span>
                   <motion.span 
-                    className="block text-primary drop-shadow-[0_0_30px_hsl(85,100%,50%,0.5)]"
+                    className="block text-[hsl(85,80%,55%)] font-bold"
                     variants={titleVariants}
                     style={{
-                      textShadow: "0 0 40px hsl(85, 100%, 50%, 0.4), 0 0 80px hsl(85, 100%, 50%, 0.2)"
+                      textShadow: "0 2px 4px rgba(0,0,0,0.8), 0 0 40px hsl(85, 100%, 50%, 0.3)"
                     }}
                   >
                     Più clienti affidabili.
@@ -333,7 +336,7 @@ const Business = () => {
             <div className="text-center mb-16">
               <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-8 tracking-wide font-display uppercase">
                 I no-show costano miliardi
-                <span className="block text-primary mt-2">ai ristoranti</span>
+                <span className="block text-[hsl(85,80%,55%)] mt-2" style={{ textShadow: "0 2px 4px rgba(0,0,0,0.3)" }}>ai ristoranti</span>
               </h2>
               
               <p className="text-lg md:text-xl text-muted-foreground mb-12 leading-relaxed max-w-3xl mx-auto">
@@ -438,7 +441,7 @@ const Business = () => {
             <div className="text-center mb-16">
               <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-8 tracking-wide font-display uppercase">
                 Prenotazioni più intelligenti
-                <span className="block text-primary mt-2">Clienti migliori</span>
+                <span className="block text-[hsl(85,80%,55%)] mt-2" style={{ textShadow: "0 2px 4px rgba(0,0,0,0.3)" }}>Clienti migliori</span>
               </h2>
               
               <p className="text-lg md:text-xl text-muted-foreground mb-12 leading-relaxed max-w-3xl mx-auto">
@@ -447,13 +450,13 @@ const Business = () => {
               </p>
             </div>
 
-            {/* Feature Cards with Icons */}
+            {/* Feature Cards with Real Images */}
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
               {[
-                { icon: Utensils, title: "Ristorante Verificato", desc: "Profilo professionale con tutte le informazioni del tuo locale" },
-                { icon: Users, title: "Clienti Qualificati", desc: "Vedi la reputazione di ogni cliente prima di confermare" },
-                { icon: Table, title: "Gestione Tavoli", desc: "Organizza sale e disponibilità in modo semplice" },
-                { icon: LineChart, title: "Dati e Insight", desc: "Monitora performance e trend del tuo ristorante" },
+                { image: featureRestaurant, title: "Ristorante Verificato", desc: "Profilo professionale con tutte le informazioni del tuo locale" },
+                { image: featureCustomers, title: "Clienti Qualificati", desc: "Vedi la reputazione di ogni cliente prima di confermare" },
+                { image: featureTables, title: "Gestione Tavoli", desc: "Organizza sale e disponibilità in modo semplice" },
+                { image: featureAnalytics, title: "Dati e Insight", desc: "Monitora performance e trend del tuo ristorante" },
               ].map((feature, index) => (
                 <motion.div
                   key={index}
@@ -462,8 +465,12 @@ const Business = () => {
                   transition={{ duration: 0.5, delay: 0.2 + index * 0.1 }}
                 >
                   <Card className="group/card h-full bg-card border-border/50 hover:border-primary/30 transition-all duration-300 hover-lift cursor-pointer overflow-hidden">
-                    <div className="aspect-video bg-gradient-to-br from-primary/20 via-primary/10 to-transparent flex items-center justify-center">
-                      <feature.icon className="w-16 h-16 text-primary/60 group-hover/card:text-primary group-hover/card:scale-110 transition-all duration-300" />
+                    <div className="aspect-video overflow-hidden">
+                      <img 
+                        src={feature.image} 
+                        alt={feature.title}
+                        className="w-full h-full object-cover group-hover/card:scale-110 transition-transform duration-500"
+                      />
                     </div>
                     <CardHeader className="p-5">
                       <CardTitle className="text-lg font-bold">{feature.title}</CardTitle>
@@ -653,7 +660,7 @@ const Business = () => {
         >
           <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-white tracking-wide font-display uppercase">
             Trasforma le prenotazioni
-            <span className="block text-primary mt-2 drop-shadow-[0_0_30px_hsl(85,100%,50%,0.5)]">in valore</span>
+            <span className="block text-[hsl(85,80%,55%)] mt-2" style={{ textShadow: "0 2px 4px rgba(0,0,0,0.8)" }}>in valore</span>
           </h2>
           <p className="text-lg md:text-xl mb-10 text-white/80 max-w-2xl mx-auto leading-relaxed font-medium">
             Unisciti ai ristoranti che stanno riducendo i no-show e aumentando i ricavi con OneTable.
