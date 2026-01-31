@@ -1,5 +1,4 @@
-import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import * as React from "react";
 
 const DISH_IMAGES = [
   {
@@ -29,64 +28,65 @@ const DISH_IMAGES = [
 ];
 
 const DishHeroCarousel = () => {
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const scrollRef = React.useRef<HTMLDivElement>(null);
+  const [isDragging, setIsDragging] = React.useState(false);
+  const [startX, setStartX] = React.useState(0);
+  const [scrollLeft, setScrollLeft] = React.useState(0);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % DISH_IMAGES.length);
-    }, 4000);
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (!scrollRef.current) return;
+    setIsDragging(true);
+    setStartX(e.pageX - scrollRef.current.offsetLeft);
+    setScrollLeft(scrollRef.current.scrollLeft);
+  };
 
-    return () => clearInterval(interval);
-  }, []);
+  const handleMouseUp = () => setIsDragging(false);
+  const handleMouseLeave = () => setIsDragging(false);
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging || !scrollRef.current) return;
+    e.preventDefault();
+    const x = e.pageX - scrollRef.current.offsetLeft;
+    const walk = (x - startX) * 2;
+    scrollRef.current.scrollLeft = scrollLeft - walk;
+  };
 
   return (
-    <div className="relative w-full h-48 md:h-64 rounded-2xl overflow-hidden mb-8 shadow-2xl">
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={currentIndex}
-          initial={{ opacity: 0, scale: 1.1 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.95 }}
-          transition={{ duration: 0.7, ease: "easeOut" }}
-          className="absolute inset-0"
-        >
-          <img
-            src={DISH_IMAGES[currentIndex].url}
-            alt={DISH_IMAGES[currentIndex].label}
-            className="w-full h-full object-cover"
-          />
-          
-          {/* Gradient overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
-          
-          {/* Label */}
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="absolute bottom-6 left-6 md:bottom-8 md:left-8"
-          >
-            <span className="text-white/80 text-sm font-medium mb-1 block">Scopri le specialità</span>
-            <h3 className="text-white text-2xl md:text-4xl font-bold font-display">
-              {DISH_IMAGES[currentIndex].label}
-            </h3>
-          </motion.div>
-        </motion.div>
-      </AnimatePresence>
-      
-      {/* Dot indicators */}
-      <div className="absolute bottom-4 right-4 md:bottom-6 md:right-6 flex gap-1.5">
-        {DISH_IMAGES.map((_, index) => (
-          <button
+    <div className="relative w-full mb-8">
+      <div 
+        ref={scrollRef}
+        className={`flex gap-4 overflow-x-auto scrollbar-hide scroll-smooth ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
+        style={{ scrollSnapType: 'x mandatory', scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+        onMouseDown={handleMouseDown}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseLeave}
+        onMouseMove={handleMouseMove}
+      >
+        {DISH_IMAGES.map((dish, index) => (
+          <div
             key={index}
-            onClick={() => setCurrentIndex(index)}
-            className={`transition-all duration-300 rounded-full ${
-              currentIndex === index 
-                ? 'w-6 h-2 bg-white' 
-                : 'w-2 h-2 bg-white/50 hover:bg-white/70'
-            }`}
-            aria-label={`Go to slide ${index + 1}`}
-          />
+            className="flex-shrink-0 w-72 md:w-96 h-48 md:h-64 rounded-2xl overflow-hidden shadow-xl"
+            style={{ scrollSnapAlign: 'start' }}
+          >
+            <div className="relative w-full h-full">
+              <img
+                src={dish.url}
+                alt={dish.label}
+                className="w-full h-full object-cover"
+                draggable={false}
+              />
+              {/* Gradient overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+              
+              {/* Label */}
+              <div className="absolute bottom-4 left-4 md:bottom-6 md:left-6">
+                <span className="text-white/70 text-xs font-medium mb-1 block">Scopri</span>
+                <h3 className="text-white text-xl md:text-2xl font-bold font-display">
+                  {dish.label}
+                </h3>
+              </div>
+            </div>
+          </div>
         ))}
       </div>
     </div>

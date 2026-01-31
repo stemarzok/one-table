@@ -96,7 +96,7 @@ export const ProfileCompletionProgress = ({
   }
 
   return (
-    <Card className="overflow-hidden border-amber-500/30 bg-gradient-to-br from-amber-500/10 via-card to-card shadow-lg">
+    <Card className="overflow-hidden border-border bg-gradient-to-br from-muted/50 via-card to-card shadow-lg">
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
         <CollapsibleTrigger className="w-full">
           <div className="p-5 flex items-center justify-between hover:bg-muted/20 transition-colors">
@@ -121,16 +121,16 @@ export const ProfileCompletionProgress = ({
                     strokeWidth="4"
                     fill="none"
                     strokeDasharray={`${percentage * 1.51} 151`}
-                    className="text-amber-500 transition-all duration-500"
+                    className="text-primary transition-all duration-500"
                   />
                 </svg>
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <span className="text-sm font-bold text-amber-600 dark:text-amber-400">{percentage}%</span>
+                  <span className="text-sm font-bold text-foreground">{percentage}%</span>
                 </div>
               </div>
               
               <div className="flex-1 text-left">
-                <h3 className="font-semibold text-lg">Completa il tuo profilo</h3>
+                <h3 className="font-semibold text-lg text-foreground">Completa il tuo profilo</h3>
                 <p className="text-sm text-muted-foreground">
                   {completedCount}/{items.length} passaggi completati
                 </p>
@@ -156,26 +156,24 @@ export const ProfileCompletionProgress = ({
                       key={item.id}
                       className={`flex items-center gap-3 p-3 rounded-xl transition-all ${
                         item.completed 
-                          ? "bg-emerald-500/10 border border-emerald-500/20" 
+                          ? "bg-primary/10 border border-primary/20" 
                           : "bg-muted/50 hover:bg-muted"
                       }`}
                     >
                       <div className={`p-2 rounded-lg ${
                         item.completed 
-                          ? "bg-emerald-500/20 text-emerald-600 dark:text-emerald-400" 
+                          ? "bg-primary/15 text-primary" 
                           : "bg-background text-muted-foreground"
                       }`}>
                         <Icon className="w-4 h-4" />
                       </div>
                       
-                      <span className={`flex-1 text-sm font-medium ${
-                        item.completed ? "text-foreground" : "text-foreground"
-                      }`}>
+                      <span className="flex-1 text-sm font-medium text-foreground">
                         {item.label}
                       </span>
                     
                     {item.completed ? (
-                      <div className="p-1 rounded-full bg-emerald-500 text-white">
+                      <div className="p-1 rounded-full bg-primary text-primary-foreground">
                         <Check className="w-3 h-3" />
                       </div>
                     ) : item.action ? (

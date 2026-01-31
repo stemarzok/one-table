@@ -122,13 +122,13 @@ export const ContextualAlerts = ({
 
   if (alerts.length === 0) {
     return (
-      <Card className="p-4 border-emerald-500/30 bg-emerald-500/10 shadow-lg">
+      <Card className="p-4 border-primary/30 bg-primary/5 shadow-lg">
         <div className="flex items-center gap-3">
-          <div className="p-2 rounded-full bg-emerald-500/20">
-            <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+          <div className="p-2 rounded-full bg-primary/15">
+            <CheckCircle2 className="w-5 h-5 text-primary" />
           </div>
           <div>
-            <p className="font-medium text-emerald-700 dark:text-emerald-300">Tutto a posto!</p>
+            <p className="font-semibold text-foreground">Tutto a posto!</p>
             <p className="text-sm text-muted-foreground">Nessuna azione richiesta al momento</p>
           </div>
         </div>

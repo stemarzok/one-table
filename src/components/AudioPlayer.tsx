@@ -184,6 +184,12 @@ const AudioPlayer = () => {
   if (!shouldShow) return null;
 
   const bars = [0, 1, 2, 3, 4];
+
+  // Detect if current page has dark background
+  const darkBackgroundPaths = ['/', '/business', '/pricing'];
+  const isDarkBackground = darkBackgroundPaths.some(path => 
+    location.pathname === path || (path !== '/' && location.pathname.startsWith(path + '/'))
+  );
   
   return (
     <motion.div
@@ -196,13 +202,17 @@ const AudioPlayer = () => {
       
       <button
         onClick={togglePlay}
-        className="w-12 h-12 rounded-full backdrop-blur-xl border-2 flex items-center justify-center gap-[2px] transition-all duration-300 group shadow-lg hover:scale-105 bg-foreground/10 border-foreground/30 hover:bg-foreground/20 hover:border-foreground/50"
+        className={`w-12 h-12 rounded-full backdrop-blur-xl border-2 flex items-center justify-center gap-[2px] transition-all duration-300 group shadow-lg hover:scale-105 ${
+          isDarkBackground 
+            ? 'bg-white/10 border-white/30 hover:bg-white/20 hover:border-white/50' 
+            : 'bg-foreground/10 border-foreground/30 hover:bg-foreground/20 hover:border-foreground/50'
+        }`}
         aria-label={isPlaying ? "Pause music" : "Play music"}
       >
         {bars.map((i) => (
           <motion.div
             key={i}
-            className="w-[2px] bg-foreground/80 rounded-full"
+            className={`w-[2px] rounded-full ${isDarkBackground ? 'bg-white/80' : 'bg-foreground/80'}`}
             animate={isPlaying ? {
               height: [6, 16, 10, 20, 6],
             } : {

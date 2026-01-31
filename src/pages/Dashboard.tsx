@@ -454,8 +454,8 @@ const Dashboard = () => {
                         </div>
                       </div>
                       
-                      {/* Quick action buttons - more spacing */}
-                      <div className="flex flex-wrap gap-3 mt-6 pt-4 border-t border-border/50">
+                      {/* Quick action buttons - more spacing on wrap */}
+                      <div className="flex flex-wrap gap-4 mt-6 pt-4 border-t border-border/50">
                         <Button 
                           variant="outline" 
                           size="sm"
@@ -472,7 +472,7 @@ const Dashboard = () => {
                           variant="outline" 
                           size="sm"
                           onClick={() => handleStatClick('tables')}
-                          className="gap-2 hover:bg-muted transition-all duration-200"
+                          className="gap-2 hover:bg-muted transition-all duration-200 mt-2 sm:mt-0"
                         >
                           <Table2 className="w-4 h-4" />
                           Tavoli ({stats.tables})
@@ -481,7 +481,7 @@ const Dashboard = () => {
                           variant="outline" 
                           size="sm"
                           onClick={() => handleStatClick('menu')}
-                          className="gap-2 hover:bg-muted transition-all duration-200"
+                          className="gap-2 hover:bg-muted transition-all duration-200 mt-2 sm:mt-0"
                         >
                           <UtensilsCrossed className="w-4 h-4" />
                           Menu ({stats.menuItems})
