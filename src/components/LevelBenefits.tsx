@@ -9,6 +9,9 @@ const LevelBenefits = () => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
   const [activeIndex, setActiveIndex] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [scrollLeft, setScrollLeft] = useState(0);
   
   const levels = [
     {
@@ -120,6 +123,24 @@ const LevelBenefits = () => {
       ? Math.max(0, activeIndex - 1) 
       : Math.min(levels.length - 1, activeIndex + 1);
     scrollToCard(newIndex);
+  };
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (!scrollContainerRef.current) return;
+    setIsDragging(true);
+    setStartX(e.pageX - scrollContainerRef.current.offsetLeft);
+    setScrollLeft(scrollContainerRef.current.scrollLeft);
+  };
+
+  const handleMouseUp = () => setIsDragging(false);
+  const handleMouseLeave = () => setIsDragging(false);
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging || !scrollContainerRef.current) return;
+    e.preventDefault();
+    const x = e.pageX - scrollContainerRef.current.offsetLeft;
+    const walk = (x - startX) * 2;
+    scrollContainerRef.current.scrollLeft = scrollLeft - walk;
   };
 
   return (
@@ -239,7 +260,7 @@ const LevelBenefits = () => {
           
           <motion.div 
             ref={scrollContainerRef}
-            className="overflow-x-auto py-4 scroll-smooth hide-scrollbar touch-pan-x cursor-grab active:cursor-grabbing"
+            className={`overflow-x-auto py-4 scroll-smooth hide-scrollbar touch-pan-x ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
             style={{ 
               scrollSnapType: 'x mandatory',
               WebkitOverflowScrolling: 'touch'
@@ -247,6 +268,10 @@ const LevelBenefits = () => {
             variants={containerVariants}
             initial="hidden"
             animate={isInView ? "visible" : "hidden"}
+            onMouseDown={handleMouseDown}
+            onMouseUp={handleMouseUp}
+            onMouseLeave={handleMouseLeave}
+            onMouseMove={handleMouseMove}
           >
             <div className="flex gap-4 min-w-max px-1">
               {levels.map((level, index) => {

@@ -7,6 +7,9 @@ const HowItWorksEnhanced = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
+  const [isDragging, setIsDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [scrollLeft, setScrollLeft] = useState(0);
   
   const steps = [
     {
@@ -65,6 +68,24 @@ const HowItWorksEnhanced = () => {
       return () => ref.removeEventListener('scroll', checkScroll);
     }
   }, []);
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (!scrollRef.current) return;
+    setIsDragging(true);
+    setStartX(e.pageX - scrollRef.current.offsetLeft);
+    setScrollLeft(scrollRef.current.scrollLeft);
+  };
+
+  const handleMouseUp = () => setIsDragging(false);
+  const handleMouseLeave = () => setIsDragging(false);
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging || !scrollRef.current) return;
+    e.preventDefault();
+    const x = e.pageX - scrollRef.current.offsetLeft;
+    const walk = (x - startX) * 2;
+    scrollRef.current.scrollLeft = scrollLeft - walk;
+  };
 
   return (
     <section id="how-it-works" className="py-20 bg-muted/30 relative z-10">
@@ -161,13 +182,17 @@ const HowItWorksEnhanced = () => {
 
           <div 
             ref={scrollRef}
-            className="flex gap-4 overflow-x-auto pt-2 pb-4 scroll-smooth hide-scrollbar touch-pan-x cursor-grab active:cursor-grabbing"
+            className={`flex gap-4 overflow-x-auto pt-2 pb-4 scroll-smooth hide-scrollbar touch-pan-x ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
             style={{ 
               scrollbarWidth: 'none', 
               msOverflowStyle: 'none',
               scrollSnapType: 'x mandatory',
               WebkitOverflowScrolling: 'touch'
             }}
+            onMouseDown={handleMouseDown}
+            onMouseUp={handleMouseUp}
+            onMouseLeave={handleMouseLeave}
+            onMouseMove={handleMouseMove}
           >
             {steps.map((step, index) => {
               const Icon = step.icon;
