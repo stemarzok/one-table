@@ -112,7 +112,7 @@ const CuisineCarousel = ({ onCategorySelect }: CuisineCarouselProps) => {
               onClick={() => handleCategoryClick(category.name)}
             >
               {/* Card categoria stile TripAdvisor verticale */}
-              <div className="relative rounded-xl overflow-hidden shadow-sm hover:shadow-elegant transition-shadow duration-300 h-48 sm:h-56">
+              <div className="relative rounded-2xl overflow-hidden shadow-sm hover:shadow-elegant transition-shadow duration-300 h-48 sm:h-56">
                 {/* Immagine */}
                 <img
                   src={category.image}

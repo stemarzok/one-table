@@ -46,8 +46,8 @@ const SponsoredCard = ({ restaurant, index, isFavorite, onFavoriteClick, onClick
       {/* Card con effetto 3D tilt */}
       <motion.div 
         ref={ref as any}
-        className="relative rounded-xl overflow-hidden bg-card border border-border/30 shadow-sm transition-shadow duration-300"
-        style={style}
+        className="relative rounded-2xl overflow-hidden bg-card border border-border/30 shadow-sm transition-shadow duration-300"
+        style={{ ...style, borderRadius: '1rem' }}
         {...handlers}
       >
         {/* Shine effect overlay */}

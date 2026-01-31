@@ -338,14 +338,44 @@ const Dashboard = () => {
                   transition={{ duration: 0.3, ease: "easeInOut" }}
                 >
               <div className="space-y-8">
-                {/* Header del Ristorante */}
+                {/* Header del Ristorante - Modern Style with Cover */}
                 {statsLoading ? (
                   <RestaurantHeaderSkeleton />
                 ) : restaurant && (
-                  <section className="relative overflow-hidden rounded-2xl border bg-card shadow-lg">
-                    <div className="relative p-6 md:p-8">
-                      <div className="flex flex-col md:flex-row gap-6 items-start">
-                        {/* Logo */}
+                  <section className="relative overflow-hidden rounded-2xl border-0 shadow-xl">
+                    {/* Cover Image */}
+                    <div className="relative h-40 md:h-52">
+                      {restaurant.cover_image_url ? (
+                        <img 
+                          src={restaurant.cover_image_url}
+                          alt={`${restaurant.name} cover`}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-gradient-to-br from-primary/30 via-primary/20 to-muted" />
+                      )}
+                      {/* Dark overlay gradient */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
+                      
+                      {/* Edit button */}
+                      <Button 
+                        variant="secondary" 
+                        size="sm"
+                        onClick={() => {
+                          setInfoModalTab("info");
+                          setShowInfoModal(true);
+                        }}
+                        className="absolute top-4 right-4 gap-2 bg-background/80 backdrop-blur-sm hover:bg-background shadow-lg"
+                      >
+                        <Pencil className="w-3 h-3" />
+                        <span className="hidden sm:inline">Modifica</span>
+                      </Button>
+                    </div>
+                    
+                    {/* Content overlapping cover */}
+                    <div className="relative -mt-16 md:-mt-20 px-6 pb-6 md:px-8 md:pb-8">
+                      <div className="flex flex-col md:flex-row gap-4 md:gap-6 items-start">
+                        {/* Logo - overlapping cover */}
                         <div 
                           className="flex-shrink-0 cursor-pointer group relative"
                           onClick={() => {
@@ -357,11 +387,11 @@ const Dashboard = () => {
                             <img 
                               src={restaurant.logo_url} 
                               alt={restaurant.name}
-                              className="w-24 h-24 md:w-28 md:h-28 rounded-2xl object-cover border-4 border-background shadow-xl group-hover:scale-105 transition-transform"
+                              className="w-24 h-24 md:w-32 md:h-32 rounded-2xl object-cover border-4 border-background shadow-2xl group-hover:scale-105 transition-transform ring-2 ring-primary/20"
                             />
                           ) : (
-                            <div className="w-24 h-24 md:w-28 md:h-28 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center border-4 border-background shadow-xl group-hover:scale-105 transition-transform">
-                              <Store className="w-12 h-12 text-primary" />
+                            <div className="w-24 h-24 md:w-32 md:h-32 rounded-2xl bg-gradient-to-br from-card to-muted flex items-center justify-center border-4 border-background shadow-2xl group-hover:scale-105 transition-transform">
+                              <Store className="w-12 h-12 text-muted-foreground" />
                             </div>
                           )}
                           <div className="absolute -bottom-2 -right-2 p-2 rounded-full bg-primary text-primary-foreground shadow-lg opacity-0 group-hover:opacity-100 transition-opacity">
@@ -370,18 +400,18 @@ const Dashboard = () => {
                         </div>
                         
                         {/* Info */}
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-start justify-between gap-4">
-                            <div>
-                              <h2 className="text-2xl md:text-3xl font-bold mb-1">{restaurant.name}</h2>
+                        <div className="flex-1 min-w-0 pt-2 md:pt-6">
+                          <div className="flex flex-col md:flex-row md:items-start justify-between gap-3 md:gap-4">
+                            <div className="flex-1">
+                              <h2 className="text-2xl md:text-3xl font-bold mb-2">{restaurant.name}</h2>
                               <div className="flex flex-wrap items-center gap-2 mb-3">
                                 {restaurant.cuisine_type && (
-                                  <Badge variant="secondary" className="font-medium">
+                                  <Badge variant="secondary" className="font-medium bg-muted">
                                     {restaurant.cuisine_type}
                                   </Badge>
                                 )}
                                 {restaurant.price_range && (
-                                  <Badge variant="secondary" className="font-medium">
+                                  <Badge variant="secondary" className="font-medium bg-muted">
                                     {restaurant.price_range}
                                   </Badge>
                                 )}
@@ -391,18 +421,24 @@ const Dashboard = () => {
                                   </span>
                                 )}
                               </div>
+                              
+                              {restaurant.description ? (
+                                <p className="text-muted-foreground line-clamp-2 max-w-2xl">{restaurant.description}</p>
+                              ) : (
+                                <p className="text-muted-foreground/60 italic">Nessuna descrizione aggiunta</p>
+                              )}
                             </div>
                             
                             {/* Rating badge - TripAdvisor dots style */}
                             {stats.totalReviews > 0 && (
-                              <div className="flex-shrink-0 flex flex-col items-end gap-1">
+                              <div className="flex-shrink-0 flex flex-row md:flex-col items-center md:items-end gap-2 md:gap-1 p-3 rounded-xl bg-card/80 backdrop-blur-sm shadow-lg border border-border/50">
                                 <div className="flex items-center gap-2">
-                                  <span className="text-lg font-bold text-foreground">{stats.avgRating}</span>
+                                  <span className="text-xl font-bold text-foreground">{stats.avgRating}</span>
                                   <div className="flex gap-0.5">
                                     {[1, 2, 3, 4, 5].map((dot) => (
                                       <div
                                         key={dot}
-                                        className={`w-3.5 h-3.5 rounded-full transition-colors ${
+                                        className={`w-3 h-3 rounded-full transition-colors ${
                                           dot <= Math.round(stats.avgRating) 
                                             ? 'bg-primary' 
                                             : 'bg-muted'
@@ -415,26 +451,41 @@ const Dashboard = () => {
                               </div>
                             )}
                           </div>
-                          
-                          {restaurant.description ? (
-                            <p className="text-muted-foreground line-clamp-2 max-w-2xl mb-4">{restaurant.description}</p>
-                          ) : (
-                            <p className="text-muted-foreground/60 italic mb-4">Nessuna descrizione aggiunta</p>
-                          )}
-                          
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => {
-                              setInfoModalTab("info");
-                              setShowInfoModal(true);
-                            }}
-                            className="gap-2 hover:bg-muted transition-all duration-200"
-                          >
-                            <Settings className="w-4 h-4" />
-                            Gestisci Info e Orari
-                          </Button>
                         </div>
+                      </div>
+                      
+                      {/* Quick action buttons - more spacing */}
+                      <div className="flex flex-wrap gap-3 mt-6 pt-4 border-t border-border/50">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => {
+                            setInfoModalTab("info");
+                            setShowInfoModal(true);
+                          }}
+                          className="gap-2 hover:bg-muted transition-all duration-200"
+                        >
+                          <Settings className="w-4 h-4" />
+                          Info e Orari
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleStatClick('tables')}
+                          className="gap-2 hover:bg-muted transition-all duration-200"
+                        >
+                          <Table2 className="w-4 h-4" />
+                          Tavoli ({stats.tables})
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleStatClick('menu')}
+                          className="gap-2 hover:bg-muted transition-all duration-200"
+                        >
+                          <UtensilsCrossed className="w-4 h-4" />
+                          Menu ({stats.menuItems})
+                        </Button>
                       </div>
                     </div>
                   </section>
@@ -485,12 +536,12 @@ const Dashboard = () => {
                 )}
 
                 {/* Sezione Prenotazioni con Sparkline */}
-                <section>
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="p-2 rounded-lg bg-primary/10">
+                <section className="p-6 rounded-2xl bg-gradient-to-br from-slate-900/5 via-card to-card dark:from-slate-800/50 dark:via-card dark:to-card border border-border/50 shadow-lg">
+                  <div className="flex items-center gap-3 mb-5">
+                    <div className="p-2.5 rounded-xl bg-primary/15">
                       <Calendar className="w-5 h-5 text-primary" />
                     </div>
-                    <h2 className="text-xl font-semibold">Prenotazioni</h2>
+                    <h2 className="text-xl font-bold">Prenotazioni</h2>
                   </div>
                   {statsLoading ? (
                     <BookingStatsGridSkeleton />
@@ -575,12 +626,12 @@ const Dashboard = () => {
                 )}
 
                 {/* Sezione Struttura (Tavoli + Menu) */}
-                <section>
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="p-2 rounded-lg bg-primary/10">
-                      <Store className="w-5 h-5 text-primary" />
+                <section className="p-6 rounded-2xl bg-gradient-to-br from-amber-900/5 via-card to-card dark:from-amber-800/20 dark:via-card dark:to-card border border-border/50 shadow-lg">
+                  <div className="flex items-center gap-3 mb-5">
+                    <div className="p-2.5 rounded-xl bg-amber-500/15">
+                      <Store className="w-5 h-5 text-amber-600 dark:text-amber-400" />
                     </div>
-                    <h2 className="text-xl font-semibold">Struttura</h2>
+                    <h2 className="text-xl font-bold">Struttura</h2>
                   </div>
                   {statsLoading ? (
                     <StructureStatsGridSkeleton />
@@ -627,12 +678,12 @@ const Dashboard = () => {
                 </section>
 
                 {/* Sezione Recensioni */}
-                <section>
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="p-2 rounded-lg bg-primary/10">
-                      <Star className="w-5 h-5 text-primary" />
+                <section className="p-6 rounded-2xl bg-gradient-to-br from-blue-900/5 via-card to-card dark:from-blue-800/20 dark:via-card dark:to-card border border-border/50 shadow-lg">
+                  <div className="flex items-center gap-3 mb-5">
+                    <div className="p-2.5 rounded-xl bg-blue-500/15">
+                      <Star className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                     </div>
-                    <h2 className="text-xl font-semibold">Recensioni</h2>
+                    <h2 className="text-xl font-bold">Recensioni</h2>
                   </div>
                   {statsLoading ? (
                     <ReviewStatsGridSkeleton />
