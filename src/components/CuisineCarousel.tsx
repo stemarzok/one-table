@@ -31,6 +31,9 @@ const CuisineCarousel = ({ onCategorySelect }: CuisineCarouselProps) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
+  const [isDragging, setIsDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [scrollLeft, setScrollLeft] = useState(0);
 
   const checkScroll = () => {
     if (scrollRef.current) {
@@ -60,9 +63,32 @@ const CuisineCarousel = ({ onCategorySelect }: CuisineCarouselProps) => {
   }, []);
 
   const handleCategoryClick = (categoryName: string) => {
-    if (onCategorySelect) {
+    if (!isDragging && onCategorySelect) {
       onCategorySelect(categoryName);
     }
+  };
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (!scrollRef.current) return;
+    setIsDragging(true);
+    setStartX(e.pageX - scrollRef.current.offsetLeft);
+    setScrollLeft(scrollRef.current.scrollLeft);
+  };
+
+  const handleMouseUp = () => {
+    setTimeout(() => setIsDragging(false), 10);
+  };
+
+  const handleMouseLeave = () => {
+    setIsDragging(false);
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging || !scrollRef.current) return;
+    e.preventDefault();
+    const x = e.pageX - scrollRef.current.offsetLeft;
+    const walk = (x - startX) * 2;
+    scrollRef.current.scrollLeft = scrollLeft - walk;
   };
 
   return (
@@ -99,8 +125,12 @@ const CuisineCarousel = ({ onCategorySelect }: CuisineCarouselProps) => {
 
         <div 
           ref={scrollRef}
-          className="flex gap-4 overflow-x-auto overflow-y-visible scrollbar-hide py-2 scroll-smooth touch-pan-x cursor-grab active:cursor-grabbing"
+          className={`flex gap-4 overflow-x-auto overflow-y-visible scrollbar-hide py-2 scroll-smooth touch-pan-x ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch', overscrollBehaviorX: 'contain' }}
+          onMouseDown={handleMouseDown}
+          onMouseUp={handleMouseUp}
+          onMouseLeave={handleMouseLeave}
+          onMouseMove={handleMouseMove}
         >
           {CUISINE_CATEGORIES.map((category, index) => (
             <motion.div

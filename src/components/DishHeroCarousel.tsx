@@ -1,4 +1,4 @@
-import * as React from "react";
+import { useEffect, useRef, useState } from "react";
 
 const DISH_IMAGES = [
   {
@@ -28,66 +28,76 @@ const DISH_IMAGES = [
 ];
 
 const DishHeroCarousel = () => {
-  const scrollRef = React.useRef<HTMLDivElement>(null);
-  const [isDragging, setIsDragging] = React.useState(false);
-  const [startX, setStartX] = React.useState(0);
-  const [scrollLeft, setScrollLeft] = React.useState(0);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [currentLabel, setCurrentLabel] = useState(DISH_IMAGES[0].label);
+  
+  // Auto-scroll showreel effect
+  useEffect(() => {
+    const container = scrollRef.current;
+    if (!container) return;
 
-  const handleMouseDown = (e: React.MouseEvent) => {
-    if (!scrollRef.current) return;
-    setIsDragging(true);
-    setStartX(e.pageX - scrollRef.current.offsetLeft);
-    setScrollLeft(scrollRef.current.scrollLeft);
-  };
-
-  const handleMouseUp = () => setIsDragging(false);
-  const handleMouseLeave = () => setIsDragging(false);
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging || !scrollRef.current) return;
-    e.preventDefault();
-    const x = e.pageX - scrollRef.current.offsetLeft;
-    const walk = (x - startX) * 2;
-    scrollRef.current.scrollLeft = scrollLeft - walk;
-  };
+    let animationId: number;
+    let scrollSpeed = 1; // pixels per frame
+    
+    const animate = () => {
+      if (!container) return;
+      
+      container.scrollLeft += scrollSpeed;
+      
+      // Reset to beginning when reaching the end (seamless loop)
+      if (container.scrollLeft >= container.scrollWidth - container.clientWidth) {
+        container.scrollLeft = 0;
+      }
+      
+      // Update current label based on scroll position
+      const imageWidth = container.scrollWidth / DISH_IMAGES.length;
+      const currentIndex = Math.floor((container.scrollLeft + container.clientWidth / 2) / imageWidth) % DISH_IMAGES.length;
+      setCurrentLabel(DISH_IMAGES[currentIndex]?.label || DISH_IMAGES[0].label);
+      
+      animationId = requestAnimationFrame(animate);
+    };
+    
+    animationId = requestAnimationFrame(animate);
+    
+    return () => {
+      cancelAnimationFrame(animationId);
+    };
+  }, []);
 
   return (
-    <div className="relative w-full mb-8">
+    <div className="relative w-full h-48 md:h-64 rounded-2xl overflow-hidden mb-8 shadow-2xl">
+      {/* Scrolling images container */}
       <div 
         ref={scrollRef}
-        className={`flex gap-4 overflow-x-auto scrollbar-hide scroll-smooth ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
-        style={{ scrollSnapType: 'x mandatory', scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-        onMouseDown={handleMouseDown}
-        onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseLeave}
-        onMouseMove={handleMouseMove}
+        className="absolute inset-0 flex overflow-hidden"
+        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
       >
-        {DISH_IMAGES.map((dish, index) => (
+        {/* Double the images for seamless loop */}
+        {[...DISH_IMAGES, ...DISH_IMAGES].map((dish, index) => (
           <div
             key={index}
-            className="flex-shrink-0 w-72 md:w-96 h-48 md:h-64 rounded-2xl overflow-hidden shadow-xl"
-            style={{ scrollSnapAlign: 'start' }}
+            className="flex-shrink-0 h-full"
+            style={{ width: '50%', minWidth: '300px' }}
           >
-            <div className="relative w-full h-full">
-              <img
-                src={dish.url}
-                alt={dish.label}
-                className="w-full h-full object-cover"
-                draggable={false}
-              />
-              {/* Gradient overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-              
-              {/* Label */}
-              <div className="absolute bottom-4 left-4 md:bottom-6 md:left-6">
-                <span className="text-white/70 text-xs font-medium mb-1 block">Scopri</span>
-                <h3 className="text-white text-xl md:text-2xl font-bold font-display">
-                  {dish.label}
-                </h3>
-              </div>
-            </div>
+            <img
+              src={dish.url}
+              alt={dish.label}
+              className="w-full h-full object-cover"
+              draggable={false}
+            />
           </div>
         ))}
+      </div>
+      
+      {/* Gradient overlay */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent pointer-events-none" />
+      
+      {/* Current label */}
+      <div className="absolute bottom-4 left-4 md:bottom-6 md:left-6 pointer-events-none">
+        <span className="text-white/70 text-xs font-medium mb-1 block">Scopri le specialità</span>
+        <h3 className="text-white text-2xl md:text-4xl font-bold font-display transition-all duration-300">
+          {currentLabel}
+        </h3>
       </div>
     </div>
   );
