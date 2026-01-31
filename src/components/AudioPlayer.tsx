@@ -15,7 +15,7 @@ const AudioPlayer = () => {
 
   // Show on landing pages for non-logged-in users AND on user pages (not business dashboard)
   const publicPaths = ['/', '/business', '/pricing'];
-  const userPaths = ['/restaurant/', '/profile', '/settings', '/my-bookings', '/reviews', '/favorites'];
+  const userPaths = ['/restaurants', '/restaurant/', '/profile', '/settings', '/my-bookings', '/reviews', '/favorites'];
   const businessDashboardPaths = ['/dashboard', '/analytics', '/billing', '/promo'];
   
   const isPublicPage = publicPaths.some(path => 
@@ -196,16 +196,13 @@ const AudioPlayer = () => {
       
       <button
         onClick={togglePlay}
-        className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 flex items-center justify-center gap-[2px] hover:bg-white/20 hover:border-white/40 transition-all duration-300 group shadow-lg"
-        style={{ 
-          background: 'rgba(255, 255, 255, 0.08)',
-        }}
+        className="w-12 h-12 rounded-full backdrop-blur-xl border-2 flex items-center justify-center gap-[2px] transition-all duration-300 group shadow-lg hover:scale-105 bg-foreground/10 border-foreground/30 hover:bg-foreground/20 hover:border-foreground/50"
         aria-label={isPlaying ? "Pause music" : "Play music"}
       >
         {bars.map((i) => (
           <motion.div
             key={i}
-            className="w-[2px] bg-white/80 rounded-full"
+            className="w-[2px] bg-foreground/80 rounded-full"
             animate={isPlaying ? {
               height: [6, 16, 10, 20, 6],
             } : {

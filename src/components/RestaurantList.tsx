@@ -4,14 +4,16 @@ import { FilterState } from "./RestaurantFilters";
 import UnifiedSearchBar from "./UnifiedSearchBar";
 import SponsoredCarousel from "./SponsoredCarousel";
 import CuisineCarousel from "./CuisineCarousel";
+import DishHeroCarousel from "./DishHeroCarousel";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useState, useMemo, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { MapPin, X } from "lucide-react";
+import { MapPin, X, History, RotateCcw } from "lucide-react";
 import Map from "@/components/Map";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface Restaurant {
   id: string;
@@ -34,6 +36,7 @@ interface Restaurant {
 }
 
 const RestaurantList = () => {
+  const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
@@ -41,6 +44,8 @@ const RestaurantList = () => {
   const [showMap, setShowMap] = useState(false);
   const [userLocation, setUserLocation] = useState<{lat: number; lng: number} | null>(null);
   const [selectedCuisine, setSelectedCuisine] = useState<string | null>(null);
+  const [recentlyViewed, setRecentlyViewed] = useState<Restaurant[]>([]);
+  const [previouslyBooked, setPreviouslyBooked] = useState<Restaurant[]>([]);
   const itemsPerPage = 9;
   const [filters, setFilters] = useState<FilterState>({
     city: "all",
@@ -57,7 +62,11 @@ const RestaurantList = () => {
 
   useEffect(() => {
     fetchRestaurants();
-  }, []);
+    if (user?.id) {
+      fetchRecentlyViewed();
+      fetchPreviouslyBooked();
+    }
+  }, [user?.id]);
 
   // Update filters when cuisine is selected from carousel
   useEffect(() => {
@@ -100,6 +109,97 @@ const RestaurantList = () => {
       console.error('Error fetching restaurants:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Fetch recently viewed restaurants (from user_analytics page_view events)
+  const fetchRecentlyViewed = async () => {
+    if (!user?.id) return;
+    
+    try {
+      // Get restaurant page views from analytics
+      const { data: views } = await supabase
+        .from('user_analytics')
+        .select('page_path, created_at')
+        .eq('user_id', user.id)
+        .eq('event_type', 'page_view')
+        .like('page_path', '/restaurant/%')
+        .order('created_at', { ascending: false })
+        .limit(20);
+
+      if (views && views.length > 0) {
+        // Extract unique restaurant IDs
+        const restaurantIds = [...new Set(
+          views
+            .map(v => v.page_path.replace('/restaurant/', ''))
+            .filter(id => id && id.length > 10)
+        )].slice(0, 6);
+
+        if (restaurantIds.length > 0) {
+          const { data: restaurants } = await supabase
+            .from('restaurants')
+            .select('id, name, cuisine_type, address, city, price_range, cover_image_url, logo_url, gallery_images, is_active, is_sponsored, cuisine_types, specializations, occasions, extra_features')
+            .in('id', restaurantIds)
+            .eq('is_active', true);
+
+          if (restaurants) {
+            const withRatings = await Promise.all(
+              restaurants.map(async (r) => {
+                const { data } = await supabase.rpc('get_restaurant_rating', { restaurant_id_param: r.id });
+                return { 
+                  ...r, 
+                  avg_rating: data?.[0]?.avg_rating || 0,
+                  total_reviews: Number(data?.[0]?.total_reviews ?? 0)
+                };
+              })
+            );
+            setRecentlyViewed(withRatings);
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching recently viewed:', error);
+    }
+  };
+
+  // Fetch restaurants where user has previously booked
+  const fetchPreviouslyBooked = async () => {
+    if (!user?.id) return;
+    
+    try {
+      const { data: bookings } = await supabase
+        .from('bookings')
+        .select('restaurant_id')
+        .eq('user_id', user.id)
+        .eq('status', 'confirmed')
+        .order('created_at', { ascending: false })
+        .limit(10);
+
+      if (bookings && bookings.length > 0) {
+        const restaurantIds = [...new Set(bookings.map(b => b.restaurant_id))].slice(0, 6);
+
+        const { data: restaurants } = await supabase
+          .from('restaurants')
+          .select('id, name, cuisine_type, address, city, price_range, cover_image_url, logo_url, gallery_images, is_active, is_sponsored, cuisine_types, specializations, occasions, extra_features')
+          .in('id', restaurantIds)
+          .eq('is_active', true);
+
+        if (restaurants) {
+          const withRatings = await Promise.all(
+            restaurants.map(async (r) => {
+              const { data } = await supabase.rpc('get_restaurant_rating', { restaurant_id_param: r.id });
+              return { 
+                ...r, 
+                avg_rating: data?.[0]?.avg_rating || 0,
+                total_reviews: Number(data?.[0]?.total_reviews ?? 0)
+              };
+            })
+          );
+          setPreviouslyBooked(withRatings);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching previously booked:', error);
     }
   };
 
@@ -209,6 +309,9 @@ const RestaurantList = () => {
   return (
     <section className="py-16 bg-muted/30 relative overflow-hidden" style={{ overscrollBehaviorX: 'contain' }}>
       <div className="container mx-auto px-4 max-w-full overflow-hidden">
+        {/* Hero showreel carousel */}
+        <DishHeroCarousel />
+        
         <div className="text-center mb-10">
           <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4 font-display uppercase tracking-wide">Cosa ti va di mangiare?</h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
@@ -225,6 +328,82 @@ const RestaurantList = () => {
 
         {/* Categorie di cucina */}
         <CuisineCarousel onCategorySelect={handleCategorySelect} />
+
+        {/* Hai già visto - Recently viewed */}
+        {recentlyViewed.length > 0 && (
+          <div className="mb-10">
+            <div className="mb-4">
+              <h3 className="text-xl font-bold text-foreground flex items-center gap-2">
+                <History className="w-5 h-5 text-primary" />
+                Hai già visto
+              </h3>
+              <p className="text-sm text-muted-foreground">Ristoranti che hai visitato di recente</p>
+            </div>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {recentlyViewed.slice(0, 3).map((restaurant) => (
+                <RestaurantCard 
+                  key={`viewed-${restaurant.id}`}
+                  id={restaurant.id}
+                  name={restaurant.name}
+                  cuisine={restaurant.cuisine_type || 'Cucina Italiana'}
+                  location={restaurant.address}
+                  city={restaurant.city}
+                  rating={restaurant.avg_rating || 0}
+                  reviewCount={restaurant.total_reviews || 0}
+                  priceRange={restaurant.price_range || '€€'}
+                  image={restaurant.cover_image_url || 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&q=80'}
+                  logoUrl={restaurant.logo_url}
+                  galleryImages={restaurant.gallery_images || []}
+                  available={true}
+                  sponsored={restaurant.is_sponsored || false}
+                  coordinates={{ lat: 0, lng: 0 }}
+                  cuisineTypes={restaurant.cuisine_types}
+                  specializations={restaurant.specializations}
+                  occasions={restaurant.occasions}
+                  extraFeatures={restaurant.extra_features}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Prenota di nuovo - Previously booked */}
+        {previouslyBooked.length > 0 && (
+          <div className="mb-10">
+            <div className="mb-4">
+              <h3 className="text-xl font-bold text-foreground flex items-center gap-2">
+                <RotateCcw className="w-5 h-5 text-primary" />
+                Prenota di nuovo
+              </h3>
+              <p className="text-sm text-muted-foreground">Ristoranti dove hai già mangiato</p>
+            </div>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {previouslyBooked.slice(0, 3).map((restaurant) => (
+                <RestaurantCard 
+                  key={`booked-${restaurant.id}`}
+                  id={restaurant.id}
+                  name={restaurant.name}
+                  cuisine={restaurant.cuisine_type || 'Cucina Italiana'}
+                  location={restaurant.address}
+                  city={restaurant.city}
+                  rating={restaurant.avg_rating || 0}
+                  reviewCount={restaurant.total_reviews || 0}
+                  priceRange={restaurant.price_range || '€€'}
+                  image={restaurant.cover_image_url || 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&q=80'}
+                  logoUrl={restaurant.logo_url}
+                  galleryImages={restaurant.gallery_images || []}
+                  available={true}
+                  sponsored={restaurant.is_sponsored || false}
+                  coordinates={{ lat: 0, lng: 0 }}
+                  cuisineTypes={restaurant.cuisine_types}
+                  specializations={restaurant.specializations}
+                  occasions={restaurant.occasions}
+                  extraFeatures={restaurant.extra_features}
+                />
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Consigliati per te */}
         <SponsoredCarousel />

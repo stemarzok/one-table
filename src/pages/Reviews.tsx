@@ -45,15 +45,9 @@ const Reviews = () => {
 
   useEffect(() => {
     const fetchRestaurants = async () => {
-      if (isAdmin) {
-        const { data } = await supabase.from('restaurants').select('*').order('name');
-        if (data) {
-          setAllRestaurants(data);
-          if (data.length > 0 && !selectedRestaurantId) {
-            setSelectedRestaurantId(data[0].id);
-          }
-        }
-      } else if (businessRoles.length > 0) {
+      // Both admins and business users can ONLY see restaurants where they have a business role
+      // This prevents admins from seeing other restaurants' reviews
+      if (businessRoles.length > 0) {
         const restaurantIds = businessRoles.map(r => r.restaurant_id);
         const { data } = await supabase.from('restaurants').select('*').in('id', restaurantIds);
         if (data) {
@@ -62,10 +56,13 @@ const Reviews = () => {
             setSelectedRestaurantId(data[0].id);
           }
         }
+      } else {
+        // No business roles means no restaurant access
+        setAllRestaurants([]);
       }
     };
     if (!loading) fetchRestaurants();
-  }, [isAdmin, businessRoles, loading, selectedRestaurantId]);
+  }, [businessRoles, loading, selectedRestaurantId]);
 
   if (loading) {
     return (

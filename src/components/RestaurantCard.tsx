@@ -78,17 +78,17 @@ const RestaurantCard = ({
       {/* Card verticale con effetto 3D tilt */}
       <div 
         ref={ref}
-        style={style}
+        style={{ ...style, borderRadius: '1rem' }}
         {...handlers}
-        className="relative rounded-xl overflow-hidden bg-card border border-border/30 shadow-sm hover:shadow-2xl will-change-transform w-full"
+        className="relative rounded-2xl overflow-hidden bg-card border border-border/30 shadow-sm hover:shadow-2xl will-change-transform w-full"
       >
         {/* Glow effect on hover */}
-        <div className="absolute inset-0 opacity-0 group-hover/card:opacity-100 transition-opacity duration-500 pointer-events-none">
-          <div className="absolute inset-0 bg-gradient-to-tr from-primary/5 via-transparent to-primary/10" />
+        <div className="absolute inset-0 opacity-0 group-hover/card:opacity-100 transition-opacity duration-500 pointer-events-none rounded-2xl">
+          <div className="absolute inset-0 bg-gradient-to-tr from-primary/5 via-transparent to-primary/10 rounded-2xl" />
         </div>
 
         {/* Immagine - più alta per aspetto verticale */}
-        <div className="relative h-56 overflow-hidden">
+        <div className="relative h-56 overflow-hidden rounded-t-2xl">
           {galleryImages.length > 0 ? (
             <RestaurantCardCarousel 
               images={galleryImages} 
@@ -203,7 +203,7 @@ const RestaurantCard = ({
         </div>
 
         {/* Shine effect on hover */}
-        <div className="absolute inset-0 opacity-0 group-hover/card:opacity-100 transition-opacity duration-500 pointer-events-none overflow-hidden">
+        <div className="absolute inset-0 opacity-0 group-hover/card:opacity-100 transition-opacity duration-500 pointer-events-none overflow-hidden rounded-2xl">
           <div className="absolute -inset-full top-0 h-full w-1/2 z-5 block transform -skew-x-12 bg-gradient-to-r from-transparent to-white/5 group-hover/card:animate-[shimmer_1.5s_ease-in-out]" />
         </div>
       </div>

@@ -44,12 +44,13 @@ export const useTilt = (options: UseTiltOptions = {}) => {
   const style = {
     transform: `perspective(1000px) rotateX(${tilt.rotateX}deg) rotateY(${tilt.rotateY}deg) scale(${tilt.scale})`,
     transition: `transform ${speed}ms cubic-bezier(0.03, 0.98, 0.52, 0.99)`,
+    borderRadius: '1rem',
   };
 
   const transitionStyle = {
     transform: `perspective(1000px) rotateX(${tilt.rotateX}deg) rotateY(${tilt.rotateY}deg) scale(${tilt.scale})`,
     transition: `transform ${speed}ms cubic-bezier(0.03, 0.98, 0.52, 0.99)`,
-    borderRadius: 'inherit',
+    borderRadius: '1rem',
   };
 
   return {
