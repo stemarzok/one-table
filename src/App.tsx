@@ -64,9 +64,10 @@ const AnimatedRoutes = () => {
   const location = useLocation();
   
   return (
-    <AnimatePresence mode="wait">
+    <AnimatePresence mode="wait" initial={false}>
       <Suspense fallback={<PageLoader />}>
-        <Routes location={location} key={location.pathname}>
+        {/* key removed: PageTransition handles exit animations; remount caused double-work */}
+        <Routes location={location}>
           {/* Critical routes - no lazy loading */}
           <Route path="/" element={<PageTransition><Index /></PageTransition>} />
           <Route path="/auth" element={<PageTransition><Auth /></PageTransition>} />

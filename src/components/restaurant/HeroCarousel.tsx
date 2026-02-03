@@ -31,11 +31,13 @@ export const HeroCarousel = ({ coverImage, galleryImages = [], restaurantName }:
 
   return (
     <div className="relative w-full h-[50vh] md:h-[60vh] overflow-hidden rounded-xl group">
-      {/* Main Image */}
+      {/* Main Image — prioritize first image (LCP) */}
       <img
         src={allImages[currentIndex]}
         alt={`${restaurantName} - ${currentIndex + 1}`}
-        loading="lazy"
+        loading={currentIndex === 0 ? "eager" : "lazy"}
+        fetchPriority={currentIndex === 0 ? "high" : undefined}
+        decoding="async"
         className="w-full h-full object-cover transition-all duration-500"
       />
       
