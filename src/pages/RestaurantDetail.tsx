@@ -150,6 +150,8 @@ const RestaurantDetail = () => {
                   <img 
                     src={restaurant.logo_url} 
                     alt={`${restaurant.name} logo`}
+                    loading="lazy"
+                    decoding="async"
                     className="w-14 h-14 rounded-xl object-cover border border-border shadow-sm"
                   />
                 )}
