@@ -88,8 +88,8 @@ const HowItWorksEnhanced = () => {
   };
 
   return (
-    <section id="how-it-works" className="py-20 bg-muted/30 relative z-10">
-      <div className="container mx-auto px-4">
+    <section id="how-it-works" className="py-20 bg-muted/30 relative z-10 overflow-x-hidden">
+      <div className="container mx-auto px-4 overflow-x-hidden">
         {/* Section Header */}
         <motion.div 
           className="text-center mb-12"

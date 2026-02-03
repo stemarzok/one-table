@@ -236,7 +236,7 @@ const SponsoredCarousel = () => {
   if (restaurants.length === 0) return null;
 
   return (
-    <div className="mb-10">
+    <div className="mb-10 overflow-x-hidden">
       <div className="mb-4">
         <h3 className="text-xl font-bold text-foreground flex items-center gap-2">
           <Sparkles className="w-5 h-5 text-primary" />

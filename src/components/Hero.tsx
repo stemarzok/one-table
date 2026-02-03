@@ -41,7 +41,7 @@ const Hero = () => {
   };
 
   return (
-    <section ref={heroRef} className="relative min-h-screen flex items-center overflow-hidden">
+    <section ref={heroRef} className="relative min-h-screen flex items-center overflow-x-hidden">
       {/* Video Background with Parallax */}
       <motion.div 
         className="absolute inset-0 z-0"
