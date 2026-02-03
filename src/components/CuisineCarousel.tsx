@@ -92,7 +92,7 @@ const CuisineCarousel = ({ onCategorySelect }: CuisineCarouselProps) => {
   };
 
   return (
-    <div id="cuisine-carousel" className="mb-10 scroll-mt-24">
+    <div id="cuisine-carousel" className="mb-10 scroll-mt-24 overflow-x-hidden">
       <div className="mb-4">
         <h3 className="text-xl font-bold text-foreground flex items-center gap-2">
           <Utensils className="w-5 h-5 text-primary" />

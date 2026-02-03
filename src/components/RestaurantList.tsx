@@ -307,8 +307,8 @@ const RestaurantList = () => {
   }
 
   return (
-    <section className="py-16 bg-muted/30 relative overflow-hidden" style={{ overscrollBehaviorX: 'contain' }}>
-      <div className="container mx-auto px-4 max-w-full overflow-hidden">
+    <section className="py-16 bg-muted/30 relative overflow-x-hidden" style={{ overscrollBehaviorX: 'contain' }}>
+      <div className="container mx-auto px-4 overflow-x-hidden">
         {/* Hero showreel carousel */}
         <DishHeroCarousel />
         
