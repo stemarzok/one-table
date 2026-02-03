@@ -1,18 +1,19 @@
-import { ArrowLeft, Mail, Phone, MapPin, Facebook, Instagram, Linkedin, Twitter, Globe, Moon, Sun } from "lucide-react";
+import { ArrowLeft, Mail, Phone, MapPin, Facebook, Instagram, Linkedin, Twitter, Globe, Moon, Sun, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { useLanguage } from "@/contexts/LanguageContext";
+import { useLanguage, languageInfo, type Language } from "@/contexts/LanguageContext";
 import { useState } from "react";
 import { toast } from "sonner";
 
+const languages: Language[] = ['it', 'en', 'es', 'de', 'fr', 'nl', 'ru'];
+
 const Settings = () => {
   const navigate = useNavigate();
-  const { language, setLanguage } = useLanguage();
+  const { language, setLanguage, t, isTranslating } = useLanguage();
   const [theme, setTheme] = useState<"light" | "dark">("light");
 
   const handleThemeToggle = () => {
@@ -20,6 +21,11 @@ const Settings = () => {
     setTheme(newTheme);
     document.documentElement.classList.toggle("dark", newTheme === "dark");
     toast.success(`Tema ${newTheme === "dark" ? "scuro" : "chiaro"} attivato`);
+  };
+
+  const handleLanguageChange = (lang: Language) => {
+    setLanguage(lang);
+    toast.success(`Lingua cambiata in ${languageInfo[lang].nativeName}`);
   };
 
   return (
@@ -34,7 +40,10 @@ const Settings = () => {
           >
             <ArrowLeft className="w-5 h-5" />
           </Button>
-          <h1 className="text-lg font-semibold">Impostazioni</h1>
+          <h1 className="text-lg font-semibold">{t('settings.title')}</h1>
+          {isTranslating && (
+            <Loader2 className="w-4 h-4 animate-spin text-primary" />
+          )}
         </div>
       </div>
 
@@ -42,22 +51,43 @@ const Settings = () => {
       <div className="container mx-auto px-4 py-6 space-y-6 pb-20">
         {/* Preferenze */}
         <Card className="p-6">
-          <h2 className="text-xl font-bold mb-4">Preferenze</h2>
+          <h2 className="text-xl font-bold mb-4">{t('settings.preferences')}</h2>
           <div className="space-y-4">
-            <div className="flex items-center justify-between">
+            {/* Language Selection */}
+            <div className="space-y-3">
               <Label className="flex items-center gap-2">
                 <Globe className="w-5 h-5" />
-                Lingua
+                {t('settings.language')}
+                {isTranslating && (
+                  <span className="text-xs text-muted-foreground ml-2">
+                    ({t('settings.translating')})
+                  </span>
+                )}
               </Label>
-              <Select value={language} onValueChange={setLanguage}>
-                <SelectTrigger className="w-[140px]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="it">🇮🇹 Italiano</SelectItem>
-                  <SelectItem value="en">🇬🇧 English</SelectItem>
-                </SelectContent>
-              </Select>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+                {languages.map((lang) => {
+                  const info = languageInfo[lang];
+                  const isSelected = language === lang;
+                  return (
+                    <button
+                      key={lang}
+                      onClick={() => handleLanguageChange(lang)}
+                      disabled={isTranslating}
+                      className={`
+                        flex items-center gap-2 p-3 rounded-lg border transition-all
+                        ${isSelected 
+                          ? 'border-primary bg-primary/10 ring-2 ring-primary/20' 
+                          : 'border-border hover:border-primary/50 hover:bg-muted/50'
+                        }
+                        ${isTranslating ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
+                      `}
+                    >
+                      <span className="text-xl">{info.flag}</span>
+                      <span className="text-sm font-medium truncate">{info.nativeName}</span>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
             
             <Separator />
@@ -65,7 +95,7 @@ const Settings = () => {
             <div className="flex items-center justify-between">
               <Label className="flex items-center gap-2">
                 {theme === "light" ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-                Tema Scuro
+                {t('settings.darkTheme')}
               </Label>
               <Switch
                 checked={theme === "dark"}
