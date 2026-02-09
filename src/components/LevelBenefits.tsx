@@ -3,6 +3,7 @@ import { Trophy, Star, Award, Crown, ChevronLeft, ChevronRight, Check } from "lu
 import { motion, useInView } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const LevelBenefits = () => {
   const ref = useRef(null);
@@ -12,53 +13,54 @@ const LevelBenefits = () => {
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
   const [scrollLeft, setScrollLeft] = useState(0);
+  const { t } = useLanguage();
   
   const levels = [
     {
-      name: "Bronzo",
-      subtitle: "Inizia il percorso",
+      name: t('levels.bronze'),
+      subtitle: t('levels.bronzeSub'),
       icon: Star,
       range: "0-100",
       benefits: [
-        "Accesso alla piattaforma",
-        "Prenotazioni standard",
-        "Notifiche e gestione semplice"
+        t('levels.bronze.b1'),
+        t('levels.bronze.b2'),
+        t('levels.bronze.b3'),
       ]
     },
     {
-      name: "Argento",
-      subtitle: "Inizia a distinguerti",
+      name: t('levels.silver'),
+      subtitle: t('levels.silverSub'),
       icon: Award,
       range: "101-300",
       benefits: [
-        "Priorità nelle prenotazioni",
-        "5% di sconto",
-        "Tavoli con vista migliore"
+        t('levels.silver.b1'),
+        t('levels.silver.b2'),
+        t('levels.silver.b3'),
       ]
     },
     {
-      name: "Oro",
-      subtitle: "Accesso premium",
+      name: t('levels.gold'),
+      subtitle: t('levels.goldSub'),
       icon: Crown,
       range: "301-600",
       benefits: [
-        "Prenotazioni garantite",
-        "15% di sconto",
-        "Tavoli premium",
-        "Welcome drink incluso"
+        t('levels.gold.b1'),
+        t('levels.gold.b2'),
+        t('levels.gold.b3'),
+        t('levels.gold.b4'),
       ]
     },
     {
-      name: "Platino",
-      subtitle: "Trattamento VIP",
+      name: t('levels.platinum'),
+      subtitle: t('levels.platinumSub'),
       icon: Trophy,
       range: "601+",
       benefits: [
-        "Accesso VIP illimitato",
-        "25% di sconto",
-        "I migliori tavoli disponibili",
-        "Menu degustazione omaggio",
-        "Concierge personale"
+        t('levels.platinum.b1'),
+        t('levels.platinum.b2'),
+        t('levels.platinum.b3'),
+        t('levels.platinum.b4'),
+        t('levels.platinum.b5'),
       ]
     }
   ];
@@ -162,13 +164,13 @@ const LevelBenefits = () => {
             animate={isInView ? { opacity: 1, scale: 1 } : {}}
             transition={{ delay: 0.2 }}
           >
-            Sistema a livelli
+            {t('levels.badge')}
           </motion.span>
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-background mb-5 tracking-wide font-display uppercase">
-            Più sei affidabile, più vieni premiato
+            {t('levels.title')}
           </h2>
           <p className="text-lg text-background/70 max-w-2xl mx-auto leading-relaxed">
-            Ogni livello sblocca vantaggi esclusivi. Il tuo percorso inizia ora.
+            {t('levels.subtitle')}
           </p>
         </motion.div>
         
@@ -209,7 +211,7 @@ const LevelBenefits = () => {
                   </div>
                   
                   <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-primary/20 border border-primary/30 rounded-lg mb-5 w-fit relative z-10">
-                    <span className="text-primary font-semibold text-sm">{level.range} punti</span>
+                    <span className="text-primary font-semibold text-sm">{level.range} {t('levels.points')}</span>
                   </div>
                   
                   <ul className="space-y-3 flex-1 relative z-10">
@@ -299,7 +301,7 @@ const LevelBenefits = () => {
                       </div>
                       
                       <div className="inline-flex px-2.5 py-1 bg-primary/20 border border-primary/30 rounded-md mb-4 w-fit">
-                        <span className="text-primary font-semibold text-xs">{level.range} punti</span>
+                        <span className="text-primary font-semibold text-xs">{level.range} {t('levels.points')}</span>
                       </div>
                       
                       <ul className="space-y-2 flex-1">
@@ -331,7 +333,7 @@ const LevelBenefits = () => {
                     ? 'w-6 h-2 bg-primary' 
                     : 'w-2 h-2 bg-background/30 hover:bg-background/50'
                 }`}
-                aria-label={`Vai al livello ${index + 1}`}
+                aria-label={`${t('levels.goToLevel')} ${index + 1}`}
               />
             ))}
           </div>

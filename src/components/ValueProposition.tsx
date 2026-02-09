@@ -1,33 +1,35 @@
 import { motion } from "framer-motion";
 import { Gift, TrendingUp, Star, Zap } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const ValueProposition = () => {
+  const { t } = useLanguage();
+
   const features = [
     {
       icon: TrendingUp,
-      title: "Upgrade",
-      description: "Tavoli migliori"
+      title: t('value.upgrade'),
+      description: t('value.upgradeDesc')
     },
     {
       icon: Gift,
-      title: "Sconti",
-      description: "Esclusivi"
+      title: t('value.discounts'),
+      description: t('value.discountsDesc')
     },
     {
       icon: Star,
-      title: "VIP",
-      description: "Trattamento riservato"
+      title: t('value.vip'),
+      description: t('value.vipDesc')
     },
     {
       icon: Zap,
-      title: "Vantaggi",
-      description: "Reali e immediati"
+      title: t('value.benefits'),
+      description: t('value.benefitsDesc')
     }
   ];
 
   return (
     <section className="py-20 bg-background relative overflow-x-hidden">
-      {/* Background decoration */}
       <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-[120px]" />
       <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-primary/5 rounded-full blur-[120px]" />
       
@@ -40,15 +42,13 @@ const ValueProposition = () => {
           className="text-center max-w-3xl mx-auto mb-12"
         >
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-6 leading-tight font-display uppercase tracking-wide">
-            One-Table non è una semplice prenotazione.
+            {t('value.title')}
           </h2>
           <p className="text-base sm:text-lg text-muted-foreground leading-relaxed">
-            È un sistema che trasforma il tuo comportamento in vantaggi reali: 
-            upgrade, sconti, tavoli migliori e trattamenti riservati.
+            {t('value.description')}
           </p>
         </motion.div>
         
-        {/* Feature icons */}
         <motion.div 
           className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto"
           initial={{ opacity: 0 }}
@@ -60,7 +60,7 @@ const ValueProposition = () => {
             const Icon = feature.icon;
             return (
               <motion.div
-                key={feature.title}
+                key={index}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}

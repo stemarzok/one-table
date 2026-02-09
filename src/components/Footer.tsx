@@ -2,6 +2,7 @@ import { Mail, Phone, MapPin, Facebook, Instagram, Linkedin, Twitter } from "luc
 import { useAuth } from "@/contexts/AuthContext";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const BUILD_VERSION = `v${new Date().toISOString().slice(0, 16).replace('T', '-')}`;
 
@@ -10,12 +11,10 @@ const Footer = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
+  const { t } = useLanguage();
   
-  // Determine if we're on business section
   const isBusinessSection = location.pathname === '/business' || location.pathname === '/pricing';
   
-  // Hide footer on mobile when logged in on /restaurants
-  // Hide footer completely on /dashboard
   const isRestaurantsPage = location.pathname === '/restaurants';
   const isDashboardPage = location.pathname === '/dashboard';
   
@@ -27,11 +26,9 @@ const Footer = () => {
     return null;
   }
 
-  // Handle scroll to section - navigate to home first if on business page
   const handleScrollToSection = (e: React.MouseEvent, sectionId: string) => {
     e.preventDefault();
     if (isBusinessSection) {
-      // Navigate to home page first, then scroll
       navigate('/');
       setTimeout(() => {
         document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth' });
@@ -56,7 +53,7 @@ const Footer = () => {
               </span>
             </div>
             <p className="text-background/80 text-sm mb-4">
-              La piattaforma innovativa che premia la tua affidabilità con vantaggi esclusivi nei migliori ristoranti.
+              {t('footer.description')}
             </p>
             <div className="flex gap-4">
               <a href="#" className="text-background hover:text-primary transition-colors">
@@ -76,7 +73,7 @@ const Footer = () => {
 
           {/* Links Section */}
           <div>
-            <h3 className="font-bold text-background mb-4">Link Utili</h3>
+            <h3 className="font-bold text-background mb-4">{t('footer.usefulLinks')}</h3>
             <ul className="space-y-2">
               <li>
                 <a 
@@ -84,7 +81,7 @@ const Footer = () => {
                   onClick={(e) => handleScrollToSection(e, 'how-it-works')}
                   className="text-background/80 hover:text-primary transition-colors cursor-pointer"
                 >
-                  Come Funziona
+                  {t('footer.howItWorks')}
                 </a>
               </li>
               <li>
@@ -93,7 +90,7 @@ const Footer = () => {
                   onClick={(e) => handleScrollToSection(e, 'level-benefits')}
                   className="text-background/80 hover:text-primary transition-colors cursor-pointer"
                 >
-                  Livelli e Vantaggi
+                  {t('footer.levelsAndBenefits')}
                 </a>
               </li>
               <li>
@@ -102,12 +99,12 @@ const Footer = () => {
                   onClick={(e) => handleScrollToSection(e, 'restaurant-list')}
                   className="text-background/80 hover:text-primary transition-colors cursor-pointer"
                 >
-                  Ristoranti Partner
+                  {t('footer.partnerRestaurants')}
                 </a>
               </li>
               <li>
                 <a href="/business" className="text-background/80 hover:text-primary transition-colors">
-                  Per Aziende
+                  {t('footer.forBusiness')}
                 </a>
               </li>
             </ul>
@@ -115,21 +112,21 @@ const Footer = () => {
 
           {/* Legal Section */}
           <div>
-            <h3 className="font-bold text-background mb-4">Legale</h3>
+            <h3 className="font-bold text-background mb-4">{t('footer.legal')}</h3>
             <ul className="space-y-2">
               <li>
                 <a href="/privacy" className="text-background/80 hover:text-primary transition-colors">
-                  Privacy Policy
+                  {t('footer.privacyPolicy')}
                 </a>
               </li>
               <li>
                 <a href="/terms" className="text-background/80 hover:text-primary transition-colors">
-                  Termini e Condizioni
+                  {t('footer.termsAndConditions')}
                 </a>
               </li>
               <li>
                 <a href="/cookies" className="text-background/80 hover:text-primary transition-colors">
-                  Cookie Policy
+                  {t('footer.cookiePolicy')}
                 </a>
               </li>
               <li>
@@ -142,7 +139,7 @@ const Footer = () => {
 
           {/* Contact Section */}
           <div>
-            <h3 className="font-bold text-background mb-4">Contatti</h3>
+            <h3 className="font-bold text-background mb-4">{t('footer.contacts')}</h3>
             <ul className="space-y-3">
               <li className="flex items-center gap-2 text-background/80">
                 <Mail className="w-4 h-4" />
@@ -166,7 +163,7 @@ const Footer = () => {
 
         <div className="border-t border-background/20 mt-8 pt-8 text-center text-sm text-background/60">
           <div className="flex items-center justify-between flex-wrap gap-2">
-            <p>&copy; {new Date().getFullYear()} OneTable. Tutti i diritti riservati.</p>
+            <p>&copy; {new Date().getFullYear()} OneTable. {t('footer.allRightsReserved')}</p>
             <div className="flex items-center gap-3">
               <a href="/status" className="hover:text-primary transition-colors text-xs">
                 Status

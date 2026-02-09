@@ -2,10 +2,12 @@ import { Search, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
+import { useLanguage } from "@/contexts/LanguageContext";
 import heroVideo from "@/assets/hero-video.mp4";
 
 const Hero = () => {
   const heroRef = useRef<HTMLElement>(null);
+  const { t } = useLanguage();
   
   const { scrollYProgress } = useScroll({
     target: heroRef,
@@ -22,7 +24,6 @@ const Hero = () => {
     }
   };
 
-  // Text reveal animation variants
   const titleVariants = {
     hidden: { 
       opacity: 0, 
@@ -42,7 +43,6 @@ const Hero = () => {
 
   return (
     <section ref={heroRef} className="relative min-h-screen flex items-center overflow-x-hidden">
-      {/* Video Background with Parallax */}
       <motion.div 
         className="absolute inset-0 z-0"
         style={{ y: backgroundY }}
@@ -56,9 +56,7 @@ const Hero = () => {
         >
           <source src={heroVideo} type="video/mp4" />
         </video>
-        {/* Strong Dark Overlay for readability */}
         <div className="absolute inset-0 bg-black/70" />
-        {/* Subtle gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/40" />
       </motion.div>
       
@@ -68,7 +66,6 @@ const Hero = () => {
       >
         <div className="max-w-7xl mx-auto">
           <div className="text-center">
-            {/* Main Heading - Bebas Neue Giant Title */}
             <div className="overflow-hidden mb-8">
               <motion.h1 
                 className="font-display text-[12vw] sm:text-[11vw] md:text-[10vw] lg:text-[9vw] xl:text-[8vw] font-normal text-white leading-[0.9] tracking-[0.02em] uppercase"
@@ -87,7 +84,7 @@ const Hero = () => {
                   className="block"
                   variants={titleVariants}
                 >
-                  I Migliori Tavoli
+                  {t('hero.title1')}
                 </motion.span>
                 <motion.span 
                   className="block text-primary drop-shadow-[0_0_30px_hsl(85,100%,50%,0.5)]"
@@ -96,22 +93,20 @@ const Hero = () => {
                     textShadow: "0 0 40px hsl(85, 100%, 50%, 0.4), 0 0 80px hsl(85, 100%, 50%, 0.2)"
                   }}
                 >
-                  Per Chi Se Li Merita
+                  {t('hero.title2')}
                 </motion.span>
               </motion.h1>
             </div>
             
-            {/* Subtitle */}
             <motion.p 
               className="text-sm sm:text-base md:text-lg text-white/70 mb-10 leading-relaxed max-w-xl mx-auto font-medium px-4"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.8 }}
             >
-              Più rispetti le prenotazioni, più sblocchi vantaggi VIP nei migliori ristoranti.
+              {t('hero.subtitle')}
             </motion.p>
             
-            {/* CTA Buttons */}
             <motion.div 
               className="flex flex-col sm:flex-row gap-4 justify-center items-center"
               initial={{ opacity: 0, y: 20 }}
@@ -130,7 +125,7 @@ const Hero = () => {
                 }}
               >
                 <Search className="w-5 h-5" />
-                Cerca un ristorante
+                {t('hero.searchButton')}
               </Button>
               
               <Button 
@@ -139,7 +134,7 @@ const Hero = () => {
                 className="text-base px-8 py-6 w-full sm:w-auto font-semibold"
                 onClick={scrollToHowItWorks}
               >
-                Come funziona
+                {t('hero.howItWorks')}
                 <ChevronDown className="w-5 h-5 ml-2" />
               </Button>
             </motion.div>
@@ -147,7 +142,6 @@ const Hero = () => {
         </div>
       </motion.div>
       
-      {/* Scroll indicator */}
       <motion.div 
         className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10"
         initial={{ opacity: 0, y: -10 }}

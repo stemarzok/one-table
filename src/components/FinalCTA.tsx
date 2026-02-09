@@ -1,11 +1,13 @@
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Search, ArrowRight } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const FinalCTA = () => {
+  const { t } = useLanguage();
+
   return (
     <section className="py-24 bg-background relative overflow-hidden">
-      {/* Background decoration */}
       <div className="absolute inset-0 bg-gradient-to-b from-muted/30 to-background" />
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/5 rounded-full blur-[150px]" />
       
@@ -18,11 +20,11 @@ const FinalCTA = () => {
           className="text-center max-w-2xl mx-auto"
         >
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-6 leading-tight font-display uppercase tracking-wide">
-            Il tuo tavolo ti sta aspettando
+            {t('cta.title')}
           </h2>
           
           <p className="text-base sm:text-lg text-muted-foreground mb-10 leading-relaxed">
-            Inizia da oggi a trasformare le tue prenotazioni in vantaggi esclusivi.
+            {t('cta.subtitle')}
           </p>
           
           <motion.div
@@ -38,7 +40,7 @@ const FinalCTA = () => {
               onClick={() => window.location.href = '/auth'}
             >
               <Search className="w-5 h-5" />
-              Cerca un ristorante
+              {t('cta.button')}
               <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
             </Button>
           </motion.div>

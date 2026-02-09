@@ -62,11 +62,14 @@ const Header = () => {
     : "fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border";
 
   // Text color based on state
-  const textColorClass = isLandingPage && !scrolled
-    ? "text-white"
-    : scrolled && isLandingPage
+  const textColorClass = isLandingPage
     ? "text-white"
     : "text-foreground";
+
+  // Language selector class for proper visibility
+  const langSelectorClass = isLandingPage
+    ? "text-white hover:text-white hover:bg-white/10"
+    : "text-foreground hover:text-foreground";
 
   return (
     <header className={headerClasses}>
@@ -76,36 +79,36 @@ const Header = () => {
           <span className="text-2xl font-extrabold text-primary transition-colors duration-200">Table</span>
         </Link>
         
-        <nav className="hidden md:flex items-center gap-8">
+        <nav className="hidden md:flex items-center gap-6">
           {!isLoggedIn && (
             <>
               {isInBusinessSection && (
                 <>
                   <Link to="/" className={`text-sm font-semibold ${textColorClass} hover:text-primary transition-colors`}>
-                    Sei un Cliente?
+                    {t('nav.areYouClient')}
                   </Link>
-                  <Link to="/pricing" className={`text-sm font-semibold ${textColorClass} hover:text-primary transition-colors mr-2`}>
-                    Prezzi
+                  <Link to="/pricing" className={`text-sm font-semibold ${textColorClass} hover:text-primary transition-colors`}>
+                    {t('nav.pricing')}
                   </Link>
                 </>
               )}
               {!isInBusinessSection && (
-                <Link to="/business" className={`text-sm font-semibold ${textColorClass} hover:text-primary transition-colors mr-2`}>
+                <Link to="/business" className={`text-sm font-semibold ${textColorClass} hover:text-primary transition-colors`}>
                   {t('nav.forBusiness')}
                 </Link>
               )}
             </>
           )}
 
+          <LanguageSelector variant="compact" className={langSelectorClass} />
+
           {isLoggedIn ? (
-            <div className="hidden md:flex items-center gap-2">
-              <LanguageSelector variant="compact" />
+            <div className="flex items-center gap-2">
               <NotificationPopover />
               {isBusinessMode ? <BusinessUserMenu /> : <DesktopUserMenu />}
             </div>
           ) : (
             <div className="flex items-center gap-3">
-              <LanguageSelector variant="compact" />
               <Link to={isInBusinessSection ? '/business-login' : '/auth'}>
                 <Button 
                   variant="outline" 
@@ -120,23 +123,23 @@ const Header = () => {
               </Link>
               <Link to={isInBusinessSection ? '/business-registration' : '/auth#signup'}>
                 <Button className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-full btn-premium">
-                  Registrati
+                  {t('nav.signup')}
                 </Button>
               </Link>
             </div>
           )}
         </nav>
 
-        {/* Mobile menu - Show user menu icon when logged in, hamburger when not */}
+        {/* Mobile menu */}
         {isLoggedIn ? (
           <div className="md:hidden flex items-center gap-2">
-            <LanguageSelector variant="compact" />
+            <LanguageSelector variant="compact" className={langSelectorClass} />
             <NotificationPopover />
             {isBusinessMode ? <MobileBusinessMenu /> : <MobileUserMenu />}
           </div>
         ) : (
           <div className="md:hidden flex items-center gap-1">
-            <LanguageSelector variant="compact" />
+            <LanguageSelector variant="compact" className={langSelectorClass} />
             <button 
               className={textColorClass}
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -155,10 +158,10 @@ const Header = () => {
             {isInBusinessSection ? (
               <>
                 <Link to="/" className={`py-2 font-medium ${isLandingPage ? 'text-white' : 'text-foreground'}`} onClick={() => setMobileMenuOpen(false)}>
-                  Sei un Cliente?
+                  {t('nav.areYouClient')}
                 </Link>
                 <Link to="/pricing" className={`py-2 font-medium ${isLandingPage ? 'text-white' : 'text-foreground'}`} onClick={() => setMobileMenuOpen(false)}>
-                  Prezzi
+                  {t('nav.pricing')}
                 </Link>
               </>
             ) : (
@@ -174,7 +177,7 @@ const Header = () => {
             </Link>
             <Link to={isInBusinessSection ? '/business-registration' : '/auth#signup'} onClick={() => setMobileMenuOpen(false)}>
               <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold">
-                Registrati
+                {t('nav.signup')}
               </Button>
             </Link>
             </div>
