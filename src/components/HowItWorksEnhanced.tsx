@@ -2,6 +2,7 @@ import { useRef, useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, UserPlus, Utensils, Clock, Trophy } from "lucide-react";
 import { motion } from "framer-motion";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const HowItWorksEnhanced = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -10,34 +11,35 @@ const HowItWorksEnhanced = () => {
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
   const [scrollLeft, setScrollLeft] = useState(0);
+  const { t } = useLanguage();
   
   const steps = [
     {
       number: "1",
       icon: UserPlus,
-      title: "Crea il tuo account",
-      description: "Registrati gratuitamente e inizia a prenotare.",
+      title: t('howItWorks.step1.title'),
+      description: t('howItWorks.step1.desc'),
       image: "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=800&q=80"
     },
     {
       number: "2",
       icon: Utensils,
-      title: "Prenota un ristorante",
-      description: "Scegli tra ristoranti selezionati e prenota in pochi click.",
+      title: t('howItWorks.step2.title'),
+      description: t('howItWorks.step2.desc'),
       image: "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&q=80"
     },
     {
       number: "3",
       icon: Clock,
-      title: "Rispetta la prenotazione",
-      description: "Arriva puntuale e vivi l'esperienza.",
+      title: t('howItWorks.step3.title'),
+      description: t('howItWorks.step3.desc'),
       image: "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&q=80"
     },
     {
       number: "4",
       icon: Trophy,
-      title: "Sblocca vantaggi VIP",
-      description: "Ogni prenotazione rispettata ti fa salire di livello e ti premia.",
+      title: t('howItWorks.step4.title'),
+      description: t('howItWorks.step4.desc'),
       image: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&q=80"
     }
   ];
@@ -99,10 +101,10 @@ const HowItWorksEnhanced = () => {
           transition={{ duration: 0.6 }}
         >
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-4 font-display uppercase tracking-wide">
-            Il tuo comportamento diventa valore
+            {t('howItWorks.sectionTitle')}
           </h2>
           <p className="text-muted-foreground max-w-xl mx-auto">
-            Non basta prenotare, conta come ti comporti.
+            {t('howItWorks.sectionSubtitle')}
           </p>
         </motion.div>
 
@@ -247,7 +249,7 @@ const HowItWorksEnhanced = () => {
           
           {/* Scroll hint */}
           <div className="flex justify-center mt-2 gap-2">
-            <span className="text-muted-foreground text-xs">← Scorri per vedere tutti →</span>
+            <span className="text-muted-foreground text-xs">{t('howItWorks.scrollHint')}</span>
           </div>
         </div>
       </div>
