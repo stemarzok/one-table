@@ -37,7 +37,6 @@ serve(async (req) => {
       );
     }
 
-    // If source and target are the same, return texts as-is
     if (sourceLanguage === targetLanguage) {
       const result: Record<string, string> = {};
       texts.forEach((t: { key: string; value: string }) => {
@@ -57,18 +56,15 @@ serve(async (req) => {
     const sourceLangName = languageNames[sourceLanguage] || sourceLanguage;
     const targetLangName = languageNames[targetLanguage] || targetLanguage;
 
-    // Build prompt with all texts to translate
-    const textsToTranslate = texts.map((t: { key: string; value: string }) => 
-      `"${t.key}": "${t.value}"`
-    ).join("\n");
+    // Build a structured input for better parsing
+    const inputObj: Record<string, string> = {};
+    texts.forEach((t: { key: string; value: string }) => {
+      inputObj[t.key] = t.value;
+    });
 
-    const systemPrompt = `You are a professional translator. Translate the following UI texts from ${sourceLangName} to ${targetLangName}.
-Maintain the same keys and only translate the values.
-Keep placeholder variables like {name}, {count} unchanged.
-Keep technical terms that shouldn't be translated (like "OneTable" brand name).
-Return ONLY a valid JSON object with the translated key-value pairs, no markdown, no explanation.`;
+    const systemPrompt = `You are a professional translator. You will receive a JSON object with UI text strings in ${sourceLangName}. Translate ALL values to ${targetLangName}. Keep the keys exactly the same. Keep brand names like "OneTable" unchanged. Keep placeholders like {name} unchanged. Respond with ONLY the JSON object, no markdown fences, no explanation, no extra text.`;
 
-    const userPrompt = `Translate these texts:\n${textsToTranslate}`;
+    const userPrompt = JSON.stringify(inputObj);
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -77,25 +73,25 @@ Return ONLY a valid JSON object with the translated key-value pairs, no markdown
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
+        model: "google/gemini-2.5-flash",
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt },
         ],
-        temperature: 0.3,
+        temperature: 0.2,
       }),
     });
 
     if (!response.ok) {
       if (response.status === 429) {
         return new Response(
-          JSON.stringify({ error: "Rate limit exceeded, please try again later." }),
+          JSON.stringify({ error: "Rate limit exceeded" }),
           { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
       if (response.status === 402) {
         return new Response(
-          JSON.stringify({ error: "Payment required, please add credits." }),
+          JSON.stringify({ error: "Payment required" }),
           { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
@@ -107,18 +103,34 @@ Return ONLY a valid JSON object with the translated key-value pairs, no markdown
     const data = await response.json();
     const content = data.choices?.[0]?.message?.content || "";
 
-    // Parse the JSON response
     let translations: Record<string, string> = {};
     try {
-      // Remove potential markdown code blocks
-      const cleanContent = content.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
+      // Remove potential markdown code blocks and trim
+      let cleanContent = content.trim();
+      // Remove ```json ... ``` wrapping
+      if (cleanContent.startsWith("```")) {
+        cleanContent = cleanContent.replace(/^```(?:json)?\s*\n?/, "").replace(/\n?```\s*$/, "");
+      }
       translations = JSON.parse(cleanContent);
     } catch (parseError) {
-      console.error("Failed to parse AI response:", content);
-      // Fallback: return original texts
-      texts.forEach((t: { key: string; value: string }) => {
-        translations[t.key] = t.value;
-      });
+      console.error("Failed to parse AI response:", content.substring(0, 200));
+      
+      // Try to extract JSON from the response
+      const jsonMatch = content.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        try {
+          translations = JSON.parse(jsonMatch[0]);
+        } catch {
+          // Final fallback: return original texts
+          texts.forEach((t: { key: string; value: string }) => {
+            translations[t.key] = t.value;
+          });
+        }
+      } else {
+        texts.forEach((t: { key: string; value: string }) => {
+          translations[t.key] = t.value;
+        });
+      }
     }
 
     return new Response(

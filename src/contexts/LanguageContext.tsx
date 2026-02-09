@@ -455,9 +455,20 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
     const stored = localStorage.getItem('onetable_language');
     return (stored as Language) || 'it';
   });
-  const [translations, setTranslations] = useState<Record<string, string>>(
-    language === 'it' ? baseTranslations : (translationCache[language] || {})
-  );
+  const [translations, setTranslations] = useState<Record<string, string>>(() => {
+    const lang = (localStorage.getItem('onetable_language') as Language) || 'it';
+    if (lang === 'it') return baseTranslations;
+    if (lang === 'en') return englishTranslations;
+    // Try localStorage cache
+    try {
+      const cached = localStorage.getItem(`onetable_translations_${lang}`);
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Object.keys(parsed).length > 0) return parsed;
+      }
+    } catch {}
+    return baseTranslations; // fallback to Italian while loading
+  });
   const [isTranslating, setIsTranslating] = useState(false);
 
   // Load AI translations for non-cached languages
@@ -478,7 +489,7 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
       const cached = localStorage.getItem(cacheKey);
       if (cached) {
         const parsed = JSON.parse(cached);
-        if (Object.keys(parsed).length > 0) {
+        if (Object.keys(parsed).length >= Object.keys(baseTranslations).length * 0.8) {
           translationCache[lang] = parsed;
           setTranslations(parsed);
           return;
@@ -497,8 +508,8 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
         value,
       }));
 
-      // Split into batches of 30 to avoid token limits
-      const batchSize = 30;
+      // Split into batches of 40
+      const batchSize = 40;
       const batches = [];
       for (let i = 0; i < textsToTranslate.length; i += batchSize) {
         batches.push(textsToTranslate.slice(i, i + batchSize));
@@ -506,24 +517,31 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
 
       let allTranslations: Record<string, string> = {};
 
-      for (const batch of batches) {
-        const { data, error } = await supabase.functions.invoke('translate', {
-          body: {
-            texts: batch,
-            targetLanguage: lang,
-            sourceLanguage: 'it',
-          },
-        });
+      // Run batches in parallel for speed
+      const results = await Promise.allSettled(
+        batches.map(async (batch) => {
+          const { data, error } = await supabase.functions.invoke('translate', {
+            body: {
+              texts: batch,
+              targetLanguage: lang,
+              sourceLanguage: 'it',
+            },
+          });
 
-        if (error) {
-          console.error('Translation error:', error);
-          continue;
-        }
+          if (error) {
+            console.error('Translation batch error:', error);
+            return {};
+          }
 
-        if (data?.translations) {
-          allTranslations = { ...allTranslations, ...data.translations };
+          return data?.translations || {};
+        })
+      );
+
+      results.forEach((result) => {
+        if (result.status === 'fulfilled' && result.value) {
+          allTranslations = { ...allTranslations, ...result.value };
         }
-      }
+      });
 
       if (Object.keys(allTranslations).length > 0) {
         translationCache[lang] = allTranslations;
@@ -538,8 +556,7 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
       }
     } catch (error) {
       console.error('Failed to load translations:', error);
-      // Fallback to Italian
-      setTranslations(baseTranslations);
+      // Keep current translations (Italian fallback)
     } finally {
       setIsTranslating(false);
     }
@@ -552,7 +569,7 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
     loadTranslations(lang);
   }, [loadTranslations]);
 
-  // Load translations on mount and language change
+  // Load translations on mount
   useEffect(() => {
     loadTranslations(language);
   }, [language, loadTranslations]);
