@@ -18,37 +18,26 @@ const languages: Language[] = ['it', 'en', 'es', 'de', 'fr', 'nl', 'ru'];
 
 export const LanguageSelector = ({ variant = "default", className }: LanguageSelectorProps) => {
   const { language, setLanguage, isTranslating } = useLanguage();
-  const currentLang = languageInfo[language];
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
-          size={variant === "compact" ? "icon" : "sm"}
+          size="icon"
           className={cn(
-            "gap-2 transition-all",
-            isTranslating && "opacity-70",
+            "relative transition-all h-9 w-9",
             className
           )}
-          disabled={isTranslating}
         >
           {isTranslating ? (
             <Loader2 className="w-4 h-4 animate-spin" />
           ) : (
-            <>
-              <span className="text-base">{currentLang.flag}</span>
-              {variant === "full" && (
-                <span className="hidden sm:inline">{currentLang.nativeName}</span>
-              )}
-              {variant === "default" && (
-                <Globe className="w-4 h-4" />
-              )}
-            </>
+            <span className="text-xs font-bold uppercase tracking-tight">{language}</span>
           )}
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="min-w-[160px]">
+      <DropdownMenuContent align="end" className="min-w-[180px] bg-popover border border-border z-[100]">
         {languages.map((lang) => {
           const info = languageInfo[lang];
           return (
@@ -60,8 +49,8 @@ export const LanguageSelector = ({ variant = "default", className }: LanguageSel
                 language === lang && "bg-primary/10 text-primary"
               )}
             >
-              <span className="text-lg">{info.flag}</span>
-              <span className="flex-1">{info.nativeName}</span>
+              <span className="text-xs font-bold uppercase w-5 text-center">{lang}</span>
+              <span className="flex-1 text-sm">{info.nativeName}</span>
               {language === lang && (
                 <span className="w-2 h-2 rounded-full bg-primary" />
               )}
