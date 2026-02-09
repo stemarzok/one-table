@@ -9,6 +9,7 @@ import { DesktopUserMenu } from "@/components/DesktopUserMenu";
 import { BusinessUserMenu } from "@/components/BusinessUserMenu";
 import { MobileBusinessMenu } from "@/components/MobileBusinessMenu";
 import { NotificationPopover } from "@/components/NotificationPopover";
+import { LanguageSelector } from "@/components/LanguageSelector";
 
 const Header = () => {
   const { language, setLanguage, t } = useLanguage();
@@ -98,11 +99,13 @@ const Header = () => {
 
           {isLoggedIn ? (
             <div className="hidden md:flex items-center gap-2">
+              <LanguageSelector variant="compact" />
               <NotificationPopover />
               {isBusinessMode ? <BusinessUserMenu /> : <DesktopUserMenu />}
             </div>
           ) : (
             <div className="flex items-center gap-3">
+              <LanguageSelector variant="compact" />
               <Link to={isInBusinessSection ? '/business-login' : '/auth'}>
                 <Button 
                   variant="outline" 
@@ -127,17 +130,21 @@ const Header = () => {
         {/* Mobile menu - Show user menu icon when logged in, hamburger when not */}
         {isLoggedIn ? (
           <div className="md:hidden flex items-center gap-2">
+            <LanguageSelector variant="compact" />
             <NotificationPopover />
             {isBusinessMode ? <MobileBusinessMenu /> : <MobileUserMenu />}
           </div>
         ) : (
-          <button 
-            className={`md:hidden ${textColorClass}`}
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            aria-label={mobileMenuOpen ? "Chiudi menu" : "Apri menu"}
-          >
-            {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-          </button>
+          <div className="md:hidden flex items-center gap-1">
+            <LanguageSelector variant="compact" />
+            <button 
+              className={textColorClass}
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label={mobileMenuOpen ? "Chiudi menu" : "Apri menu"}
+            >
+              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            </button>
+          </div>
         )}
       </div>
 
