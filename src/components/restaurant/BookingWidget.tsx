@@ -63,7 +63,6 @@ export const BookingWidget = ({ restaurantId, restaurantName, openingHours }: Bo
   // Generate time slots based on opening hours
   const generateTimeSlots = (date: string): string[] => {
     if (!openingHours || typeof openingHours !== 'object') {
-      // Fallback to default slots if no opening hours configured
       return ["12:00", "12:30", "13:00", "13:30", "19:00", "19:30", "20:00", "20:30", "21:00", "21:30"];
     }
 
@@ -76,7 +75,6 @@ export const BookingWidget = ({ restaurantId, restaurantName, openingHours }: Bo
       return [];
     }
 
-    // Check if open using either 'open' or 'isOpen' property
     const isOpen = daySchedule.open ?? daySchedule.isOpen ?? false;
     if (!isOpen) {
       return [];
@@ -89,7 +87,6 @@ export const BookingWidget = ({ restaurantId, restaurantName, openingHours }: Bo
     const breakStart = daySchedule.breakStart || "15:00";
     const breakEnd = daySchedule.breakEnd || "19:00";
 
-    // Parse times
     const parseTime = (timeStr: string): number => {
       const [hours, minutes] = timeStr.split(':').map(Number);
       return hours * 60 + minutes;
@@ -102,14 +99,11 @@ export const BookingWidget = ({ restaurantId, restaurantName, openingHours }: Bo
     };
 
     const openMinutes = parseTime(openTime);
-    // Stop 1 hour before closing to allow time for dining
     const closeMinutes = parseTime(closeTime) - 60;
     const breakStartMinutes = hasBreak ? parseTime(breakStart) : -1;
     const breakEndMinutes = hasBreak ? parseTime(breakEnd) : -1;
 
-    // Generate slots every 30 minutes
     for (let time = openMinutes; time <= closeMinutes; time += 30) {
-      // Skip slots during break time
       if (hasBreak && time >= breakStartMinutes && time < breakEndMinutes) {
         continue;
       }
@@ -199,7 +193,7 @@ export const BookingWidget = ({ restaurantId, restaurantName, openingHours }: Bo
     }
 
     if (!formData.time) {
-      toast.error("Seleziona un orario disponibile");
+      toast.error(t("booking.selectTime"));
       return;
     }
 
@@ -253,7 +247,7 @@ export const BookingWidget = ({ restaurantId, restaurantName, openingHours }: Bo
         console.error("Error sending pending email:", emailError);
       }
 
-      toast.success("Richiesta di prenotazione inviata!");
+      toast.success(t("booking.requestSent"));
       setFormData({ date: "", time: "", guests: 2, specialRequests: "", marketingConsent: false });
       setAvailableSlots([]);
     } catch (error: any) {
@@ -274,7 +268,7 @@ export const BookingWidget = ({ restaurantId, restaurantName, openingHours }: Bo
       <CardHeader className="pb-4">
         <CardTitle className="text-xl flex items-center gap-2">
           <Calendar className="w-5 h-5 text-primary" />
-          Prenota un tavolo
+          {t('booking.bookATable')}
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -285,7 +279,7 @@ export const BookingWidget = ({ restaurantId, restaurantName, openingHours }: Bo
               <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
                 <Calendar className="w-4 h-4 text-primary" />
               </div>
-              Data
+              {t('booking.dateLabel')}
             </Label>
             <div className="relative">
               <Input
@@ -304,7 +298,7 @@ export const BookingWidget = ({ restaurantId, restaurantName, openingHours }: Bo
           {formData.date && isClosedOnDate && (
             <div className="flex items-center gap-2 p-3 bg-destructive/10 text-destructive rounded-lg text-sm">
               <AlertCircle className="w-4 h-4 flex-shrink-0" />
-              <span>Il ristorante è chiuso in questa data. Seleziona un altro giorno.</span>
+              <span>{t('booking.closedOnDate')}</span>
             </div>
           )}
 
@@ -314,10 +308,10 @@ export const BookingWidget = ({ restaurantId, restaurantName, openingHours }: Bo
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Clock className="w-4 h-4" />
                 <span>
-                  Aperto: {selectedDateHours.openTime} - {selectedDateHours.closeTime}
+                  {t('booking.openHours')}: {selectedDateHours.openTime} - {selectedDateHours.closeTime}
                   {selectedDateHours.hasBreak && (
                     <span className="text-xs ml-2">
-                      (pausa {selectedDateHours.breakStart}-{selectedDateHours.breakEnd})
+                      ({t('booking.breakTime')} {selectedDateHours.breakStart}-{selectedDateHours.breakEnd})
                     </span>
                   )}
                 </span>
@@ -331,7 +325,7 @@ export const BookingWidget = ({ restaurantId, restaurantName, openingHours }: Bo
               <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
                 <Users className="w-4 h-4 text-primary" />
               </div>
-              Ospiti
+              {t('booking.guestsLabel')}
             </Label>
             <div className="grid grid-cols-4 gap-2">
               {guestOptions.map((num) => (
@@ -359,14 +353,13 @@ export const BookingWidget = ({ restaurantId, restaurantName, openingHours }: Bo
               {checkingSlots ? (
                 <div className="text-center py-4 text-sm text-muted-foreground">
                   <Clock className="w-4 h-4 animate-spin inline-block mr-2" />
-                  Controllo disponibilità...
+                  {t('booking.checkingAvailability')}
                 </div>
               ) : (
                 <>
-                  {/* Lunch slots */}
                   {lunchSlots.length > 0 && (
                     <div>
-                      <Label className="text-sm text-muted-foreground mb-1.5 block">🌞 Pranzo</Label>
+                      <Label className="text-sm text-muted-foreground mb-1.5 block">🌞 {t('booking.lunch')}</Label>
                       <div className="grid grid-cols-3 gap-1.5">
                         {lunchSlots.map((slot) => (
                           <Button
@@ -385,10 +378,9 @@ export const BookingWidget = ({ restaurantId, restaurantName, openingHours }: Bo
                     </div>
                   )}
 
-                  {/* Dinner slots */}
                   {dinnerSlots.length > 0 && (
                     <div>
-                      <Label className="text-sm text-muted-foreground mb-1.5 block">🌙 Cena</Label>
+                      <Label className="text-sm text-muted-foreground mb-1.5 block">🌙 {t('booking.dinner')}</Label>
                       <div className="grid grid-cols-3 gap-1.5">
                         {dinnerSlots.map((slot) => (
                           <Button
@@ -409,7 +401,7 @@ export const BookingWidget = ({ restaurantId, restaurantName, openingHours }: Bo
 
                   {lunchSlots.length === 0 && dinnerSlots.length === 0 && (
                     <div className="text-center py-4 text-sm text-muted-foreground">
-                      Nessuno slot disponibile per questa data
+                      {t('booking.noSlotsAvailable')}
                     </div>
                   )}
                 </>
@@ -422,20 +414,20 @@ export const BookingWidget = ({ restaurantId, restaurantName, openingHours }: Bo
             className="w-full h-11" 
             disabled={loading || !formData.date || !formData.time || isClosedOnDate}
           >
-            {loading ? "Invio..." : "Prenota ora"}
+            {loading ? t('booking.sending') : t('booking.bookNow')}
           </Button>
         </form>
 
         {/* Save button */}
         <div className="mt-4 pt-4 border-t">
-          <p className="text-sm font-medium mb-2">Salva questo ristorante</p>
+          <p className="text-sm font-medium mb-2">{t('detail.saveRestaurant')}</p>
           <Button 
             variant="outline" 
             className="w-full gap-2"
             onClick={() => toggleFavorite(restaurantId)}
           >
             <Heart className={`w-4 h-4 ${isFavorite ? 'fill-red-500 text-red-500' : ''}`} />
-            {isFavorite ? 'Salvato' : 'Salva'}
+            {isFavorite ? t('detail.saved') : t('detail.save')}
           </Button>
         </div>
       </CardContent>

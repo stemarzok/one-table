@@ -1,24 +1,27 @@
 import { Clock } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface OpeningHoursDisplayProps {
   openingHours: any;
 }
 
-const dayNames: Record<string, string> = {
-  monday: "Lunedì",
-  tuesday: "Martedì", 
-  wednesday: "Mercoledì",
-  thursday: "Giovedì",
-  friday: "Venerdì",
-  saturday: "Sabato",
-  sunday: "Domenica",
-};
-
 const dayOrder = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
 
+const dayTranslationKeys: Record<string, string> = {
+  monday: "hours.monday",
+  tuesday: "hours.tuesday",
+  wednesday: "hours.wednesday",
+  thursday: "hours.thursday",
+  friday: "hours.friday",
+  saturday: "hours.saturday",
+  sunday: "hours.sunday",
+};
+
 export const OpeningHoursDisplay = ({ openingHours }: OpeningHoursDisplayProps) => {
+  const { t } = useLanguage();
+
   if (!openingHours || typeof openingHours !== 'object') {
     return null;
   }
@@ -48,7 +51,6 @@ export const OpeningHoursDisplay = ({ openingHours }: OpeningHoursDisplayProps) 
     const currentDay = now.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
     const currentDayIndex = dayOrder.indexOf(currentDay);
     
-    // Check remaining days
     for (let i = 0; i <= 7; i++) {
       const checkDayIndex = (currentDayIndex + i) % 7;
       const checkDay = dayOrder[checkDayIndex];
@@ -56,11 +58,11 @@ export const OpeningHoursDisplay = ({ openingHours }: OpeningHoursDisplayProps) 
       
       if (hours?.isOpen) {
         if (i === 0) {
-          return `Apre alle ${hours.openTime}`;
+          return `${t('hours.opensAt')} ${hours.openTime}`;
         } else if (i === 1) {
-          return `Apre domani alle ${hours.openTime}`;
+          return `${t('hours.opensTomorrow')} ${hours.openTime}`;
         } else {
-          return `Apre ${dayNames[checkDay]} alle ${hours.openTime}`;
+          return `${t('hours.opensOn')} ${t(dayTranslationKeys[checkDay])} ${t('hours.at')} ${hours.openTime}`;
         }
       }
     }
@@ -75,10 +77,10 @@ export const OpeningHoursDisplay = ({ openingHours }: OpeningHoursDisplayProps) 
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg flex items-center gap-2">
             <Clock className="w-5 h-5 text-primary" />
-            Orari
+            {t('hours.title')}
           </CardTitle>
           <Badge variant={open ? "default" : "secondary"} className={open ? "bg-green-600" : ""}>
-            {open ? "Aperto ora" : "Chiuso"}
+            {open ? t('hours.openNow') : t('hours.closed')}
           </Badge>
         </div>
         {!open && (
@@ -97,12 +99,12 @@ export const OpeningHoursDisplay = ({ openingHours }: OpeningHoursDisplayProps) 
                 className={`flex justify-between text-sm py-1 ${isToday ? 'font-medium' : ''}`}
               >
                 <span className={isToday ? 'text-primary' : 'text-muted-foreground'}>
-                  {dayNames[day]}
+                  {t(dayTranslationKeys[day])}
                 </span>
                 <span className={isToday ? '' : 'text-muted-foreground'}>
                   {hours?.isOpen 
                     ? `${hours.openTime}-${hours.closeTime}` 
-                    : "Chiuso"}
+                    : t('hours.closed')}
                 </span>
               </div>
             );

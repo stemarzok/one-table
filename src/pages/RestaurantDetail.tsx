@@ -17,9 +17,11 @@ import { RatingBreakdown } from "@/components/restaurant/RatingBreakdown";
 import { QuickLinks } from "@/components/restaurant/QuickLinks";
 import { Button } from "@/components/ui/button";
 import { useFavorites } from "@/hooks/useFavorites";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const RestaurantDetail = () => {
   const { id } = useParams();
+  const { t } = useLanguage();
   const [restaurant, setRestaurant] = useState<any>(null);
   const [menuItems, setMenuItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -123,7 +125,7 @@ const RestaurantDetail = () => {
         <Header />
         <main className="pt-24 pb-16">
           <div className="container mx-auto px-4 text-center">
-            <p className="text-lg text-muted-foreground">Ristorante non trovato</p>
+            <p className="text-lg text-muted-foreground">{t('detail.restaurantNotFound')}</p>
           </div>
         </main>
         <Footer />
@@ -160,7 +162,7 @@ const RestaurantDetail = () => {
                     {restaurant.name}
                   </h1>
                   <div className="flex flex-wrap items-center gap-2 mt-1">
-                {rating?.avg_rating && (
+                    {rating?.avg_rating && (
                       <div className="flex items-center gap-1">
                         <div className="flex gap-0.5">
                           {[1, 2, 3, 4, 5].map((star) => (
@@ -175,7 +177,7 @@ const RestaurantDetail = () => {
                           ))}
                         </div>
                         <span className="text-sm text-primary font-medium ml-1">
-                          ({rating.total_reviews} recensioni)
+                          ({rating.total_reviews} {t('detail.reviews').toLowerCase()})
                         </span>
                       </div>
                     )}
@@ -201,12 +203,12 @@ const RestaurantDetail = () => {
                   className="gap-2"
                 >
                   <Heart className={`w-4 h-4 ${isFavorite ? 'fill-red-500 text-red-500' : ''}`} />
-                  {isFavorite ? 'Salvato' : 'Salva'}
+                  {isFavorite ? t('detail.saved') : t('detail.save')}
                 </Button>
                 <ReviewDialog restaurantId={id!} onReviewSubmitted={fetchRestaurant}>
                   <Button size="sm" className="gap-2">
                     <Star className="w-4 h-4" />
-                    Scrivi una recensione
+                    {t('detail.writeReview')}
                   </Button>
                 </ReviewDialog>
               </div>
@@ -244,7 +246,7 @@ const RestaurantDetail = () => {
               
               {/* Panoramica Section */}
               <section ref={panoramicaRef} id="panoramica" className="scroll-mt-32">
-                <h2 className="text-xl font-semibold mb-4">In breve</h2>
+                <h2 className="text-xl font-semibold mb-4">{t('detail.inBrief')}</h2>
                 
                 {/* Quick Links */}
                 <QuickLinks 
@@ -257,7 +259,7 @@ const RestaurantDetail = () => {
                 {/* Description */}
                 {description && (
                   <div className="mt-6 p-5 bg-muted/30 rounded-xl">
-                    <h3 className="font-semibold mb-2">Info</h3>
+                    <h3 className="font-semibold mb-2">{t('detail.info')}</h3>
                     <p className="text-muted-foreground leading-relaxed">
                       {showAllDescription ? description : truncatedDescription}
                     </p>
@@ -266,7 +268,7 @@ const RestaurantDetail = () => {
                         onClick={() => setShowAllDescription(!showAllDescription)}
                         className="text-primary font-medium mt-2 hover:underline text-sm"
                       >
-                        {showAllDescription ? "Mostra meno" : "Scopri di più"} ▾
+                        {showAllDescription ? t('detail.showLess') : t('detail.showMore')} ▾
                       </button>
                     )}
                   </div>
@@ -275,7 +277,7 @@ const RestaurantDetail = () => {
                 {/* Features */}
                 {(restaurant.extra_features?.length > 0 || restaurant.occasions?.length > 0) && (
                   <div className="mt-6">
-                    <h3 className="font-semibold mb-3">Caratteristiche</h3>
+                    <h3 className="font-semibold mb-3">{t('detail.features')}</h3>
                     <div className="flex flex-wrap gap-3">
                       {restaurant.extra_features?.map((feature: string) => (
                         <div key={feature} className="flex items-center gap-1.5 text-sm text-muted-foreground bg-muted/50 px-3 py-1.5 rounded-full">
@@ -297,7 +299,7 @@ const RestaurantDetail = () => {
 
               {/* Posizione Section */}
               <section ref={posizioneRef} id="posizione" className="scroll-mt-32">
-                <h2 className="text-xl font-semibold mb-4">Posizione</h2>
+                <h2 className="text-xl font-semibold mb-4">{t('detail.position')}</h2>
                 <div className="bg-muted/30 rounded-xl p-5">
                   <div className="flex items-start gap-3">
                     <MapPin className="w-5 h-5 text-primary mt-0.5" />
@@ -310,7 +312,7 @@ const RestaurantDetail = () => {
                         rel="noopener noreferrer"
                         className="text-primary text-sm mt-2 inline-block hover:underline"
                       >
-                        Apri in Google Maps →
+                        {t('detail.openInGoogleMaps')} →
                       </a>
                     </div>
                   </div>
@@ -323,13 +325,13 @@ const RestaurantDetail = () => {
               <section ref={menuRef} id="menu" className="scroll-mt-32">
                 <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
                   <Utensils className="w-5 h-5 text-primary" />
-                  Menu
+                  {t('detail.menu')}
                 </h2>
                 
                 {Object.keys(groupedMenu).length === 0 ? (
                   <div className="bg-muted/30 rounded-xl p-8 text-center">
                     <p className="text-muted-foreground">
-                      Nessun piatto disponibile al momento
+                      {t('detail.noDishesAvailable')}
                     </p>
                   </div>
                 ) : (
@@ -370,17 +372,17 @@ const RestaurantDetail = () => {
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-xl font-semibold flex items-center gap-2">
                     <Star className="w-5 h-5 text-primary" />
-                    Recensioni
+                    {t('detail.reviews')}
                     {rating?.total_reviews > 0 && (
                       <Badge variant="secondary" className="ml-2 rounded-full">
                         {rating.total_reviews}
                       </Badge>
                     )}
                   </h2>
-                <ReviewDialog restaurantId={id!} onReviewSubmitted={fetchRestaurant}>
+                  <ReviewDialog restaurantId={id!} onReviewSubmitted={fetchRestaurant}>
                     <Button size="sm" className="gap-2">
                       <Star className="w-4 h-4" />
-                      Scrivi una recensione
+                      {t('detail.writeReview')}
                     </Button>
                   </ReviewDialog>
                 </div>
