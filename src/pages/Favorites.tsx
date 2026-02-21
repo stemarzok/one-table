@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Heart } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useFavorites } from '@/hooks/useFavorites';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import RestaurantCard from '@/components/RestaurantCard';
@@ -29,13 +30,13 @@ interface Restaurant {
 const Favorites = () => {
   const { isLoggedIn, isBusinessMode } = useAuth();
   const { favorites, loading: favoritesLoading } = useFavorites();
+  const { t } = useLanguage();
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const { toast } = useToast();
 
   useEffect(() => {
-    // Business users cannot access client pages
     if (isBusinessMode) {
       navigate('/dashboard');
       return;
@@ -62,7 +63,6 @@ const Favorites = () => {
 
       if (error) throw error;
 
-      // Fetch ratings for each restaurant
       const restaurantsWithRatings = await Promise.all(
         (data || []).map(async (restaurant) => {
           const { data: ratingData } = await supabase
@@ -96,7 +96,7 @@ const Favorites = () => {
         <main className="pt-24 pb-16">
           <div className="container mx-auto px-4">
             <div className="text-center">
-              <p className="text-muted-foreground">Caricamento...</p>
+              <p className="text-muted-foreground">{t('bookings.loading')}</p>
             </div>
           </div>
         </main>
@@ -113,12 +113,12 @@ const Favorites = () => {
         <div className="container mx-auto px-4 max-w-6xl">
           <div className="mb-8">
             <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
-              I Miei Preferiti
+              {t('favorites.title')}
             </h1>
             <p className="text-muted-foreground">
               {restaurants.length > 0 
-                ? `${restaurants.length} ristorante${restaurants.length > 1 ? 'i' : ''} salvat${restaurants.length > 1 ? 'i' : 'o'}`
-                : 'Nessun ristorante salvato'
+                ? `${restaurants.length} ${restaurants.length > 1 ? t('favorites.restaurants') : t('favorites.restaurant')} ${restaurants.length > 1 ? t('favorites.savedPlural') : t('favorites.saved')}`
+                : t('favorites.noSaved')
               }
             </p>
           </div>
@@ -126,12 +126,12 @@ const Favorites = () => {
           {restaurants.length === 0 ? (
             <Card className="p-12 text-center">
               <Heart className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
-              <h2 className="text-2xl font-semibold mb-2">Nessun preferito ancora</h2>
+              <h2 className="text-2xl font-semibold mb-2">{t('favorites.emptyTitle')}</h2>
               <p className="text-muted-foreground mb-6">
-                Inizia ad aggiungere i tuoi ristoranti preferiti per trovarli facilmente qui
+                {t('favorites.emptyDesc')}
               </p>
               <Button onClick={() => navigate('/restaurants')}>
-                Esplora Ristoranti
+                {t('favorites.explore')}
               </Button>
             </Card>
           ) : (

@@ -128,10 +128,10 @@ const Profile = () => {
 
   const getLevelDisplayName = (level: string) => {
     switch (level) {
-      case "Bronze": return "Bronzo";
-      case "Silver": return "Argento";
-      case "Gold": return "Oro";
-      case "Platinum": return "Platino";
+      case "Bronze": return t('levels.bronze');
+      case "Silver": return t('levels.silver');
+      case "Gold": return t('levels.gold');
+      case "Platinum": return t('levels.platinum');
       default: return level;
     }
   };
@@ -293,14 +293,14 @@ const Profile = () => {
                       <>
                         <Progress value={Math.max(0, Math.min(100, levelInfo.progress))} className="h-3" />
                         <p className="text-xs text-muted-foreground">
-                          Ti mancano {Math.max(0, levelInfo.pointsToNext)} punti per raggiungere il livello {levelInfo.nextLevel}
+                          {t('profile.pointsToNextLevel').replace('{0}', String(Math.max(0, levelInfo.pointsToNext))).replace('{1}', levelInfo.nextLevel)}
                         </p>
                       </>
                     )}
                     
                     {!levelInfo.nextLevel && (
                       <p className="text-sm text-primary font-medium">
-                        Hai raggiunto il livello massimo! 🎉
+                        {t('profile.maxLevel')}
                       </p>
                     )}
 
@@ -319,8 +319,8 @@ const Profile = () => {
                     <Calendar className="w-6 h-6 text-primary" />
                   </div>
                   <div>
-                    <h3 className="font-semibold">Le Mie Prenotazioni</h3>
-                    <p className="text-sm text-muted-foreground">Gestisci le tue prenotazioni</p>
+                    <h3 className="font-semibold">{t('profile.myBookings')}</h3>
+                    <p className="text-sm text-muted-foreground">{t('profile.manageBookings')}</p>
                   </div>
                 </div>
               </Card>
@@ -331,8 +331,8 @@ const Profile = () => {
                     <Heart className="w-6 h-6 text-primary" />
                   </div>
                   <div>
-                    <h3 className="font-semibold">I Miei Preferiti</h3>
-                    <p className="text-sm text-muted-foreground">Ristoranti salvati</p>
+                    <h3 className="font-semibold">{t('profile.myFavorites')}</h3>
+                    <p className="text-sm text-muted-foreground">{t('profile.savedRestaurants')}</p>
                   </div>
                 </div>
               </Card>
@@ -346,8 +346,8 @@ const Profile = () => {
                     <Star className="w-6 h-6 text-primary" />
                   </div>
                   <div>
-                    <h3 className="font-semibold">Recensioni Scritte</h3>
-                    <p className="text-sm text-muted-foreground">{reviewsCount} recensioni</p>
+                    <h3 className="font-semibold">{t('profile.writtenReviews')}</h3>
+                    <p className="text-sm text-muted-foreground">{reviewsCount} {t('profile.reviewsCount')}</p>
                   </div>
                 </div>
               </Card>
@@ -363,7 +363,7 @@ const Profile = () => {
                   <CollapsibleTrigger className="flex items-center justify-between w-full p-4 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
                     <div className="flex items-center gap-3">
                       <User className="w-5 h-5 text-primary" />
-                      <span className="font-medium">Dati Personali</span>
+                      <span className="font-medium">{t('profile.personalData')}</span>
                     </div>
                     <ChevronDown className={`w-5 h-5 transition-transform ${personalDataOpen ? 'rotate-180' : ''}`} />
                   </CollapsibleTrigger>
@@ -443,14 +443,14 @@ const Profile = () => {
                   <CollapsibleTrigger className="flex items-center justify-between w-full p-4 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
                     <div className="flex items-center gap-3">
                       <Mail className="w-5 h-5 text-primary" />
-                      <span className="font-medium">Cambia Email</span>
+                      <span className="font-medium">{t('profile.changeEmail')}</span>
                     </div>
                     <ChevronDown className={`w-5 h-5 transition-transform ${emailOpen ? 'rotate-180' : ''}`} />
                   </CollapsibleTrigger>
                   <CollapsibleContent className="pt-4 px-4">
                     <form onSubmit={handleEmailChange} className="space-y-4">
                       <div className="space-y-2">
-                        <Label htmlFor="newEmail">Nuova Email</Label>
+                        <Label htmlFor="newEmail">{t('profile.newEmail')}</Label>
                         <div className="relative">
                           <Mail className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
                           <Input
@@ -464,7 +464,7 @@ const Profile = () => {
                         </div>
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="passwordForEmail">Password Attuale</Label>
+                        <Label htmlFor="passwordForEmail">{t('profile.currentPasswordLabel')}</Label>
                         <div className="relative">
                           <Lock className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
                           <Input
@@ -478,7 +478,7 @@ const Profile = () => {
                         </div>
                       </div>
                       <Button type="submit" className="w-full">
-                        Cambia Email
+                        {t('profile.changeEmailButton')}
                       </Button>
                     </form>
                   </CollapsibleContent>

@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Calendar, Clock, Users, MapPin, XCircle, AlertCircle, CheckCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -43,12 +44,12 @@ interface Booking {
 
 const MyBookings = () => {
   const { user, isLoggedIn, isBusinessMode } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Business users cannot access client pages
     if (isBusinessMode) {
       navigate("/dashboard");
       return;
@@ -59,7 +60,6 @@ const MyBookings = () => {
     }
     fetchBookings();
 
-    // Subscribe to realtime updates
     const channel = supabase
       .channel('my-bookings')
       .on(
@@ -117,11 +117,9 @@ const MyBookings = () => {
     try {
       if (!user) throw new Error('Not authenticated');
       
-      // Get booking details for email
       const booking = bookings.find(b => b.id === bookingId);
       if (!booking) throw new Error('Booking not found');
 
-      // Calculate hours until booking
       const bookingDateTime = new Date(`${booking.booking_date}T${booking.booking_time}`);
       const now = new Date();
       const hoursUntilBooking = (bookingDateTime.getTime() - now.getTime()) / (1000 * 60 * 60);
@@ -135,7 +133,6 @@ const MyBookings = () => {
 
       if (error) throw error;
 
-      // Send cancellation email with point deduction info
       await supabase.functions.invoke('send-cancellation-email', {
         body: {
           bookingId,
@@ -193,10 +190,10 @@ const MyBookings = () => {
 
   const getStatusText = (status: string) => {
     switch (status) {
-      case "confirmed": return "Confermata";
-      case "pending": return "In Attesa";
-      case "cancelled": return "Annullata";
-      case "completed": return "Completata";
+      case "confirmed": return t('bookings.confirmed');
+      case "pending": return t('bookings.pending');
+      case "cancelled": return t('bookings.cancelled');
+      case "completed": return t('bookings.completed');
       default: return status;
     }
   };
@@ -215,7 +212,7 @@ const MyBookings = () => {
         <Header />
         <main className="pt-24 pb-16">
           <div className="container mx-auto px-4 text-center">
-            <p className="text-lg text-muted-foreground">Caricamento...</p>
+            <p className="text-lg text-muted-foreground">{t('bookings.loading')}</p>
           </div>
         </main>
         <Footer />
@@ -230,19 +227,19 @@ const MyBookings = () => {
       <main className="pt-24 pb-16">
         <div className="container mx-auto px-4">
           <div className="mb-8">
-            <h1 className="text-4xl font-bold mb-2">Le Mie Prenotazioni</h1>
+            <h1 className="text-4xl font-bold mb-2">{t('bookings.title')}</h1>
             <p className="text-muted-foreground">
-              Gestisci le tue prenotazioni passate e future
+              {t('bookings.subtitle')}
             </p>
           </div>
 
           <Tabs defaultValue="upcoming" className="space-y-6">
             <TabsList className="grid w-full max-w-md mx-auto grid-cols-2">
               <TabsTrigger value="upcoming">
-                Prossime ({upcomingBookings.length})
+                {t('bookings.upcoming')} ({upcomingBookings.length})
               </TabsTrigger>
               <TabsTrigger value="past">
-                Passate ({pastBookings.length})
+                {t('bookings.past')} ({pastBookings.length})
               </TabsTrigger>
             </TabsList>
 
@@ -250,12 +247,12 @@ const MyBookings = () => {
               {upcomingBookings.length === 0 ? (
                 <Card className="p-12 text-center">
                   <Calendar className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-xl font-semibold mb-2">Nessuna prenotazione futura</h3>
+                  <h3 className="text-xl font-semibold mb-2">{t('bookings.noUpcoming')}</h3>
                   <p className="text-muted-foreground mb-6">
-                    Non hai ancora prenotazioni in programma
+                    {t('bookings.noUpcomingDesc')}
                   </p>
                   <Button onClick={() => navigate("/")}>
-                    Cerca Ristoranti
+                    {t('bookings.searchRestaurants')}
                   </Button>
                 </Card>
               ) : (
@@ -311,13 +308,13 @@ const MyBookings = () => {
                           </div>
                           <div className="flex items-center gap-2 text-muted-foreground">
                             <Users className="w-4 h-4" />
-                            <span>{booking.guests_count} {booking.guests_count === 1 ? 'ospite' : 'ospiti'}</span>
+                            <span>{booking.guests_count} {booking.guests_count === 1 ? t('bookings.guest') : t('bookings.guests')}</span>
                           </div>
                         </div>
 
                         {booking.special_requests && (
                           <div className="p-3 bg-muted rounded-lg">
-                            <p className="text-sm font-medium mb-1">Richieste speciali:</p>
+                            <p className="text-sm font-medium mb-1">{t('bookings.specialRequests')}</p>
                             <p className="text-sm text-muted-foreground">{booking.special_requests}</p>
                           </div>
                         )}
@@ -328,7 +325,7 @@ const MyBookings = () => {
                             size="sm"
                             onClick={() => navigate(`/restaurant/${booking.restaurants.id}`)}
                           >
-                            Vedi Ristorante
+                            {t('bookings.viewRestaurant')}
                           </Button>
                           
                           {(booking.status === "pending" || booking.status === "confirmed") && (
@@ -336,31 +333,30 @@ const MyBookings = () => {
                               <AlertDialogTrigger asChild>
                                 <Button variant="destructive" size="sm">
                                   <XCircle className="w-4 h-4 mr-2" />
-                                  Annulla
+                                  {t('bookings.cancel')}
                                 </Button>
                               </AlertDialogTrigger>
                               <AlertDialogContent>
                                 <AlertDialogHeader>
-                                  <AlertDialogTitle>Annullare la prenotazione?</AlertDialogTitle>
+                                  <AlertDialogTitle>{t('bookings.cancelQuestion')}</AlertDialogTitle>
                                   <AlertDialogDescription>
                                     {booking.status === "confirmed" ? (
                                       <>
-                                        <p className="font-semibold text-yellow-600 mb-2">⚠️ Attenzione!</p>
-                                        <p>Annullando questa prenotazione confermata a meno di 48 ore dall'orario prenotato, perderai dei punti fedeltà.</p>
-                                        <p className="mt-2">Sei sicuro di voler procedere?</p>
+                                        <p className="font-semibold text-yellow-600 mb-2">⚠️ {t('bookings.cancelWarning')}</p>
+                                        <p>{t('bookings.cancelConfirm')}</p>
                                       </>
                                     ) : (
-                                      "Sei sicuro di voler annullare questa prenotazione? Questa azione non può essere annullata."
+                                      t('bookings.cancelGeneric')
                                     )}
                                   </AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
-                                  <AlertDialogCancel>Indietro</AlertDialogCancel>
+                                  <AlertDialogCancel>{t('bookings.back')}</AlertDialogCancel>
                                   <AlertDialogAction
                                     onClick={() => cancelBooking(booking.id, booking.status)}
                                     className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                                   >
-                                    Annulla Prenotazione
+                                    {t('bookings.cancelBooking')}
                                   </AlertDialogAction>
                                 </AlertDialogFooter>
                               </AlertDialogContent>
@@ -378,9 +374,9 @@ const MyBookings = () => {
               {pastBookings.length === 0 ? (
                 <Card className="p-12 text-center">
                   <Calendar className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-xl font-semibold mb-2">Nessuna prenotazione passata</h3>
+                  <h3 className="text-xl font-semibold mb-2">{t('bookings.noPast')}</h3>
                   <p className="text-muted-foreground">
-                    Non hai ancora prenotazioni completate o annullate
+                    {t('bookings.noPastDesc')}
                   </p>
                 </Card>
               ) : (
@@ -436,7 +432,7 @@ const MyBookings = () => {
                           </div>
                           <div className="flex items-center gap-2 text-muted-foreground">
                             <Users className="w-4 h-4" />
-                            <span>{booking.guests_count} {booking.guests_count === 1 ? 'ospite' : 'ospiti'}</span>
+                            <span>{booking.guests_count} {booking.guests_count === 1 ? t('bookings.guest') : t('bookings.guests')}</span>
                           </div>
                         </div>
 
@@ -446,7 +442,7 @@ const MyBookings = () => {
                             size="sm"
                             onClick={() => navigate(`/restaurant/${booking.restaurants.id}`)}
                           >
-                            Vedi Ristorante
+                            {t('bookings.viewRestaurant')}
                           </Button>
                           
                           {booking.status === "completed" && (
@@ -455,7 +451,7 @@ const MyBookings = () => {
                               size="sm"
                               onClick={() => navigate(`/restaurant/${booking.restaurants.id}?tab=reviews`)}
                             >
-                              Lascia una Recensione
+                              {t('bookings.leaveReview')}
                             </Button>
                           )}
                         </div>
