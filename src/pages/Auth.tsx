@@ -19,6 +19,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { roleCache } from "@/lib/roleCache";
 import { Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const staggerChildren = {
   animate: {
@@ -46,6 +47,7 @@ const Auth = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const { isLoggedIn } = useAuth();
   const navigate = useNavigate();
+  const { t } = useLanguage();
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -155,7 +157,6 @@ const Auth = () => {
     }
 
     if (authData.user) {
-      // Use cache for faster role checking
       const roles = await roleCache.fetchAndCache(authData.user.id);
       
       if (!roles.adminRole && roles.businessRoles.length > 0) {
@@ -299,10 +300,10 @@ const Auth = () => {
                 transition={{ delay: 0.2, duration: 0.4 }}
               >
                 <CardTitle className="text-3xl font-bold bg-gradient-to-r from-primary to-primary-glow bg-clip-text text-transparent">
-                  Benvenuto su OneTable
+                  {t('auth.welcome')}
                 </CardTitle>
                 <CardDescription className="text-base mt-2">
-                  Accedi o registrati per prenotare il tuo tavolo
+                  {t('auth.subtitle')}
                 </CardDescription>
               </motion.div>
             </CardHeader>
@@ -314,8 +315,8 @@ const Auth = () => {
                   transition={{ delay: 0.3, duration: 0.3 }}
                 >
                   <TabsList className="grid w-full grid-cols-2 mb-6 bg-muted/50 p-1 rounded-xl">
-                    <TabsTrigger value="login" className="data-[state=active]:bg-background data-[state=active]:shadow-md rounded-lg transition-all duration-200">Accedi</TabsTrigger>
-                    <TabsTrigger value="signup" className="data-[state=active]:bg-background data-[state=active]:shadow-md rounded-lg transition-all duration-200">Registrati</TabsTrigger>
+                    <TabsTrigger value="login" className="data-[state=active]:bg-background data-[state=active]:shadow-md rounded-lg transition-all duration-200">{t('auth.login')}</TabsTrigger>
+                    <TabsTrigger value="signup" className="data-[state=active]:bg-background data-[state=active]:shadow-md rounded-lg transition-all duration-200">{t('auth.signup')}</TabsTrigger>
                   </TabsList>
                 </motion.div>
                 
@@ -328,7 +329,7 @@ const Auth = () => {
                     animate="animate"
                   >
                     <motion.div variants={formItemVariants} className="space-y-2">
-                      <Label htmlFor="email">Email <span className="text-destructive">*</span></Label>
+                      <Label htmlFor="email">{t('auth.email')} <span className="text-destructive">*</span></Label>
                       <Input
                         id="email"
                         name="email"
@@ -340,7 +341,7 @@ const Auth = () => {
                     </motion.div>
                     
                     <motion.div variants={formItemVariants} className="space-y-2">
-                      <Label htmlFor="password">Password <span className="text-destructive">*</span></Label>
+                      <Label htmlFor="password">{t('auth.password')} <span className="text-destructive">*</span></Label>
                       <Input
                         id="password"
                         name="password"
@@ -360,7 +361,7 @@ const Auth = () => {
                           className="border-2 transition-transform duration-150 hover:scale-105" 
                         />
                         <Label htmlFor="rememberMe" className="text-sm cursor-pointer font-normal">
-                          Ricordami
+                          {t('auth.rememberMe')}
                         </Label>
                       </div>
                       <button
@@ -368,7 +369,7 @@ const Auth = () => {
                         onClick={() => setShowPasswordReset(true)}
                         className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                       >
-                        Password dimenticata?
+                        {t('auth.forgotPassword')}
                       </button>
                     </motion.div>
                     
@@ -381,16 +382,16 @@ const Auth = () => {
                         {isLoading ? (
                           <>
                             <Loader2 className="h-4 w-4 animate-spin" />
-                            Accesso in corso...
+                            {t('auth.loggingIn')}
                           </>
-                        ) : "Accedi"}
+                        ) : t('auth.login')}
                       </Button>
                     </motion.div>
                     
                     <motion.div variants={formItemVariants} className="relative my-4">
                       <Separator />
                       <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-card px-2 text-xs text-muted-foreground">
-                        oppure
+                        {t('auth.or')}
                       </span>
                     </motion.div>
                     
@@ -401,7 +402,7 @@ const Auth = () => {
                         className="w-full hover:bg-muted transition-all duration-200"
                         onClick={handleGoogleLogin}
                         disabled={isLoading}
-                        aria-label="Continua con Google"
+                        aria-label={t('auth.continueGoogle')}
                       >
                         <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24" aria-hidden="true">
                           <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -409,7 +410,7 @@ const Auth = () => {
                           <path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
                           <path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
                         </svg>
-                        Continua con Google
+                        {t('auth.continueGoogle')}
                       </Button>
                     </motion.div>
 
@@ -420,13 +421,13 @@ const Auth = () => {
                         className="w-full hover:bg-muted transition-all duration-200"
                         onClick={handleAppleLogin}
                         disabled={isLoading}
-                        aria-label="Continua con Apple (non disponibile)"
+                        aria-label={t('auth.continueApple')}
                       >
                         <AppleIcon className="mr-2 h-4 w-4" />
-                        Continua con Apple
+                        {t('auth.continueApple')}
                       </Button>
                       <p className="text-xs text-muted-foreground text-center mt-1">
-                        Apple: disponibile a breve
+                        {t('auth.appleComingSoon')}
                       </p>
                     </motion.div>
                   </motion.form>
@@ -441,7 +442,7 @@ const Auth = () => {
                     animate="animate"
                   >
                     <motion.div variants={formItemVariants} className="space-y-2">
-                      <Label htmlFor="name">Nome completo <span className="text-destructive">*</span></Label>
+                      <Label htmlFor="name">{t('auth.fullName')} <span className="text-destructive">*</span></Label>
                       <Input
                         id="name"
                         name="name"
@@ -453,7 +454,7 @@ const Auth = () => {
                     </motion.div>
                     
                     <motion.div variants={formItemVariants} className="space-y-2">
-                      <Label htmlFor="signup-email">Email <span className="text-destructive">*</span></Label>
+                      <Label htmlFor="signup-email">{t('auth.email')} <span className="text-destructive">*</span></Label>
                       <Input
                         id="signup-email"
                         name="email"
@@ -465,7 +466,7 @@ const Auth = () => {
                     </motion.div>
                     
                     <motion.div variants={formItemVariants} className="space-y-2">
-                      <Label htmlFor="signup-password">Password <span className="text-destructive">*</span></Label>
+                      <Label htmlFor="signup-password">{t('auth.password')} <span className="text-destructive">*</span></Label>
                       <Input
                         id="signup-password"
                         name="password"
@@ -481,7 +482,7 @@ const Auth = () => {
                     </motion.div>
                     
                     <motion.div variants={formItemVariants} className="space-y-2">
-                      <Label htmlFor="confirm-password">Conferma Password <span className="text-destructive">*</span></Label>
+                      <Label htmlFor="confirm-password">{t('auth.confirmPassword')} <span className="text-destructive">*</span></Label>
                       <Input
                         id="confirm-password"
                         name="confirmPassword"
@@ -500,7 +501,7 @@ const Auth = () => {
                             exit={{ opacity: 0 }}
                             className="text-xs text-destructive"
                           >
-                            Le password non corrispondono
+                            {t('auth.passwordsNoMatch')}
                           </motion.p>
                         )}
                         {confirmPassword && signupPassword === confirmPassword && (
@@ -510,14 +511,14 @@ const Auth = () => {
                             exit={{ opacity: 0 }}
                             className="text-xs text-green-600 dark:text-green-500"
                           >
-                            Le password corrispondono ✓
+                            {t('auth.passwordsMatch')}
                           </motion.p>
                         )}
                       </AnimatePresence>
                     </motion.div>
 
                     <motion.div variants={formItemVariants} className="space-y-2">
-                      <Label htmlFor="phone">Telefono <span className="text-destructive">*</span></Label>
+                      <Label htmlFor="phone">{t('auth.phone')} <span className="text-destructive">*</span></Label>
                       <Input
                         id="phone"
                         name="phone"
@@ -537,16 +538,16 @@ const Auth = () => {
                         {isLoading ? (
                           <>
                             <Loader2 className="h-4 w-4 animate-spin" />
-                            Registrazione in corso...
+                            {t('auth.signingUp')}
                           </>
-                        ) : "Registrati"}
+                        ) : t('auth.signup')}
                       </Button>
                     </motion.div>
                     
                     <motion.div variants={formItemVariants} className="relative my-4">
                       <Separator />
                       <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-card px-2 text-xs text-muted-foreground">
-                        oppure
+                        {t('auth.or')}
                       </span>
                     </motion.div>
                     
@@ -557,7 +558,7 @@ const Auth = () => {
                         className="w-full hover:bg-muted transition-all duration-200"
                         onClick={handleGoogleLogin}
                         disabled={isLoading}
-                        aria-label="Continua con Google"
+                        aria-label={t('auth.continueGoogle')}
                       >
                         <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24" aria-hidden="true">
                           <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -565,7 +566,7 @@ const Auth = () => {
                           <path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
                           <path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
                         </svg>
-                        Continua con Google
+                        {t('auth.continueGoogle')}
                       </Button>
                     </motion.div>
 
@@ -576,24 +577,24 @@ const Auth = () => {
                         className="w-full hover:bg-muted transition-all duration-200"
                         onClick={handleAppleLogin}
                         disabled={isLoading}
-                        aria-label="Continua con Apple (non disponibile)"
+                        aria-label={t('auth.continueApple')}
                       >
                         <AppleIcon className="mr-2 h-4 w-4" />
-                        Continua con Apple
+                        {t('auth.continueApple')}
                       </Button>
                       <p className="text-xs text-muted-foreground text-center mt-1">
-                        Apple: disponibile a breve
+                        {t('auth.appleComingSoon')}
                       </p>
                     </motion.div>
                     
                     <motion.p variants={formItemVariants} className="text-xs text-muted-foreground text-center">
-                      Registrandoti, accetti i nostri{" "}
+                      {t('auth.termsAgree')}{" "}
                       <a href="/terms" className="text-muted-foreground hover:text-foreground transition-colors underline">
-                        Termini di Servizio
+                        {t('auth.termsOfService')}
                       </a>{" "}
-                      e la nostra{" "}
+                      {t('auth.and')}{" "}
                       <a href="/privacy" className="text-muted-foreground hover:text-foreground transition-colors underline">
-                        Privacy Policy
+                        {t('auth.privacyPolicy')}
                       </a>
                     </motion.p>
                   </motion.form>
@@ -606,9 +607,9 @@ const Auth = () => {
         <Dialog open={showPasswordReset} onOpenChange={setShowPasswordReset}>
           <DialogContent onOpenAutoFocus={(e) => { e.preventDefault(); window.scrollTo(0, 0); }}>
             <DialogHeader>
-              <DialogTitle>Recupera Password</DialogTitle>
+              <DialogTitle>{t('auth.resetPassword')}</DialogTitle>
               <DialogDescription>
-                Inserisci la tua email e ti invieremo un link per reimpostare la password
+                {t('auth.resetDescription')}
               </DialogDescription>
             </DialogHeader>
             <form onSubmit={(e) => {
@@ -618,7 +619,7 @@ const Auth = () => {
               handlePasswordReset(email);
             }} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="reset-email">Email <span className="text-destructive">*</span></Label>
+                <Label htmlFor="reset-email">{t('auth.email')} <span className="text-destructive">*</span></Label>
                 <Input
                   id="reset-email"
                   name="reset-email"
@@ -636,9 +637,9 @@ const Auth = () => {
                 {isLoading ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin" />
-                    Invio in corso...
+                    {t('auth.sendingReset')}
                   </>
-                ) : "Invia Link di Recupero"}
+                ) : t('auth.sendResetLink')}
               </Button>
             </form>
           </DialogContent>
