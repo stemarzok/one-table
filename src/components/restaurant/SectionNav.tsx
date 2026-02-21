@@ -1,20 +1,23 @@
 import { Button } from "@/components/ui/button";
 import { FileText, Clock, MapPin, Star, Utensils } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface SectionNavProps {
   activeSection: string;
   onSectionClick: (section: string) => void;
 }
 
-const sections = [
-  { id: "panoramica", label: "Panoramica", icon: FileText },
-  { id: "orari", label: "Orari", icon: Clock },
-  { id: "posizione", label: "Posizione", icon: MapPin },
-  { id: "menu", label: "Menu", icon: Utensils },
-  { id: "recensioni", label: "Recensioni", icon: Star },
-];
-
 export const SectionNav = ({ activeSection, onSectionClick }: SectionNavProps) => {
+  const { t } = useLanguage();
+
+  const sections = [
+    { id: "panoramica", labelKey: "detail.overview", icon: FileText },
+    { id: "orari", labelKey: "detail.hours", icon: Clock },
+    { id: "posizione", labelKey: "detail.position", icon: MapPin },
+    { id: "menu", labelKey: "detail.menu", icon: Utensils },
+    { id: "recensioni", labelKey: "detail.reviews", icon: Star },
+  ];
+
   return (
     <div className="sticky top-16 z-40 bg-background/95 backdrop-blur-sm border-b border-border py-3">
       <div className="container mx-auto px-4">
@@ -36,7 +39,7 @@ export const SectionNav = ({ activeSection, onSectionClick }: SectionNavProps) =
                 }`}
               >
                 <Icon className="w-4 h-4" />
-                {section.label}
+                {t(section.labelKey)}
               </Button>
             );
           })}
