@@ -11,6 +11,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { User, Calendar, Heart, Settings, LogOut, Shield, Crown } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useAdminRole } from "@/hooks/useAdminRole";
@@ -18,12 +19,13 @@ import { useAdminRole } from "@/hooks/useAdminRole";
 export const DesktopUserMenu = () => {
   const { profile, logout } = useAuth();
   const navigate = useNavigate();
-  const { isAdmin, isSuperAdmin, adminRole } = useAdminRole();
+  const { t } = useLanguage();
+  const { isAdmin, isSuperAdmin } = useAdminRole();
 
   const handleLogout = async () => {
     await logout();
     navigate("/");
-    toast.success("Disconnesso con successo");
+    toast.success(t('menu.logoutSuccess'));
   };
 
   const getAdminBadge = () => {
@@ -75,12 +77,12 @@ export const DesktopUserMenu = () => {
             </Avatar>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
-                <p className="font-semibold truncate">{profile?.name || "Utente"}</p>
+                <p className="font-semibold truncate">{profile?.name || t('menu.user')}</p>
                 {getAdminBadge()}
               </div>
               <p className="text-xs text-muted-foreground truncate">{profile?.email}</p>
               <p className="text-xs text-primary font-medium mt-0.5">
-                {profile?.level || "Bronze"} • {profile?.points || 0} punti
+                {profile?.level || "Bronze"} • {profile?.points || 0} {t('menu.points')}
               </p>
             </div>
           </div>
@@ -88,11 +90,11 @@ export const DesktopUserMenu = () => {
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={() => navigate("/my-bookings")}>
           <Calendar className="w-4 h-4 mr-2" />
-          Le Mie Prenotazioni
+          {t('menu.myBookings')}
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => navigate("/favorites")}>
           <Heart className="w-4 h-4 mr-2" />
-          Preferiti
+          {t('menu.favorites')}
         </DropdownMenuItem>
 
         {isAdmin && (
@@ -100,7 +102,7 @@ export const DesktopUserMenu = () => {
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => navigate("/admin")}>
               {isSuperAdmin ? <Crown className="w-4 h-4 mr-2 text-amber-500" /> : <Shield className="w-4 h-4 mr-2" />}
-              Pannello Admin
+              {t('menu.adminPanel')}
             </DropdownMenuItem>
           </>
         )}
@@ -109,14 +111,14 @@ export const DesktopUserMenu = () => {
         
         <DropdownMenuItem onClick={() => navigate("/settings")}>
           <Settings className="w-4 h-4 mr-2" />
-          Impostazioni
+          {t('menu.settings')}
         </DropdownMenuItem>
         
         <DropdownMenuSeparator />
         
         <DropdownMenuItem onClick={handleLogout} className="text-destructive">
           <LogOut className="w-4 h-4 mr-2" />
-          Disconnetti
+          {t('menu.logout')}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

@@ -16,7 +16,7 @@ import { useAdminRole } from "@/hooks/useAdminRole";
 
 export const MobileUserMenu = () => {
   const { profile, logout } = useAuth();
-  const { language, setLanguage } = useLanguage();
+  const { language, setLanguage, t } = useLanguage();
   const navigate = useNavigate();
   const { isAdmin, isSuperAdmin } = useAdminRole();
   const [theme, setTheme] = useState<"light" | "dark">("light");
@@ -26,21 +26,21 @@ export const MobileUserMenu = () => {
     const newTheme = theme === "light" ? "dark" : "light";
     setTheme(newTheme);
     document.documentElement.classList.toggle("dark", newTheme === "dark");
-    toast.success(`Tema ${newTheme === "dark" ? "scuro" : "chiaro"} attivato`);
+    toast.success(newTheme === "dark" ? t('settings.themeDarkActivated') : t('settings.themeLightActivated'));
   };
 
   const handleLogout = async () => {
     await logout();
     setOpen(false);
     navigate("/");
-    toast.success("Disconnesso con successo");
+    toast.success(t('menu.logoutSuccess'));
   };
 
   const menuItems = [
-    { icon: Calendar, label: "Le Mie Prenotazioni", path: "/my-bookings" },
-    { icon: Heart, label: "Preferiti", path: "/favorites" },
-    { icon: Settings, label: "Impostazioni", path: "/settings" },
-    ...(isAdmin ? [{ icon: isSuperAdmin ? Crown : Shield, label: "Pannello Admin", path: "/admin" }] : []),
+    { icon: Calendar, label: t('menu.myBookings'), path: "/my-bookings" },
+    { icon: Heart, label: t('menu.favorites'), path: "/favorites" },
+    { icon: Settings, label: t('menu.settings'), path: "/settings" },
+    ...(isAdmin ? [{ icon: isSuperAdmin ? Crown : Shield, label: t('menu.adminPanel'), path: "/admin" }] : []),
   ];
 
   const getAdminBadge = () => {
@@ -80,17 +80,14 @@ export const MobileUserMenu = () => {
       </SheetTrigger>
       <SheetContent side="right" className="w-[300px] sm:w-[400px]">
         <SheetHeader>
-          <SheetTitle>Menu Utente</SheetTitle>
+          <SheetTitle>{t('menu.title')}</SheetTitle>
         </SheetHeader>
 
         <div className="mt-6 space-y-6">
           {/* User Profile Section */}
           <div 
             className="flex items-center gap-4 p-4 bg-muted rounded-lg cursor-pointer hover:bg-muted/80 transition-colors" 
-            onClick={() => {
-              navigate("/profile");
-              setOpen(false);
-            }}
+            onClick={() => { navigate("/profile"); setOpen(false); }}
           >
             <Avatar className="w-12 h-12">
               <AvatarImage src={profile?.avatar_url || undefined} />
@@ -100,12 +97,12 @@ export const MobileUserMenu = () => {
             </Avatar>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
-                <p className="font-semibold truncate">{profile?.name || "Utente"}</p>
+                <p className="font-semibold truncate">{profile?.name || t('menu.user')}</p>
                 {getAdminBadge()}
               </div>
               <p className="text-sm text-muted-foreground truncate">{profile?.email}</p>
               <p className="text-xs text-primary font-medium mt-1">
-                {profile?.level || "Bronze"} • {profile?.points || 0} punti
+                {profile?.level || "Bronze"} • {profile?.points || 0} {t('menu.points')}
               </p>
             </div>
           </div>
@@ -119,10 +116,7 @@ export const MobileUserMenu = () => {
                 key={item.path}
                 variant="ghost"
                 className="w-full justify-start gap-3"
-                onClick={() => {
-                  navigate(item.path);
-                  setOpen(false);
-                }}
+                onClick={() => { navigate(item.path); setOpen(false); }}
               >
                 <item.icon className={`w-5 h-5 ${item.path === '/admin' && isSuperAdmin ? 'text-amber-500' : ''}`} />
                 {item.label}
@@ -136,12 +130,11 @@ export const MobileUserMenu = () => {
           <div className="space-y-4">
             <div className="flex items-center gap-2">
               <Globe className="w-5 h-5" />
-              <h3 className="font-semibold">Preferenze Rapide</h3>
+              <h3 className="font-semibold">{t('menu.quickPreferences')}</h3>
             </div>
 
-            {/* Language Selector */}
             <div className="space-y-2">
-              <Label>Lingua</Label>
+              <Label>{t('menu.language')}</Label>
               <Select value={language} onValueChange={setLanguage}>
                 <SelectTrigger>
                   <SelectValue />
@@ -153,29 +146,20 @@ export const MobileUserMenu = () => {
               </Select>
             </div>
 
-            {/* Theme Toggle */}
             <div className="flex items-center justify-between">
               <Label className="flex items-center gap-2">
                 {theme === "light" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-                Tema Scuro
+                {t('menu.darkTheme')}
               </Label>
-              <Switch
-                checked={theme === "dark"}
-                onCheckedChange={handleThemeToggle}
-              />
+              <Switch checked={theme === "dark"} onCheckedChange={handleThemeToggle} />
             </div>
           </div>
 
           <Separator />
 
-          {/* Logout Button */}
-          <Button
-            variant="destructive"
-            className="w-full gap-2"
-            onClick={handleLogout}
-          >
+          <Button variant="destructive" className="w-full gap-2" onClick={handleLogout}>
             <LogOut className="w-4 h-4" />
-            Disconnetti
+            {t('menu.logout')}
           </Button>
         </div>
       </SheetContent>
