@@ -309,14 +309,14 @@ const RestaurantList = () => {
   }
 
   return (
-    <section className="py-16 bg-muted/30 relative overflow-x-hidden" style={{ overscrollBehaviorX: 'contain' }}>
+    <section className="py-10 sm:py-16 bg-muted/30 relative overflow-x-hidden" style={{ overscrollBehaviorX: 'contain' }}>
       <div className="container mx-auto px-4 overflow-x-hidden">
         {/* Hero showreel carousel */}
         <DishHeroCarousel />
         
-        <div className="text-center mb-10">
-          <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4 font-display uppercase tracking-wide">{t('restaurants.whatToEat')}</h2>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
+        <div className="text-center mb-8 sm:mb-10">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-3 sm:mb-4 font-display uppercase tracking-wide">{t('restaurants.whatToEat')}</h2>
+          <p className="text-base sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-6 sm:mb-8 px-2">
             {t('restaurants.findPerfect')}
           </p>
           
@@ -441,7 +441,7 @@ const RestaurantList = () => {
           </div>
         ) : (
           <>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-8">
               {paginatedRestaurants.map((restaurant) => (
                 <RestaurantCard 
                   key={restaurant.id}
