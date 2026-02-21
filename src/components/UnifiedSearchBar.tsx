@@ -152,7 +152,7 @@ const UnifiedSearchBar = ({ onSearch, onFilterChange, onNearMe, filters }: Unifi
                 className="rounded-full gap-1 sm:gap-2 text-muted-foreground hover:text-foreground px-2 sm:px-3 shrink-0"
               >
                 <SlidersHorizontal className="w-4 h-4" />
-                <span className="hidden md:inline text-sm">Filtri</span>
+                <span className="hidden md:inline text-sm">{t('restaurants.filters')}</span>
                 {activeFiltersCount > 0 && (
                   <Badge variant="secondary" className="h-4 w-4 sm:h-5 sm:w-5 p-0 flex items-center justify-center text-xs">
                     {activeFiltersCount}
@@ -176,7 +176,7 @@ const UnifiedSearchBar = ({ onSearch, onFilterChange, onNearMe, filters }: Unifi
             size="sm"
             onClick={onNearMe}
             className="rounded-full text-muted-foreground hover:text-foreground px-2 sm:px-3 shrink-0"
-            title="Trova ristoranti vicino a te"
+            title={t('restaurants.findNearby')}
           >
             <MapPin className="w-4 h-4" />
           </Button>
@@ -203,7 +203,7 @@ const UnifiedSearchBar = ({ onSearch, onFilterChange, onNearMe, filters }: Unifi
             <div className="p-2">
               <div className="px-3 py-2 text-xs font-medium text-muted-foreground flex items-center gap-2">
                 <History className="w-3 h-3" />
-                Ricerche recenti
+                {t('restaurants.recentSearches')}
               </div>
               {searchHistory.map((item) => (
                 <button
@@ -223,7 +223,7 @@ const UnifiedSearchBar = ({ onSearch, onFilterChange, onNearMe, filters }: Unifi
             <div className="p-2">
               {query.length > 0 && (
                 <div className="px-3 py-2 text-xs font-medium text-muted-foreground">
-                  Ristoranti
+                  {t('restaurants.restaurants')}
                 </div>
               )}
               {suggestions.map((restaurant) => (
@@ -273,7 +273,7 @@ const UnifiedSearchBar = ({ onSearch, onFilterChange, onNearMe, filters }: Unifi
           ))}
           {(filters.specializations.length > 2 || filters.occasions.length > 0 || filters.extraFeatures.length > 0) && (
             <Badge variant="secondary">
-              +{filters.specializations.length - 2 + filters.occasions.length + filters.extraFeatures.length} altri
+              +{filters.specializations.length - 2 + filters.occasions.length + filters.extraFeatures.length} {t('restaurants.others')}
             </Badge>
           )}
         </div>

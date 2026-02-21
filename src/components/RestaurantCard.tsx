@@ -5,6 +5,7 @@ import { useTilt } from "@/hooks/useTilt";
 import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { RestaurantCardCarousel } from "./RestaurantCardCarousel";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface RestaurantCardProps {
   id: string;
@@ -46,6 +47,7 @@ const RestaurantCard = ({
   const navigate = useNavigate();
   const { toggleFavorite, isFavorite } = useFavorites();
   const { ref, style, handlers } = useTilt({ max: 8, scale: 1.02, speed: 300 });
+  const { t } = useLanguage();
 
   const handleCardClick = () => {
     navigate(`/restaurant/${id}`);
@@ -106,14 +108,14 @@ const RestaurantCard = ({
           {/* Badge Sponsorizzato */}
           {sponsored && (
             <Badge className="absolute top-3 left-3 bg-primary text-primary-foreground text-xs shadow-lg">
-              Sponsorizzato
+              {t('restaurants.sponsored')}
             </Badge>
           )}
           
           {/* Heart button - stile TripAdvisor con animazione */}
           <button
             onClick={handleFavoriteClick}
-            aria-label={isFavorite(String(id)) ? "Rimuovi dai preferiti" : "Aggiungi ai preferiti"}
+            aria-label={isFavorite(String(id)) ? t('restaurants.removeFromFavorites') : t('restaurants.addToFavorites')}
             className="absolute top-3 right-3 p-2 rounded-full bg-white/90 backdrop-blur-sm shadow-md hover:bg-white transition-all duration-200 hover:scale-110 active:scale-95"
           >
             <Heart 
@@ -167,7 +169,7 @@ const RestaurantCard = ({
               ))
             ) : (
               <Badge variant="secondary" className="text-xs px-2 py-0.5">
-                Ristorante
+                {t('restaurants.restaurant')}
               </Badge>
             )}
           </div>

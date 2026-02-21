@@ -14,6 +14,7 @@ import Map from "@/components/Map";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface Restaurant {
   id: string;
@@ -37,6 +38,7 @@ interface Restaurant {
 
 const RestaurantList = () => {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
@@ -313,9 +315,9 @@ const RestaurantList = () => {
         <DishHeroCarousel />
         
         <div className="text-center mb-10">
-          <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4 font-display uppercase tracking-wide">Cosa ti va di mangiare?</h2>
+          <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4 font-display uppercase tracking-wide">{t('restaurants.whatToEat')}</h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
-            Trova il ristorante perfetto per ogni occasione
+            {t('restaurants.findPerfect')}
           </p>
           
           <UnifiedSearchBar 
@@ -335,9 +337,9 @@ const RestaurantList = () => {
             <div className="mb-4">
               <h3 className="text-xl font-bold text-foreground flex items-center gap-2">
                 <History className="w-5 h-5 text-primary" />
-                Hai già visto
+                {t('restaurants.recentlyViewed')}
               </h3>
-              <p className="text-sm text-muted-foreground">Ristoranti che hai visitato di recente</p>
+              <p className="text-sm text-muted-foreground">{t('restaurants.recentlyViewedDesc')}</p>
             </div>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {recentlyViewed.slice(0, 3).map((restaurant) => (
@@ -373,9 +375,9 @@ const RestaurantList = () => {
             <div className="mb-4">
               <h3 className="text-xl font-bold text-foreground flex items-center gap-2">
                 <RotateCcw className="w-5 h-5 text-primary" />
-                Prenota di nuovo
+                {t('restaurants.bookAgain')}
               </h3>
-              <p className="text-sm text-muted-foreground">Ristoranti dove hai già mangiato</p>
+              <p className="text-sm text-muted-foreground">{t('restaurants.bookAgainDesc')}</p>
             </div>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {previouslyBooked.slice(0, 3).map((restaurant) => (
@@ -410,10 +412,10 @@ const RestaurantList = () => {
         
         {/* Lista ristoranti */}
         <div id="restaurant-list" className="mb-6">
-          <h3 className="text-xl font-bold text-foreground">Tutti i ristoranti</h3>
+          <h3 className="text-xl font-bold text-foreground">{t('restaurants.allRestaurants')}</h3>
           <div className="flex items-center gap-2 mt-2">
             <p className="text-sm text-muted-foreground">
-              {filteredRestaurants.length} ristoranti trovati
+              {filteredRestaurants.length} {t('restaurants.found')}
             </p>
             {selectedCuisine && (
               <Badge 
@@ -430,10 +432,10 @@ const RestaurantList = () => {
 
         {paginatedRestaurants.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-xl text-muted-foreground">Nessun ristorante trovato</p>
+            <p className="text-xl text-muted-foreground">{t('restaurants.noRestaurantsFound')}</p>
             {selectedCuisine && (
               <Button variant="outline" className="mt-4" onClick={clearCuisineFilter}>
-                Rimuovi filtro categoria
+                {t('restaurants.removeCategoryFilter')}
               </Button>
             )}
           </div>
@@ -478,7 +480,7 @@ const RestaurantList = () => {
                           ? 'w-8 h-2 bg-primary' 
                           : 'w-2 h-2 bg-muted-foreground/30 hover:bg-muted-foreground/50'
                       }`}
-                      aria-label={`Vai a pagina ${page}`}
+                      aria-label={`${t('restaurants.goToPage')} ${page}`}
                     />
                   ))}
                 </div>
@@ -494,11 +496,11 @@ const RestaurantList = () => {
 
         <Dialog open={showMap} onOpenChange={setShowMap}>
           <DialogContent className="max-w-6xl h-[80vh]">
-            <DialogHeader><DialogTitle>Ristoranti vicino a te</DialogTitle></DialogHeader>
+            <DialogHeader><DialogTitle>{t('restaurants.nearbyRestaurants')}</DialogTitle></DialogHeader>
             {!mapboxToken ? (
               <div className="flex flex-col items-center justify-center h-full p-8">
                 <MapPin className="w-16 h-16 text-primary" />
-                <p className="text-muted-foreground text-center mt-4">Token Mapbox mancante</p>
+                <p className="text-muted-foreground text-center mt-4">{t('restaurants.missingMapToken')}</p>
               </div>
             ) : userLocation ? (
               <Map accessToken={mapboxToken} center={[userLocation.lng, userLocation.lat]} zoom={12} restaurants={[]} userLocation={userLocation} />

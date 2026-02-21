@@ -2,6 +2,7 @@ import { useRef, useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, Utensils } from "lucide-react";
 import { motion } from "framer-motion";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface CuisineCategory {
   name: string;
@@ -28,6 +29,7 @@ interface CuisineCarouselProps {
 }
 
 const CuisineCarousel = ({ onCategorySelect }: CuisineCarouselProps) => {
+  const { t } = useLanguage();
   const scrollRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
@@ -96,9 +98,9 @@ const CuisineCarousel = ({ onCategorySelect }: CuisineCarouselProps) => {
       <div className="mb-4">
         <h3 className="text-xl font-bold text-foreground flex items-center gap-2">
           <Utensils className="w-5 h-5 text-primary" />
-          Esplora per categoria
+          {t('restaurants.exploreByCategory')}
         </h3>
-        <p className="text-sm text-muted-foreground">Scopri ristoranti per tipo di cucina</p>
+        <p className="text-sm text-muted-foreground">{t('restaurants.discoverByCuisine')}</p>
       </div>
 
       <div className="relative group py-2">
