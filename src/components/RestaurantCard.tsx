@@ -90,7 +90,7 @@ const RestaurantCard = ({
         </div>
 
         {/* Immagine - più alta per aspetto verticale */}
-        <div className="relative h-56 overflow-hidden rounded-t-2xl">
+        <div className="relative h-44 sm:h-56 overflow-hidden rounded-t-2xl">
           {galleryImages.length > 0 ? (
             <RestaurantCardCarousel 
               images={galleryImages} 

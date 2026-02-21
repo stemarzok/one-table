@@ -42,7 +42,7 @@ const Hero = () => {
   };
 
   return (
-    <section ref={heroRef} className="relative min-h-screen flex items-center overflow-x-hidden">
+    <section ref={heroRef} className="relative min-h-[100svh] flex items-center overflow-x-hidden">
       <motion.div 
         className="absolute inset-0 z-0"
         style={{ y: backgroundY }}
@@ -68,7 +68,7 @@ const Hero = () => {
           <div className="text-center">
             <div className="overflow-hidden mb-8">
               <motion.h1 
-                className="font-display text-[12vw] sm:text-[11vw] md:text-[10vw] lg:text-[9vw] xl:text-[8vw] font-normal text-white leading-[0.9] tracking-[0.02em] uppercase"
+                className="font-display text-[11vw] sm:text-[11vw] md:text-[10vw] lg:text-[9vw] xl:text-[8vw] font-normal text-white leading-[0.85] tracking-[0.02em] uppercase"
                 initial="hidden"
                 animate="visible"
                 variants={{
@@ -99,7 +99,7 @@ const Hero = () => {
             </div>
             
             <motion.p 
-              className="text-sm sm:text-base md:text-lg text-white/70 mb-10 leading-relaxed max-w-xl mx-auto font-medium px-4"
+              className="text-sm sm:text-base md:text-lg text-white/70 mb-8 leading-relaxed max-w-xl mx-auto font-medium px-2"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.8 }}
@@ -116,7 +116,7 @@ const Hero = () => {
               <Button 
                 size="lg" 
                 variant="premium"
-                className="text-base px-8 py-6 gap-3 w-full sm:w-auto font-bold"
+                className="text-sm sm:text-base px-6 sm:px-8 py-5 sm:py-6 gap-3 w-full sm:w-auto font-bold"
                 onClick={() => {
                   const element = document.getElementById('cuisine-carousel');
                   if (element) {
@@ -131,7 +131,7 @@ const Hero = () => {
               <Button 
                 size="lg" 
                 variant="outline-hero"
-                className="text-base px-8 py-6 w-full sm:w-auto font-semibold"
+                className="text-sm sm:text-base px-6 sm:px-8 py-5 sm:py-6 w-full sm:w-auto font-semibold"
                 onClick={scrollToHowItWorks}
               >
                 {t('hero.howItWorks')}

@@ -29,7 +29,7 @@ const ValueProposition = () => {
   ];
 
   return (
-    <section className="py-20 bg-background relative overflow-x-hidden">
+    <section className="py-14 sm:py-20 bg-background relative overflow-x-hidden">
       <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-[120px]" />
       <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-primary/5 rounded-full blur-[120px]" />
       
@@ -50,7 +50,7 @@ const ValueProposition = () => {
         </motion.div>
         
         <motion.div 
-          className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto"
+          className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 max-w-4xl mx-auto"
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}

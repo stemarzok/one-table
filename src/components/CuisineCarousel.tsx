@@ -94,7 +94,7 @@ const CuisineCarousel = ({ onCategorySelect }: CuisineCarouselProps) => {
   };
 
   return (
-    <div id="cuisine-carousel" className="mb-10 scroll-mt-24 overflow-x-hidden">
+    <div id="cuisine-carousel" className="mb-8 sm:mb-10 scroll-mt-24 overflow-x-hidden">
       <div className="mb-4">
         <h3 className="text-xl font-bold text-foreground flex items-center gap-2">
           <Utensils className="w-5 h-5 text-primary" />
@@ -140,11 +140,11 @@ const CuisineCarousel = ({ onCategorySelect }: CuisineCarouselProps) => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: index * 0.05 }}
-              className="flex-shrink-0 w-[160px] sm:w-[180px] cursor-pointer group/card"
+              className="flex-shrink-0 w-[140px] sm:w-[180px] cursor-pointer group/card"
               onClick={() => handleCategoryClick(category.name)}
             >
               {/* Card categoria stile TripAdvisor verticale */}
-              <div className="relative rounded-2xl overflow-hidden shadow-sm hover:shadow-elegant transition-shadow duration-300 h-48 sm:h-56">
+              <div className="relative rounded-xl sm:rounded-2xl overflow-hidden shadow-sm hover:shadow-elegant transition-shadow duration-300 h-40 sm:h-56">
                 {/* Immagine */}
                 <img
                   src={category.image}

@@ -125,7 +125,7 @@ const UnifiedSearchBar = ({ onSearch, onFilterChange, onNearMe, filters }: Unifi
   return (
     <div className="w-full max-w-4xl mx-auto relative">
       <form onSubmit={handleSubmit}>
-        <div className="flex items-center gap-1 sm:gap-2 bg-background/95 backdrop-blur-sm rounded-full p-1.5 sm:p-2 shadow-2xl border-2 border-primary/20">
+        <div className="flex items-center gap-1 sm:gap-2 bg-background/95 backdrop-blur-sm rounded-2xl sm:rounded-full p-1.5 sm:p-2 shadow-2xl border-2 border-primary/20">
           {/* Search Input */}
           <div className="flex-1 min-w-0 relative">
             <Search className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 w-4 sm:w-5 h-4 sm:h-5 text-muted-foreground" />
@@ -185,9 +185,10 @@ const UnifiedSearchBar = ({ onSearch, onFilterChange, onNearMe, filters }: Unifi
           <Button 
             type="submit" 
             size="sm"
-            className="rounded-full px-3 sm:px-6 font-semibold bg-primary hover:bg-primary/90 text-sm sm:text-base shrink-0"
+            className="rounded-full px-3 sm:px-6 font-semibold bg-primary hover:bg-primary/90 text-xs sm:text-base shrink-0"
           >
-            {t('hero.searchButton')}
+            <Search className="w-4 h-4 sm:hidden" />
+            <span className="hidden sm:inline">{t('hero.searchButton')}</span>
           </Button>
         </div>
       </form>

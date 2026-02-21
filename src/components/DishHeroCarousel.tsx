@@ -65,7 +65,7 @@ const DishHeroCarousel = () => {
   }, []);
 
   return (
-    <div className="relative w-full h-48 md:h-64 rounded-2xl overflow-hidden mb-8 shadow-2xl">
+    <div className="relative w-full h-40 sm:h-48 md:h-64 rounded-xl sm:rounded-2xl overflow-hidden mb-6 sm:mb-8 shadow-2xl">
       {/* Scrolling images container */}
       <div 
         ref={scrollRef}
@@ -95,7 +95,7 @@ const DishHeroCarousel = () => {
       {/* Current label */}
       <div className="absolute bottom-4 left-4 md:bottom-6 md:left-6 pointer-events-none">
         <span className="text-white/70 text-xs font-medium mb-1 block">Scopri le specialità</span>
-        <h3 className="text-white text-2xl md:text-4xl font-bold font-display transition-all duration-300">
+        <h3 className="text-white text-xl sm:text-2xl md:text-4xl font-bold font-display transition-all duration-300">
           {currentLabel}
         </h3>
       </div>
