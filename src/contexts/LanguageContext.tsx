@@ -458,6 +458,28 @@ const baseTranslations: Record<string, string> = {
   'settings.legal': 'Informazioni Legali',
   'settings.about': 'Chi Siamo',
   'settings.systemStatus': 'Status Sistema',
+  'settings.aboutDescription': 'La piattaforma innovativa che premia la tua affidabilità con vantaggi esclusivi nei migliori ristoranti.',
+  'settings.copyright': 'Tutti i diritti riservati.',
+  'settings.privacyPolicy': 'Privacy Policy',
+  'settings.termsConditions': 'Termini e Condizioni',
+  'settings.cookiePolicy': 'Cookie Policy',
+  'settings.themeLightActivated': 'Tema chiaro attivato',
+  'settings.themeDarkActivated': 'Tema scuro attivato',
+
+  // User Menu
+  'menu.title': 'Menu Utente',
+  'menu.myBookings': 'Le Mie Prenotazioni',
+  'menu.favorites': 'Preferiti',
+  'menu.settings': 'Impostazioni',
+  'menu.adminPanel': 'Pannello Admin',
+  'menu.logout': 'Disconnetti',
+  'menu.logoutSuccess': 'Disconnesso con successo',
+  'menu.user': 'Utente',
+  'menu.points': 'punti',
+  'menu.quickPreferences': 'Preferenze Rapide',
+  'menu.language': 'Lingua',
+  'menu.darkTheme': 'Tema Scuro',
+  'menu.languageChanged': 'Lingua cambiata in',
 };
 
 // Pre-translated English (for performance on common language)
@@ -857,6 +879,28 @@ const englishTranslations: Record<string, string> = {
   'settings.legal': 'Legal Information',
   'settings.about': 'About Us',
   'settings.systemStatus': 'System Status',
+  'settings.aboutDescription': 'The innovative platform that rewards your reliability with exclusive benefits at the best restaurants.',
+  'settings.copyright': 'All rights reserved.',
+  'settings.privacyPolicy': 'Privacy Policy',
+  'settings.termsConditions': 'Terms and Conditions',
+  'settings.cookiePolicy': 'Cookie Policy',
+  'settings.themeLightActivated': 'Light theme activated',
+  'settings.themeDarkActivated': 'Dark theme activated',
+
+  // User Menu
+  'menu.title': 'User Menu',
+  'menu.myBookings': 'My Bookings',
+  'menu.favorites': 'Favorites',
+  'menu.settings': 'Settings',
+  'menu.adminPanel': 'Admin Panel',
+  'menu.logout': 'Log Out',
+  'menu.logoutSuccess': 'Logged out successfully',
+  'menu.user': 'User',
+  'menu.points': 'points',
+  'menu.quickPreferences': 'Quick Preferences',
+  'menu.language': 'Language',
+  'menu.darkTheme': 'Dark Theme',
+  'menu.languageChanged': 'Language changed to',
 };
 
 // Translation cache
