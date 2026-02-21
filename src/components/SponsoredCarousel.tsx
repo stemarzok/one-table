@@ -7,6 +7,7 @@ import { useFavorites } from "@/hooks/useFavorites";
 import { motion } from "framer-motion";
 import { RestaurantCardCarousel } from "./RestaurantCardCarousel";
 import { useTilt } from "@/hooks/useTilt";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface SponsoredRestaurant {
   id: string;
@@ -146,6 +147,7 @@ const SponsoredCard = ({ restaurant, index, isFavorite, onFavoriteClick, onClick
 };
 
 const SponsoredCarousel = () => {
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const scrollRef = useRef<HTMLDivElement>(null);
   const [restaurants, setRestaurants] = useState<SponsoredRestaurant[]>([]);
@@ -240,9 +242,9 @@ const SponsoredCarousel = () => {
       <div className="mb-4">
         <h3 className="text-xl font-bold text-foreground flex items-center gap-2">
           <Sparkles className="w-5 h-5 text-primary" />
-          Consigliati per te
+          {t('restaurants.recommendedForYou')}
         </h3>
-        <p className="text-sm text-muted-foreground">Esperienze selezionate per te</p>
+        <p className="text-sm text-muted-foreground">{t('restaurants.recommendedDesc')}</p>
       </div>
 
       <div className="relative group">
